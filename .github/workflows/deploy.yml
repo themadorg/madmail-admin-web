@@ -56,8 +56,6 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Build
-        env:
-          BASE_PATH: /madmail-admin-web
         run: bun run build
 
       - name: Create SPA fallback and stamp version
