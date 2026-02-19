@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/themadorg/madmail-admin-web/compare/v1.1.0...v1.2.0) (2026-02-19)
+
+
+### Features
+
+* add GitHub repo link button ([5ccb005](https://github.com/themadorg/madmail-admin-web/commit/5ccb0050ba5ee89310ac58fd074588af210a844a))
+
 # [1.1.0](https://github.com/themadorg/madmail-admin-web/compare/v1.0.2...v1.1.0) (2026-02-19)
 
 
