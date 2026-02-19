@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/themadorg/madmail-admin-web/compare/v1.3.0...v1.3.1) (2026-02-19)
+
+
+### Bug Fixes
+
+* SW not intercepting cross-origin API calls, add cert trust helper in login ([2d6374e](https://github.com/themadorg/madmail-admin-web/commit/2d6374e9d4538b031d77c40fcc96660380565caa))
+
 # [1.3.0](https://github.com/themadorg/madmail-admin-web/compare/v1.2.3...v1.3.0) (2026-02-19)
 
 
