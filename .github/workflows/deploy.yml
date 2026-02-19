@@ -60,8 +60,11 @@ jobs:
           BASE_PATH: /madmail-admin-web
         run: bun run build
 
-      - name: Create SPA fallback for GitHub Pages
-        run: cp build/index.html build/404.html
+      - name: Create SPA fallback and stamp version
+        run: |
+          cp build/index.html build/404.html
+          VERSION=$(cat .version 2>/dev/null || echo "0.0.0")
+          echo "{\"version\":\"$VERSION\"}" > build/version.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

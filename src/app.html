@@ -2,10 +2,23 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<meta name="theme-color" content="#111113" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<link rel="manifest" href="%sveltekit.assets%/manifest.json" />
+		<link rel="icon" type="image/png" sizes="192x192" href="%sveltekit.assets%/icon-192.png" />
+		<link rel="apple-touch-icon" href="%sveltekit.assets%/icon-192.png" />
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
+		<script>
+			// Register service worker
+			if ('serviceWorker' in navigator) {
+				navigator.serviceWorker.register('%sveltekit.assets%/sw.js', { scope: '%sveltekit.assets%/' })
+					.catch(err => console.warn('SW registration failed:', err));
+			}
+		</script>
 	</body>
 </html>

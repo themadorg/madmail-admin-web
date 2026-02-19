@@ -4,6 +4,7 @@
   import { base } from "$app/paths";
   import { store } from "$lib/state.svelte";
   import { t, getLocale, setLocale, LOCALES, type Locale } from "$lib/i18n";
+  import { startVersionChecker, applyUpdate } from "$lib/sw-update";
   import {
     getSavedServers,
     removeServer,
@@ -26,6 +27,7 @@
     Server,
     Trash2,
     Github,
+    Download,
   } from "lucide-svelte";
 
   let { children } = $props();
@@ -112,6 +114,14 @@
     }
   });
 
+  // Version update checker
+  let updateAvailable = $state("");
+  if (typeof window !== "undefined") {
+    startVersionChecker((newVer) => {
+      updateAvailable = newVer;
+    });
+  }
+
   function isActive(href: string, path: string): boolean {
     // Strip base prefix for comparison
     const p = base ? path.replace(base, "") || "/" : path;
@@ -157,6 +167,26 @@
     {/if}
   </div>
 {/snippet}
+
+<!-- Update Banner -->
+{#if updateAvailable}
+  <div
+    class="fixed top-0 inset-x-0 z-[60] bg-accent/95 text-white px-4 py-2.5 flex items-center justify-center gap-3 text-sm font-medium shadow-lg backdrop-blur-sm"
+  >
+    <Download size={16} />
+    <span>v{updateAvailable} available</span>
+    <button
+      onclick={() => applyUpdate()}
+      class="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-md text-xs font-semibold transition-colors"
+      >Update</button
+    >
+    <button
+      onclick={() => (updateAvailable = "")}
+      class="px-2 py-1 text-white/60 hover:text-white text-xs transition-colors"
+      >✕</button
+    >
+  </div>
+{/if}
 
 <!-- Toast -->
 {#if store.toast}
@@ -289,9 +319,11 @@
     class="min-h-screen bg-surface text-text"
     style="font-family: 'Inter', system-ui, sans-serif;"
   >
-    <div class="max-w-4xl mx-auto px-4 py-6">
+    <div class="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
       <!-- Header -->
-      <header class="flex items-center justify-between mb-6">
+      <header
+        class="flex flex-wrap items-center justify-between gap-2 mb-4 sm:mb-6"
+      >
         <div class="flex items-center gap-2">
           <a href="{base}/" class="p-1.5 bg-accent/15 rounded-lg">
             <Mail size={16} class="text-accent" />
@@ -364,7 +396,9 @@
       </header>
 
       <!-- Navigation -->
-      <nav class="flex gap-0.5 mb-5 border-b border-border">
+      <nav
+        class="flex gap-0.5 mb-4 sm:mb-5 border-b border-border overflow-x-auto scrollbar-hide -mx-3 px-3 sm:mx-0 sm:px-0"
+      >
         {#each NAV_ITEMS as item}
           <a
             href="{base}{item.href}"
