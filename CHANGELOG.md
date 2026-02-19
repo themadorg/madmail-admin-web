@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/themadorg/madmail-admin-web/compare/v1.2.2...v1.2.3) (2026-02-19)
+
+
+### Bug Fixes
+
+* move version badge below login card ([992f5ef](https://github.com/themadorg/madmail-admin-web/commit/992f5ef6525992cb149a2dcc90ce1d55bcfbd817))
+
 ## [1.2.2](https://github.com/themadorg/madmail-admin-web/compare/v1.2.1...v1.2.2) (2026-02-19)
 
 
