@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/themadorg/madmail-admin-web/compare/v1.4.0...v1.4.1) (2026-02-19)
+
+
+### Bug Fixes
+
+* add docker image build and publish ([b163b53](https://github.com/themadorg/madmail-admin-web/commit/b163b5334e3afc924d253fa5204c4e895bbc67db))
+
 # [1.4.0](https://github.com/themadorg/madmail-admin-web/compare/v1.3.1...v1.4.0) (2026-02-19)
 
 
