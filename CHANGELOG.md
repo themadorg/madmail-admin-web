@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/themadorg/madmail-admin-web/compare/v1.0.1...v1.0.2) (2026-02-19)
+
+
+### Bug Fixes
+
+* add github plugin for creating releases ([4060c74](https://github.com/themadorg/madmail-admin-web/commit/4060c74f0c44c0e2376d0c5671f7db2da58d2e14))
+
 ## [1.0.1](https://github.com/themadorg/madmail-admin-web/compare/v1.0.0...v1.0.1) (2026-02-19)
 
 
