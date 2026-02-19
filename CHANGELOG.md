@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/themadorg/madmail-admin-web/compare/v1.2.0...v1.2.1) (2026-02-19)
+
+
+### Bug Fixes
+
+* rename dns to endpoint cache in state, i18n, and page ([ee97a05](https://github.com/themadorg/madmail-admin-web/commit/ee97a05618ac52ae7f43952c17c273a3c4c084c7))
+
 # [1.2.0](https://github.com/themadorg/madmail-admin-web/compare/v1.1.0...v1.2.0) (2026-02-19)
 
 
