@@ -25,6 +25,7 @@
     Moon,
     Server,
     Trash2,
+    Github,
   } from "lucide-svelte";
 
   let { children } = $props();
@@ -272,7 +273,15 @@
         </div>
       {/if}
     </div>
-    <p class="text-text-2/40 text-[10px] mt-4 text-center">v{appVersion}</p>
+    <a
+      href="https://github.com/themadorg/madmail-admin-web"
+      target="_blank"
+      rel="noopener"
+      class="text-text-2/40 hover:text-text-2/70 text-[10px] mt-4 text-center flex items-center justify-center gap-1 transition-colors"
+    >
+      <Github size={10} />
+      v{appVersion}
+    </a>
   </div>
 {:else}
   <!-- Authenticated Shell -->
@@ -313,6 +322,15 @@
             </button>
           {/if}
           {@render langPicker()}
+          <a
+            href="https://github.com/themadorg/madmail-admin-web"
+            target="_blank"
+            rel="noopener"
+            class="p-1.5 text-text-2 border border-border rounded-lg hover:bg-surface-3 transition-colors"
+            title="GitHub"
+          >
+            <Github size={14} />
+          </a>
           <button
             onclick={toggleTheme}
             class="p-1.5 text-text-2 border border-border rounded-lg hover:bg-surface-3 transition-colors"
