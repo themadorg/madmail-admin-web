@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/themadorg/madmail-admin-web/compare/v1.2.1...v1.2.2) (2026-02-19)
+
+
+### Bug Fixes
+
+* add 404.html SPA fallback for GitHub Pages and fix svelte:component deprecation ([99f351d](https://github.com/themadorg/madmail-admin-web/commit/99f351d10c64bf9e03e3b85f6bde1b24a7a7bbda))
+
 ## [1.2.1](https://github.com/themadorg/madmail-admin-web/compare/v1.2.0...v1.2.1) (2026-02-19)
 
 
