@@ -29,6 +29,9 @@
 
   let { children } = $props();
 
+  const appVersion =
+    typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "dev";
+
   let langOpen = $state(false);
   let locale = $state(getLocale());
 
@@ -110,7 +113,7 @@
 
   function isActive(href: string, path: string): boolean {
     // Strip base prefix for comparison
-    const p = base ? path.replace(base, '') || '/' : path;
+    const p = base ? path.replace(base, "") || "/" : path;
     if (href === "/") return p === "/";
     return p.startsWith(href);
   }
@@ -269,6 +272,7 @@
         </div>
       {/if}
     </div>
+    <p class="text-text-2/40 text-[10px] mt-4 text-center">v{appVersion}</p>
   </div>
 {:else}
   <!-- Authenticated Shell -->
@@ -284,7 +288,12 @@
             <Mail size={16} class="text-accent" />
           </a>
           <div>
-            <h1 class="text-base font-semibold">Madmail</h1>
+            <div class="flex items-center gap-1.5">
+              <h1 class="text-base font-semibold">Madmail</h1>
+              <span class="text-[10px] text-text-2/50 font-mono"
+                >v{appVersion}</span
+              >
+            </div>
             <p class="text-text-2 text-[11px] truncate max-w-[200px]">
               {store.baseUrl}
             </p>

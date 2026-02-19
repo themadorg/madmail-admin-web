@@ -22,6 +22,7 @@
 		"@tailwindcss/forms": "^0.5.11",
 		"@tailwindcss/typography": "^0.5.19",
 		"@tailwindcss/vite": "^4.1.18",
+		"@types/node": "^25.2.3",
 		"semantic-release": "^25.0.2",
 		"svelte": "^5.49.2",
 		"svelte-check": "^4.3.6",
