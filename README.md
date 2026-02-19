@@ -1,42 +1,31 @@
-# sv
+# Madmail Admin Web Panel
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+The web-based administration panel for [Madmail](https://github.com/themadorg/madmail) — a mad fork of [maddy](https://github.com/foxcpp/maddy), optimized for instant, secure messaging with [Delta Chat](https://delta.chat).
 
-## Creating a project
+## Tech Stack
 
-If you're seeing this, you've probably already done this step. Congrats!
+- [SvelteKit](https://svelte.dev/docs/kit) with TypeScript
+- [Tailwind CSS](https://tailwindcss.com) v4
+- Static adapter for deployment to GitHub Pages
 
-```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
+## Development
 
 ```sh
-# recreate this project
-bun x sv create --template minimal --types ts --add tailwindcss="plugins:typography,forms" sveltekit-adapter="adapter:static" devtools-json --install bun admin-web
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+bun install
+bun run dev
 ```
 
 ## Building
 
-To create a production version of your app:
-
 ```sh
-npm run build
+bun run build
+bun run preview
 ```
 
-You can preview the production build with `npm run preview`.
+## Deployment
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+This project is automatically deployed to GitHub Pages on every push to `main` via GitHub Actions. Versioning is handled by [semantic-release](https://github.com/semantic-release/semantic-release) using [Conventional Commits](https://www.conventionalcommits.org).
+
+## License
+
+Licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html).
