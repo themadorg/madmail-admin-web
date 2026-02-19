@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/themadorg/madmail-admin-web/compare/v1.0.2...v1.1.0) (2026-02-19)
+
+
+### Features
+
+* display app version in login page and header ([cbf950f](https://github.com/themadorg/madmail-admin-web/commit/cbf950ff8fc6b58442005e5b6293e4d20b2059bd))
+
 ## [1.0.2](https://github.com/themadorg/madmail-admin-web/compare/v1.0.1...v1.0.2) (2026-02-19)
 
 
