@@ -32,23 +32,27 @@ self.addEventListener('activate', (e) => {
     self.clients.claim();
 });
 
-// ── Fetch: cache-first for app assets, network-first for version.json & API ──
+// ── Fetch: cache-first for same-origin app assets only ──
 self.addEventListener('fetch', (e) => {
     const url = new URL(e.request.url);
 
-    // Never cache API calls or version.json
-    if (url.pathname.includes('/api/') || url.pathname.endsWith('version.json')) {
-        e.respondWith(fetch(e.request));
+    // Skip cross-origin requests entirely — let the browser handle them.
+    // This prevents the SW from interfering with API calls to external servers.
+    if (url.origin !== self.location.origin) {
         return;
     }
 
-    // Cache-first for everything else
+    // Don't cache version.json (used for update checking)
+    if (url.pathname.endsWith('version.json')) {
+        return;
+    }
+
+    // Cache-first for same-origin app assets
     e.respondWith(
         caches.match(e.request).then((cached) => {
             if (cached) return cached;
             return fetch(e.request).then((response) => {
-                // Only cache successful same-origin responses
-                if (response.ok && url.origin === self.location.origin) {
+                if (response.ok) {
                     const clone = response.clone();
                     caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
                 }

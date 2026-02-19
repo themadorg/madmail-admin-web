@@ -248,10 +248,30 @@
       />
 
       {#if store.connectError}
-        <p class="text-danger text-xs mb-3 flex items-center gap-1">
-          <AlertTriangle size={12} />
-          {store.connectError}
-        </p>
+        <div class="text-danger text-xs mb-3">
+          <p class="flex items-center gap-1">
+            <AlertTriangle size={12} />
+            {store.connectError}
+          </p>
+          {#if store.connectError.includes("Failed to fetch") || store.connectError.includes("NetworkError") || store.connectError.includes("net::")}
+            <div
+              class="mt-2 p-2 bg-warning/10 border border-warning/20 rounded-md text-warning text-xs"
+            >
+              <p class="font-medium mb-1">Certificate not trusted?</p>
+              <p class="text-text-2 mb-2">
+                Open the API URL below, accept the certificate in your browser,
+                then come back and try again.
+              </p>
+              <a
+                href={store.baseUrl}
+                target="_blank"
+                rel="noopener"
+                class="inline-flex items-center gap-1 text-accent hover:underline font-medium"
+                >Open {store.baseUrl} ↗</a
+              >
+            </div>
+          {/if}
+        </div>
       {/if}
 
       <button
