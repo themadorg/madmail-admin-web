@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/themadorg/madmail-admin-web/compare/v1.2.3...v1.3.0) (2026-02-19)
+
+
+### Features
+
+* add PWA support with service worker, manifest, version checking, and responsive layout ([1992d00](https://github.com/themadorg/madmail-admin-web/commit/1992d00c2d245eb6433ee4af1fd6ab26d8b6a576))
+
 ## [1.2.3](https://github.com/themadorg/madmail-admin-web/compare/v1.2.2...v1.2.3) (2026-02-19)
 
 
