@@ -47,7 +47,7 @@ class AdminState {
     accounts = $state<AccountList | null>(null);
     quota = $state<QuotaStats | null>(null);
     blocklist = $state<BlocklistResponse | null>(null);
-    dnsOverrides = $state<DnsListResponse | null>(null);
+    endpointOverrides = $state<DnsListResponse | null>(null);
 
     // UI
     toast = $state('');
@@ -121,7 +121,7 @@ class AdminState {
             if (d.data) this.quota = d.data;
             if (e.data) this.status = e.data;
             if (f.data) this.blocklist = f.data;
-            if (g.data) this.dnsOverrides = g.data;
+            if (g.data) this.endpointOverrides = g.data;
         } finally { this.refreshing = false; }
     }
 
@@ -131,7 +131,7 @@ class AdminState {
         localStorage.removeItem('madmail_token');
         this.baseUrl = '';
         this.token = '';
-        this.status = this.storage = this.settings = this.accounts = this.quota = this.blocklist = this.dnsOverrides = null;
+        this.status = this.storage = this.settings = this.accounts = this.quota = this.blocklist = this.endpointOverrides = null;
         this.newAccount = null;
     }
 
@@ -358,24 +358,24 @@ class AdminState {
         this.editValue = current;
     }
 
-    async addDnsOverride(lookupKey: string, targetHost: string, comment?: string) {
+    async addEndpointOverride(lookupKey: string, targetHost: string, comment?: string) {
         if (this.busy) return;
         this.busy = true;
         try {
             const res = await api.addDns(this.cfg(), lookupKey, targetHost, comment);
             if (res.error) { this.notify(res.error, 'err'); return; }
-            this.notify(t('notify.dns_added', { key: lookupKey }));
+            this.notify(t('notify.endpoint_added', { key: lookupKey }));
             await this.refresh();
         } finally { this.busy = false; }
     }
 
-    async deleteDnsOverride(lookupKey: string) {
+    async deleteEndpointOverride(lookupKey: string) {
         if (this.busy) return;
         this.busy = true;
         try {
             const res = await api.deleteDns(this.cfg(), lookupKey);
             if (res.error) { this.notify(res.error, 'err'); return; }
-            this.notify(t('notify.dns_deleted', { key: lookupKey }));
+            this.notify(t('notify.endpoint_deleted', { key: lookupKey }));
             await this.refresh();
         } finally { this.busy = false; }
     }

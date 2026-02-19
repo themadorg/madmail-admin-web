@@ -20,10 +20,10 @@
   let confirmingDelete = $state("");
 
   let filtered = $derived.by(() => {
-    if (!store.dnsOverrides) return [];
-    if (!search) return store.dnsOverrides.overrides;
+    if (!store.endpointOverrides) return [];
+    if (!search) return store.endpointOverrides.overrides;
     const q = search.toLowerCase();
-    return store.dnsOverrides.overrides.filter(
+    return store.endpointOverrides.overrides.filter(
       (e) =>
         e.lookup_key.toLowerCase().includes(q) ||
         e.target_host.toLowerCase().includes(q) ||
@@ -33,7 +33,7 @@
 
   async function handleAdd() {
     if (!newLookup.trim() || !newTarget.trim()) return;
-    await store.addDnsOverride(
+    await store.addEndpointOverride(
       newLookup.trim(),
       newTarget.trim(),
       newComment.trim(),
@@ -51,15 +51,15 @@
   async function handleConfirmDelete() {
     const key = confirmingDelete;
     confirmingDelete = "";
-    await store.deleteDnsOverride(key);
+    await store.deleteEndpointOverride(key);
   }
 </script>
 
-{#if store.dnsOverrides}
+{#if store.endpointOverrides}
   <div class="dns-header">
     <span class="dns-count">
       <Globe size={14} />
-      {_("dns.total", { count: String(store.dnsOverrides.total) })}
+      {_("dns.total", { count: String(store.endpointOverrides.total) })}
     </span>
     <button class="btn-add" onclick={() => (showAdd = !showAdd)}>
       <Plus size={12} />
@@ -115,7 +115,7 @@
   {/if}
 
   <!-- Search -->
-  {#if store.dnsOverrides.total > 0}
+  {#if store.endpointOverrides.total > 0}
     <div class="search-wrap">
       <input
         type="text"
@@ -126,7 +126,7 @@
     </div>
   {/if}
 
-  {#if filtered.length === 0 && store.dnsOverrides.total === 0 && !showAdd}
+  {#if filtered.length === 0 && store.endpointOverrides.total === 0 && !showAdd}
     <div class="empty-state">
       <Globe size={32} />
       <p>{_("dns.empty")}</p>
@@ -135,7 +135,7 @@
         {_("dns.add")}
       </button>
     </div>
-  {:else if filtered.length === 0 && store.dnsOverrides.total > 0}
+  {:else if filtered.length === 0 && store.endpointOverrides.total > 0}
     <div class="empty-state">
       <SearchX size={24} />
       <p>No results for "{search}"</p>
