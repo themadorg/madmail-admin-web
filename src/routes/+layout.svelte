@@ -173,7 +173,7 @@
 <!-- Login Gate -->
 {#if !store.connected}
   <div
-    class="min-h-screen bg-surface text-text flex items-center justify-center p-4"
+    class="min-h-screen bg-surface text-text flex flex-col items-center justify-center p-4"
     style="font-family: 'Inter', system-ui, sans-serif;"
   >
     <div
