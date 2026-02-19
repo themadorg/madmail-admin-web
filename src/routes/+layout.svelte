@@ -373,7 +373,7 @@
               ? 'text-accent border-b-2 border-accent font-medium'
               : 'text-text-2 hover:text-text'}"
           >
-            <svelte:component this={item.icon} size={13} />
+            <item.icon size={13} />
             {_(item.key)}
           </a>
         {/each}
