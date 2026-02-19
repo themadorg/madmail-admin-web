@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/themadorg/madmail-admin-web/compare/v1.3.1...v1.4.0) (2026-02-19)
+
+
+### Features
+
+* use custom domain admin.madmail.chat and support root deployment ([9fc2690](https://github.com/themadorg/madmail-admin-web/commit/9fc2690eb93c114fcd2c81515c849a619177b3eb))
+
 ## [1.3.1](https://github.com/themadorg/madmail-admin-web/compare/v1.3.0...v1.3.1) (2026-02-19)
 
 
