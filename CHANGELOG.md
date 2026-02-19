@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/themadorg/madmail-admin-web/compare/v1.4.1...v1.4.2) (2026-02-19)
+
+
+### Bug Fixes
+
+* **ci:** add packages write permission to allow pushing to ghcr.io ([3124595](https://github.com/themadorg/madmail-admin-web/commit/3124595d574c00ec831a0ad34de25646e9e15df4))
+
 ## [1.4.1](https://github.com/themadorg/madmail-admin-web/compare/v1.4.0...v1.4.1) (2026-02-19)
 
 
