@@ -12,7 +12,7 @@
         "!**/node_modules/**"
     ],
     "asar": true,
-    "compression": "maximum",
+    "compression": "normal",
     "electronLanguages": [
         "en-US",
         "fa"
