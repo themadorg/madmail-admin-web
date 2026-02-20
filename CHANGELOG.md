@@ -1,3 +1,10 @@
+## [1.5.2](https://github.com/themadorg/madmail-admin-web/compare/v1.5.1...v1.5.2) (2026-02-20)
+
+
+### Bug Fixes
+
+* **ci:** reduce Electron package size and upload to GitHub Releases ([9e87a23](https://github.com/themadorg/madmail-admin-web/commit/9e87a23833e021cfdd4c032755c3505b0cdef33d))
+
 ## [1.5.1](https://github.com/themadorg/madmail-admin-web/compare/v1.5.0...v1.5.1) (2026-02-20)
 
 
