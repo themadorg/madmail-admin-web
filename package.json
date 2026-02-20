@@ -1,8 +1,12 @@
 {
 	"name": "madmail-admin-web",
+<<<<<<< HEAD
 	"version": "1.4.1",
 	"description": "Madmail server administration dashboard",
 	"author": "Madmail <admin@madmail.chat>",
+=======
+	"version": "1.4.2",
+>>>>>>> 08532321c05047928951df1face021d003b1b965
 	"type": "module",
 	"main": "electron/main.cjs",
 	"scripts": {
