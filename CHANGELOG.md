@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/themadorg/madmail-admin-web/compare/v1.5.4...v1.6.0) (2026-02-20)
+
+
+### Features
+
+* enhance shadowsocks with real-time URL and QR code ([007faf0](https://github.com/themadorg/madmail-admin-web/commit/007faf02bae4132fadf9686ca55a8c77a5ca8e74))
+
 ## [1.5.4](https://github.com/themadorg/madmail-admin-web/compare/v1.5.3...v1.5.4) (2026-02-20)
 
 
