@@ -1,3 +1,10 @@
+## [1.5.4](https://github.com/themadorg/madmail-admin-web/compare/v1.5.3...v1.5.4) (2026-02-20)
+
+
+### Bug Fixes
+
+* **ci:** upload raw binaries to release (both AppImage and exe) ([22d640b](https://github.com/themadorg/madmail-admin-web/commit/22d640b24f0131073d1a4d3631de7ffbf7694295))
+
 ## [1.5.3](https://github.com/themadorg/madmail-admin-web/compare/v1.5.2...v1.5.3) (2026-02-20)
 
 
