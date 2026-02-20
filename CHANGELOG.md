@@ -1,3 +1,15 @@
+# [1.5.0](https://github.com/themadorg/madmail-admin-web/compare/v1.4.2...v1.5.0) (2026-02-20)
+
+
+### Bug Fixes
+
+* resolve issue ([6c15178](https://github.com/themadorg/madmail-admin-web/commit/6c151786860eac8ab0ed8e4ddd01ee14daeb9774))
+
+
+### Features
+
+* add Electron desktop builds (AppImage + Windows) ([557e035](https://github.com/themadorg/madmail-admin-web/commit/557e0355339ef0bec70e2660a852014004698396))
+
 ## [1.4.2](https://github.com/themadorg/madmail-admin-web/compare/v1.4.1...v1.4.2) (2026-02-19)
 
 
