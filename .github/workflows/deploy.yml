@@ -128,10 +128,10 @@ jobs:
         include:
           - os: ubuntu-latest
             build-flag: --linux
-            artifact-pattern: "dist-electron/*.AppImage"
+            artifact-glob: "*.AppImage"
           - os: windows-latest
             build-flag: --win
-            artifact-pattern: "dist-electron/*.exe"
+            artifact-glob: "*.exe"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -150,10 +150,26 @@ jobs:
           bun run build
           npx electron-builder ${{ matrix.build-flag }} --publish never
 
-      - name: Upload Electron artifacts
+      - name: Upload to GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=$(cat .version 2>/dev/null || echo "")
+          if [ -n "$VERSION" ]; then
+            for file in dist-electron/${{ matrix.artifact-glob }}; do
+              if [ -f "$file" ]; then
+                echo "Uploading $file to release v${VERSION}"
+                gh release upload "v${VERSION}" "$file" --clobber || echo "Warning: upload failed for $file"
+              fi
+            done
+          else
+            echo "No version file found, skipping release upload"
+          fi
+
+      - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: electron-${{ runner.os }}
-          path: ${{ matrix.artifact-pattern }}
+          path: dist-electron/${{ matrix.artifact-glob }}
           retention-days: 30
-

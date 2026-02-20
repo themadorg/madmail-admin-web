@@ -8,11 +8,15 @@
         "build/**/*",
         "electron/**/*",
         "static/icon-192.png",
-        "static/icon-512.png"
+        "static/icon-512.png",
+        "!**/node_modules/**"
     ],
+    "asar": true,
+    "compression": "maximum",
     "win": {
         "target": "nsis",
-        "icon": "static/icon-512.png"
+        "icon": "static/icon-512.png",
+        "artifactName": "${productName}-${version}-win-${arch}.${ext}"
     },
     "nsis": {
         "oneClick": true,
@@ -24,6 +28,6 @@
         "category": "Network"
     },
     "appImage": {
-        "artifactName": "${productName}-${version}-${arch}.AppImage"
+        "artifactName": "${productName}-${version}-linux-${arch}.AppImage"
     }
 }
