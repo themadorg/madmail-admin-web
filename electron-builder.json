@@ -13,6 +13,11 @@
     ],
     "asar": true,
     "compression": "maximum",
+    "electronLanguages": [
+        "en-US",
+        "fa"
+    ],
+    "afterPack": "./electron/afterPack.cjs",
     "win": {
         "target": "nsis",
         "icon": "static/icon-512.png",
