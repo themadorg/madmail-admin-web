@@ -148,7 +148,7 @@ jobs:
       - name: Build SvelteKit + Electron
         run: |
           bun run build
-          npx electron-builder ${{ matrix.build-flag }}
+          npx electron-builder ${{ matrix.build-flag }} --publish never
 
       - name: Upload Electron artifacts
         uses: actions/upload-artifact@v4
