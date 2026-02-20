@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/themadorg/madmail-admin-web/compare/v1.5.0...v1.5.1) (2026-02-20)
+
+
+### Bug Fixes
+
+* **ci:** disable electron-builder auto-publish in CI ([ade5faa](https://github.com/themadorg/madmail-admin-web/commit/ade5faa83425ae38da54491e2725ec2682f63af3))
+
 # [1.5.0](https://github.com/themadorg/madmail-admin-web/compare/v1.4.2...v1.5.0) (2026-02-20)
 
 
