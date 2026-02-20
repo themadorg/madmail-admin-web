@@ -61,6 +61,32 @@ class AdminState {
     confirmingDelete = $state('');
     newAccount = $state<CreateAccountResponse | null>(null);
 
+    // Derived
+    get shadowsocksUrl(): string {
+        if (!this.settings || this.settings.ss_enabled !== 'enabled') return '';
+
+        const getVal = (key: string, fallback: string) => {
+            if (this.editingField === key) return this.editValue;
+            return this.setting(key).value || fallback;
+        };
+
+        const cipher = getVal('ss_cipher', 'chacha20-ietf-poly1305');
+        const password = getVal('ss_password', '');
+        const port = getVal('ss_port', '8388');
+
+        if (!password) return '';
+
+        try {
+            const url = new URL(this.baseUrl);
+            const userinfo = `${cipher}:${password}`;
+            const auth = btoa(userinfo).replace(/=+$/, '');
+            const tag = encodeURIComponent(url.hostname);
+            return `ss://${auth}@${url.hostname}:${port}#${tag}`;
+        } catch {
+            return '';
+        }
+    }
+
     // --- Helpers ---
     cfg(): ApiConfig {
         return { baseUrl: this.baseUrl, token: this.token };

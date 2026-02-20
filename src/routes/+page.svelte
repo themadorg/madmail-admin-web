@@ -12,7 +12,11 @@
     Mail,
     SendHorizonal,
     Inbox,
+    QrCode,
   } from "lucide-svelte";
+  import ShadowsocksQR from "$lib/components/ShadowsocksQR.svelte";
+
+  let showQR = $state(false);
 
   let locale = $state(getLocale());
   function _(key: string, params?: Record<string, string>): string {
@@ -107,6 +111,47 @@
         _("stat.ss_conns"),
         `${store.status.shadowsocks.connections} (${store.status.shadowsocks.unique_ips} IPs)`,
       )}
+    {/if}
+  </div>
+{/if}
+
+<!-- Shadowsocks URL -->
+{#if store.shadowsocksUrl}
+  <div class="bg-surface-2 rounded-lg p-3 border border-border mb-4">
+    <div class="flex items-center justify-between gap-3 mb-2">
+      <div class="min-w-0">
+        <div class="text-[10px] uppercase tracking-wider text-text-2 mb-0.5">
+          {_("svc.shadowsocks_client_url")}
+        </div>
+        <div class="text-xs font-mono text-accent truncate">
+          {store.shadowsocksUrl}
+        </div>
+      </div>
+      <div class="flex gap-1">
+        <button
+          onclick={() => (showQR = !showQR)}
+          class="p-1.5 bg-surface-3 border border-border rounded hover:border-accent/50 transition-colors text-text-2"
+          title="Show QR Code"
+        >
+          <QrCode size={14} />
+        </button>
+        <button
+          onclick={() => {
+            navigator.clipboard.writeText(store.shadowsocksUrl);
+            store.notify(_("notify.copied"));
+          }}
+          class="px-2 py-1 bg-surface-3 border border-border rounded text-[10px] hover:border-text-2/50 transition-colors shrink-0"
+        >
+          {_("action.copy")}
+        </button>
+      </div>
+    </div>
+    {#if showQR}
+      <div
+        class="flex justify-center p-2 bg-white rounded border border-border animate-in fade-in zoom-in duration-300"
+      >
+        <ShadowsocksQR url={store.shadowsocksUrl} />
+      </div>
     {/if}
   </div>
 {/if}

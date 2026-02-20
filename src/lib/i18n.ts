@@ -78,6 +78,8 @@ const translations: Record<Locale, Record<string, string>> = {
         'svc.ss_cipher': 'SS Cipher',
         'svc.ss_password': 'SS Password',
         'svc.admin_path': 'Admin API Path',
+        'svc.shadowsocks_client_url': 'Shadowsocks Client URI',
+        'svc.shadowsocks_url_hint': 'Scan this URI with your Shadowsocks client to connect.',
 
         // Ports tab
         'port.smtp': 'SMTP',
@@ -142,6 +144,7 @@ const translations: Record<Locale, Record<string, string>> = {
         // Actions
         'action.save': 'Save',
         'action.cancel': 'Cancel',
+        'action.copy': 'Copy',
         'action.apply_restart': 'Apply & Restart',
         'action.restarting': 'Restarting…',
         'action.restart_needed': 'Changes need a restart',
@@ -164,6 +167,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'notify.restarting': 'Restarting service...',
         'notify.quota_updated': 'Quota updated',
         'notify.quota_reset': 'Quota reset to default',
+        'notify.copied': 'Copied to clipboard',
 
         // Misc
         'misc.default': '(default)',
@@ -229,6 +233,8 @@ const translations: Record<Locale, Record<string, string>> = {
         'svc.ss_cipher': 'رمزنگاری SS',
         'svc.ss_password': 'رمز عبور SS',
         'svc.admin_path': 'مسیر API مدیریت',
+        'svc.shadowsocks_client_url': 'آدرس کلاینت شدوساکس',
+        'svc.shadowsocks_url_hint': 'این آدرس را در کلاینت شدوساکس خود اسکن یا وارد کنید.',
 
         'port.smtp': 'SMTP',
         'port.submission': 'ارسال',
@@ -289,6 +295,7 @@ const translations: Record<Locale, Record<string, string>> = {
 
         'action.save': 'ذخیره',
         'action.cancel': 'لغو',
+        'action.copy': 'کپی',
         'action.apply_restart': 'اعمال و ری‌استارت',
         'action.restarting': 'در حال ری‌استارت…',
         'action.restart_needed': 'تغییرات نیاز به ری‌استارت دارند',
@@ -310,6 +317,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'notify.restarting': 'در حال ری‌استارت سرویس...',
         'notify.quota_updated': 'سهمیه به‌روز شد',
         'notify.quota_reset': 'سهمیه به پیش‌فرض بازگشت',
+        'notify.copied': 'در حافظه کپی شد',
 
         'misc.default': '(پیش‌فرض)',
         'misc.loading': 'بارگذاری…',
@@ -374,6 +382,8 @@ const translations: Record<Locale, Record<string, string>> = {
         'svc.ss_cipher': 'Cifrado SS',
         'svc.ss_password': 'Contraseña SS',
         'svc.admin_path': 'Ruta API Admin',
+        'svc.shadowsocks_client_url': 'URI de cliente Shadowsocks',
+        'svc.shadowsocks_url_hint': 'Escanea este URI con tu cliente Shadowsocks для conectar.',
 
         'port.smtp': 'SMTP',
         'port.submission': 'Envío',
@@ -434,6 +444,7 @@ const translations: Record<Locale, Record<string, string>> = {
 
         'action.save': 'Guardar',
         'action.cancel': 'Cancelar',
+        'action.copy': 'Copiar',
         'action.apply_restart': 'Aplicar y reiniciar',
         'action.restarting': 'Reiniciando…',
         'action.restart_needed': 'Los cambios requieren reinicio',
@@ -455,6 +466,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'notify.restarting': 'Reiniciando servicio...',
         'notify.quota_updated': 'Cuota actualizada',
         'notify.quota_reset': 'Cuota restablecida',
+        'notify.copied': 'Copiado al portapapeles',
 
         'misc.default': '(predeterminado)',
         'misc.loading': 'Cargando…',
@@ -519,6 +531,8 @@ const translations: Record<Locale, Record<string, string>> = {
         'svc.ss_cipher': 'Шифр SS',
         'svc.ss_password': 'Пароль SS',
         'svc.admin_path': 'Путь API администратора',
+        'svc.shadowsocks_client_url': 'URI клиента Shadowsocks',
+        'svc.shadowsocks_url_hint': 'Отсканируйте этот URI вашим клиентом Shadowsocks для подключения.',
 
         'port.smtp': 'SMTP',
         'port.submission': 'Отправка',
@@ -579,6 +593,7 @@ const translations: Record<Locale, Record<string, string>> = {
 
         'action.save': 'Сохранить',
         'action.cancel': 'Отмена',
+        'action.copy': 'Копировать',
         'action.apply_restart': 'Применить и перезапустить',
         'action.restarting': 'Перезапуск…',
         'action.restart_needed': 'Изменения требуют перезапуска',
@@ -600,6 +615,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'notify.restarting': 'Перезапуск сервиса...',
         'notify.quota_updated': 'Квота обновлена',
         'notify.quota_reset': 'Квота сброшена',
+        'notify.copied': 'Скопировано в буфер обмена',
 
         'misc.default': '(по умолчанию)',
         'misc.loading': 'Загрузка…',
