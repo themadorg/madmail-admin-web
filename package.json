@@ -1,14 +1,21 @@
 {
 	"name": "madmail-admin-web",
 	"version": "1.4.1",
+	"description": "Madmail server administration dashboard",
+	"author": "Madmail <admin@madmail.chat>",
 	"type": "module",
+	"main": "electron/main.cjs",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"dev:electron": "vite build && electron .",
+		"build:electron": "vite build && electron-builder --win --linux",
+		"build:electron:win": "vite build && electron-builder --win",
+		"build:electron:linux": "vite build && electron-builder --linux"
 	},
 	"devDependencies": {
 		"@semantic-release/changelog": "^6.0.3",
@@ -23,6 +30,8 @@
 		"@tailwindcss/typography": "^0.5.19",
 		"@tailwindcss/vite": "^4.1.18",
 		"@types/node": "^25.2.3",
+		"electron": "^35.1.2",
+		"electron-builder": "^26.0.12",
 		"semantic-release": "^25.0.2",
 		"svelte": "^5.49.2",
 		"svelte-check": "^4.3.6",

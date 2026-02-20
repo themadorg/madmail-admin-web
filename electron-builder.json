@@ -1,0 +1,29 @@
+{
+    "appId": "chat.madmail.admin",
+    "productName": "Madmail Admin",
+    "directories": {
+        "output": "dist-electron"
+    },
+    "files": [
+        "build/**/*",
+        "electron/**/*",
+        "static/icon-192.png",
+        "static/icon-512.png"
+    ],
+    "win": {
+        "target": "nsis",
+        "icon": "static/icon-512.png"
+    },
+    "nsis": {
+        "oneClick": true,
+        "allowToChangeInstallationDirectory": false
+    },
+    "linux": {
+        "target": "AppImage",
+        "icon": "static/icon-512.png",
+        "category": "Network"
+    },
+    "appImage": {
+        "artifactName": "${productName}-${version}-${arch}.AppImage"
+    }
+}
