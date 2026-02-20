@@ -150,6 +150,18 @@ jobs:
           bun run build
           npx electron-builder ${{ matrix.build-flag }} --publish never
 
+      - name: Zip artifacts
+        shell: bash
+        run: |
+          cd dist-electron
+          for file in ${{ matrix.artifact-glob }}; do
+            if [ -f "$file" ]; then
+              echo "Zipping $file"
+              zip -9 "${file}.zip" "$file"
+              echo "  $(du -sh "${file}.zip" | cut -f1) compressed (was $(du -sh "$file" | cut -f1))"
+            fi
+          done
+
       - name: Upload to GitHub Release
         shell: bash
         env:
@@ -157,7 +169,7 @@ jobs:
         run: |
           VERSION=$(cat .version 2>/dev/null || echo "")
           if [ -n "$VERSION" ]; then
-            for file in dist-electron/${{ matrix.artifact-glob }}; do
+            for file in dist-electron/${{ matrix.artifact-glob }}.zip; do
               if [ -f "$file" ]; then
                 echo "Uploading $file to release v${VERSION}"
                 gh release upload "v${VERSION}" "$file" --clobber || echo "Warning: upload failed for $file"
@@ -171,5 +183,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: electron-${{ runner.os }}
-          path: dist-electron/${{ matrix.artifact-glob }}
+          path: dist-electron/${{ matrix.artifact-glob }}.zip
           retention-days: 30
