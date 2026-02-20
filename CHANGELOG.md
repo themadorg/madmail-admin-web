@@ -1,3 +1,12 @@
+## [1.5.3](https://github.com/themadorg/madmail-admin-web/compare/v1.5.2...v1.5.3) (2026-02-20)
+
+
+### Bug Fixes
+
+* **ci:** zip Electron artifacts before uploading to GitHub Releases ([5bd5c93](https://github.com/themadorg/madmail-admin-web/commit/5bd5c9369ca5f28d1691a5751502b5f897564686))
+* reduce Electron AppImage size from 109MB to 76MB ([9fb3c39](https://github.com/themadorg/madmail-admin-web/commit/9fb3c39b5b54e4e3c1f093de8cde3518c6a2a217))
+* use normal compression for fast AppImage startup ([2bd6f73](https://github.com/themadorg/madmail-admin-web/commit/2bd6f73bd69c2af179c01eb5c6af30aa41ca071a))
+
 ## [1.5.2](https://github.com/themadorg/madmail-admin-web/compare/v1.5.1...v1.5.2) (2026-02-20)
 
 
