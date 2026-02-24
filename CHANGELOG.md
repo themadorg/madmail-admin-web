@@ -1,3 +1,10 @@
+## [1.6.2](https://github.com/themadorg/madmail-admin-web/compare/v1.6.1...v1.6.2) (2026-02-24)
+
+
+### Bug Fixes
+
+* add in-app proxy in Electron to bypass CORS and self-signed certs ([7cc30b5](https://github.com/themadorg/madmail-admin-web/commit/7cc30b53d8ad428b6f2d52f741dec5588b7a9add))
+
 ## [1.6.1](https://github.com/themadorg/madmail-admin-web/compare/v1.6.0...v1.6.1) (2026-02-20)
 
 
