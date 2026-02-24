@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/themadorg/madmail-admin-web/compare/v1.6.0...v1.6.1) (2026-02-20)
+
+
+### Bug Fixes
+
+* **ci:** update bun lockfile and remove package-lock.json ([5ef4616](https://github.com/themadorg/madmail-admin-web/commit/5ef46165c0186e3a3960938f0ae359cc9685fafc))
+
 # [1.6.0](https://github.com/themadorg/madmail-admin-web/compare/v1.5.4...v1.6.0) (2026-02-20)
 
 
