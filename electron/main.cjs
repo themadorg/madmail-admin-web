@@ -2,6 +2,13 @@ const { app, BrowserWindow, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
+const https = require('https');
+const { URL } = require('url');
+
+// Debug mode: only log proxy details when --debug is passed
+const DEBUG = process.argv.includes('--debug');
+function debug(...args) { if (DEBUG) console.log(...args); }
+function debugErr(...args) { if (DEBUG) console.error(...args); }
 
 // Path to the SvelteKit static build output
 const BUILD_DIR = path.join(__dirname, '..', 'build');
@@ -29,11 +36,117 @@ const MIME_TYPES = {
     '.webmanifest': 'application/manifest+json',
 };
 
+// --- In-app API proxy ---
+// Accepts POST to /__proxy with JSON body: { targetUrl: string, payload: object }
+// Forwards `payload` to `targetUrl` using Node.js http/https (bypasses CORS + self-signed certs)
+// Returns the upstream response back to the renderer.
+function handleProxy(req, res) {
+    debug('[PROXY] ← incoming request from renderer');
+    let body = '';
+    req.on('data', (chunk) => { body += chunk; });
+    req.on('end', () => {
+        debug('[PROXY] raw body:', body.substring(0, 500));
+        let parsed;
+        try {
+            parsed = JSON.parse(body);
+        } catch (e) {
+            debugErr('[PROXY] JSON parse error:', e.message);
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Invalid JSON in proxy request' }));
+            return;
+        }
+
+        const { targetUrl, payload } = parsed;
+        debug('[PROXY] targetUrl:', targetUrl);
+
+        if (!targetUrl) {
+            debugErr('[PROXY] missing targetUrl');
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Missing targetUrl' }));
+            return;
+        }
+
+        let target;
+        try {
+            target = new URL(targetUrl);
+        } catch {
+            debugErr('[PROXY] invalid targetUrl:', targetUrl);
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Invalid targetUrl' }));
+            return;
+        }
+
+        const payloadStr = JSON.stringify(payload ?? {});
+        const isHttps = target.protocol === 'https:';
+        const transport = isHttps ? https : http;
+
+        debug('[PROXY] → forwarding to:', target.hostname + ':' + (target.port || (isHttps ? 443 : 80)) + target.pathname);
+
+        const proxyReq = transport.request(
+            {
+                hostname: target.hostname,
+                port: target.port || (isHttps ? 443 : 80),
+                path: target.pathname + target.search,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': Buffer.byteLength(payloadStr),
+                },
+                rejectUnauthorized: false,
+                timeout: 30000,
+            },
+            (proxyRes) => {
+                debug('[PROXY] ← upstream status:', proxyRes.statusCode);
+                if (DEBUG) {
+                    // In debug mode, collect body for logging before sending
+                    let responseBody = '';
+                    proxyRes.on('data', (chunk) => { responseBody += chunk; });
+                    proxyRes.on('end', () => {
+                        debug('[PROXY] ← upstream body:', responseBody.substring(0, 500));
+                        res.writeHead(proxyRes.statusCode || 502, {
+                            'Content-Type': proxyRes.headers['content-type'] || 'application/json',
+                        });
+                        res.end(responseBody);
+                    });
+                } else {
+                    // In normal mode, pipe directly for efficiency
+                    res.writeHead(proxyRes.statusCode || 502, {
+                        'Content-Type': proxyRes.headers['content-type'] || 'application/json',
+                    });
+                    proxyRes.pipe(res);
+                }
+            }
+        );
+
+        proxyReq.on('error', (err) => {
+            debugErr('[PROXY] ✗ error:', err.message);
+            res.writeHead(502, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: `Proxy error: ${err.message}` }));
+        });
+
+        proxyReq.on('timeout', () => {
+            debugErr('[PROXY] ✗ timeout after 30s');
+            proxyReq.destroy();
+            res.writeHead(504, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Proxy timeout' }));
+        });
+
+        proxyReq.write(payloadStr);
+        proxyReq.end();
+    });
+}
+
 // Simple static file server — serves the SvelteKit build exactly like a web server
 function startStaticServer() {
     return new Promise((resolve) => {
         const server = http.createServer((req, res) => {
             let pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+
+            // --- Proxy endpoint: intercept /__proxy ---
+            if (pathname === '/__proxy' && req.method === 'POST') {
+                handleProxy(req, res);
+                return;
+            }
 
             // Resolve file path
             let filePath = path.join(BUILD_DIR, pathname);

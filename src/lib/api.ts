@@ -1,5 +1,9 @@
 // Admin API client for the Madmail RPC-style single-endpoint API.
 // All requests are POST to the admin API URL provided by the user.
+//
+// When running inside Electron (detected by the page being served from 127.0.0.1),
+// requests are routed through a local /__proxy endpoint in the Electron main process.
+// This avoids CORS restrictions and self-signed certificate errors.
 
 export interface ApiConfig {
     baseUrl: string;
@@ -126,6 +130,16 @@ export interface CreateAccountResponse {
 
 // --- API Client ---
 
+// Detect if we're running inside Electron's embedded server (localhost origin).
+// In that case, route requests through the /__proxy endpoint to bypass CORS + self-signed certs.
+function isElectron(): boolean {
+    try {
+        return typeof window !== 'undefined' && window.location.hostname === '127.0.0.1';
+    } catch {
+        return false;
+    }
+}
+
 export async function apiCall<T = unknown>(
     config: ApiConfig,
     resource: string,
@@ -133,28 +147,59 @@ export async function apiCall<T = unknown>(
     body?: unknown
 ): Promise<{ data?: T; error?: string; status: number }> {
     try {
-        const url = config.baseUrl.replace(/\/+$/, '');
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                method,
-                resource,
-                headers: { Authorization: `Bearer ${config.token}` },
-                body: body ?? {}
-            })
-        });
+        const targetUrl = config.baseUrl.replace(/\/+$/, '');
+        const payload = {
+            method,
+            resource,
+            headers: { Authorization: `Bearer ${config.token}` },
+            body: body ?? {}
+        };
 
-        const json: ApiResponse<T> = await res.json();
+        let res: Response;
+
+        if (isElectron()) {
+            // Route through Electron's in-app proxy to avoid CORS and self-signed cert issues
+            const proxyUrl = `${window.location.origin}/__proxy`;
+            res = await fetch(proxyUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ targetUrl, payload })
+            });
+        } else {
+            // Direct fetch (web / GitHub Pages deployment)
+            res = await fetch(targetUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+        }
+
+        const text = await res.text();
+        if (!text) {
+            // HTTP 200 with empty body = auth succeeded, server accepted the request.
+            // If auth failed, the server would return {"status":401,"error":"unauthorized"}.
+            if (res.status >= 200 && res.status < 300) {
+                return { data: undefined as unknown as T, status: res.status };
+            }
+            return { error: `Empty response from server (HTTP ${res.status})`, status: res.status };
+        }
+
+        let json: ApiResponse<T>;
+        try {
+            json = JSON.parse(text);
+        } catch {
+            return { error: `Invalid JSON from server: ${text.substring(0, 200)}`, status: res.status };
+        }
 
         if (json.error) {
             return { error: json.error, status: json.status };
         }
-        return { data: json.body, status: json.status };
+        return { data: json.body, status: json.status ?? res.status };
     } catch (e) {
         return { error: String(e), status: 0 };
     }
 }
+
 
 // Convenience wrappers
 export const api = {

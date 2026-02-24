@@ -124,7 +124,7 @@ class AdminState {
         // Save to IndexedDB for multi-server support
         saveServer(this.baseUrl, this.token).catch(() => { });
         this.connected = true;
-        this.status = res.data!;
+        if (res.data) this.status = res.data;
         this.refresh();
     }
 
