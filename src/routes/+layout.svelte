@@ -77,6 +77,7 @@
     { href: "/accounts", key: "tab.accounts", icon: Users },
     { href: "/blocked", key: "tab.blocked", icon: ShieldBan },
     { href: "/dns", key: "tab.dns", icon: Globe },
+    { href: "/notice", key: "tab.notice", icon: Mail },
   ];
 
   // Saved servers from IndexedDB

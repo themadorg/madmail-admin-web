@@ -258,5 +258,11 @@ export const api = {
 
     // Restart service (needed after port access changes)
     restart: (c: ApiConfig) => apiCall(c, '/admin/restart', 'POST'),
+
+    // Admin notices
+    sendNotice: (c: ApiConfig, subject: string, body: string, recipient?: string) =>
+        apiCall<{ sent: number; failed: number; errors?: string[] }>(c, '/admin/notice', 'POST', {
+            subject, body, recipient: recipient || '',
+        }),
 };
 

@@ -33,6 +33,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'tab.accounts': 'Accounts',
         'tab.blocked': 'Blocked',
         'tab.dns': 'Endpoints',
+        'tab.notice': 'Notice',
 
         // Overview cards
         'stat.users': 'Users',
@@ -171,6 +172,22 @@ const translations: Record<Locale, Record<string, string>> = {
         'notify.quota_reset': 'Quota reset to default',
         'notify.copied': 'Copied to clipboard',
 
+        // Notice tab
+        'notice.title': 'Send Admin Notice',
+        'notice.subtitle': 'Send an unencrypted email to users',
+        'notice.recipient_all': 'All Users',
+        'notice.recipient_single': 'Specific User',
+        'notice.recipient_placeholder': 'user@domain.com',
+        'notice.subject': 'Subject',
+        'notice.subject_placeholder': 'Notice subject...',
+        'notice.body': 'Message',
+        'notice.body_placeholder': 'Type your message here...',
+        'notice.send': 'Send Notice',
+        'notice.sending': 'Sending...',
+        'notice.sent': 'Sent to {count} user(s)',
+        'notice.failed': '{count} failed',
+        'notice.confirm_all': 'Send notice to ALL {count} users?',
+
         // Misc
         'misc.default': '(default)',
         'misc.loading': 'Loading…',
@@ -195,6 +212,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'tab.accounts': 'حساب‌ها',
         'tab.blocked': 'مسدود',
         'tab.dns': 'نقاط انتهایی',
+        'tab.notice': 'اعلان',
 
         'stat.users': 'کاربران',
         'stat.uptime': 'آپتایم',
@@ -346,6 +364,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'tab.accounts': 'Cuentas',
         'tab.blocked': 'Bloqueados',
         'tab.dns': 'Endpoints',
+        'tab.notice': 'Aviso',
 
         'stat.users': 'Usuarios',
         'stat.uptime': 'Tiempo activo',
@@ -497,6 +516,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'tab.accounts': 'Аккаунты',
         'tab.blocked': 'Заблокированные',
         'tab.dns': 'Endpoints',
+        'tab.notice': 'Уведомление',
 
         'stat.users': 'Пользователи',
         'stat.uptime': 'Аптайм',
