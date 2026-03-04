@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/themadorg/madmail-admin-web/compare/v1.6.2...v1.7.0) (2026-03-04)
+
+
+### Features
+
+* add admin web dashboard toggle and path configuration ([630a94f](https://github.com/themadorg/madmail-admin-web/commit/630a94f93f09bce7497f7985cdb22e77fd58ee4b))
+
 ## [1.6.2](https://github.com/themadorg/madmail-admin-web/compare/v1.6.1...v1.6.2) (2026-02-24)
 
 
