@@ -55,6 +55,7 @@ export interface AllSettings {
     iroh_enabled: string;
     ss_enabled: string;
     log_disabled: string;
+    admin_web_enabled: string;
     smtp_port: SettingValue;
     submission_port: SettingValue;
     imap_port: SettingValue;
@@ -83,6 +84,7 @@ export interface AllSettings {
     ss_cipher: SettingValue;
     ss_password: SettingValue;
     admin_path: SettingValue;
+    admin_web_path: SettingValue;
 }
 
 export interface AccountList {

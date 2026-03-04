@@ -204,6 +204,12 @@
       store.settings.iroh_enabled,
       "enabled",
     )}
+    {@render toggleRow(
+      _("svc.admin_web"),
+      "/admin/services/admin_web",
+      store.settings.admin_web_enabled,
+      "enabled",
+    )}
   </div>
 
   <!-- Shadowsocks Section -->
@@ -315,6 +321,12 @@
       "admin_path",
       _("svc.admin_path"),
       "/api/admin",
+      "text",
+    )}
+    {@render editableRow(
+      "admin_web_path",
+      _("svc.admin_web_path"),
+      "/admin",
       "text",
     )}
   </div>
