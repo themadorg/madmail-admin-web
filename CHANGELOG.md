@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/themadorg/madmail-admin-web/compare/v1.8.0...v1.9.0) (2026-03-04)
+
+
+### Features
+
+* **i18n:** add notice form translations for fa, es, ru ([80bf97c](https://github.com/themadorg/madmail-admin-web/commit/80bf97cb29be16435cb516573d849879c141c935))
+
 # [1.8.0](https://github.com/themadorg/madmail-admin-web/compare/v1.7.0...v1.8.0) (2026-03-04)
 
 
