@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/themadorg/madmail-admin-web/compare/v1.9.0...v1.10.0) (2026-03-04)
+
+
+### Features
+
+* **queue:** add message blob purge UI with retention selector ([091c157](https://github.com/themadorg/madmail-admin-web/commit/091c157988aeecff54ca22a4faf65daaddb7c13a))
+
 # [1.9.0](https://github.com/themadorg/madmail-admin-web/compare/v1.8.0...v1.9.0) (2026-03-04)
 
 
