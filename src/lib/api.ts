@@ -245,6 +245,12 @@ export const api = {
     // Queue
     purgeQueue: (c: ApiConfig, action: string) =>
         apiCall(c, '/admin/queue', 'POST', { action }),
+    purgeOlder: (c: ApiConfig, retention: string) =>
+        apiCall(c, '/admin/queue', 'POST', { action: 'purge_older', retention }),
+    purgeBlobs: (c: ApiConfig) =>
+        apiCall(c, '/admin/queue', 'POST', { action: 'purge_blobs' }),
+    purgeBlobsOlder: (c: ApiConfig, retention: string) =>
+        apiCall(c, '/admin/queue', 'POST', { action: 'purge_blobs_older', retention }),
 
     // DNS overrides
     dns: (c: ApiConfig) => apiCall<DnsListResponse>(c, '/admin/dns'),

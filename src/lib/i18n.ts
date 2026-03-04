@@ -62,6 +62,9 @@ const translations: Record<Locale, Record<string, string>> = {
         'queue.title': 'Queue',
         'queue.purge_read': 'Purge Read',
         'queue.purge_all': 'Purge All',
+        'queue.purge_older': 'Purge Older Than',
+        'queue.purge_files': 'Message Files',
+        'queue.purge_all_files': 'Purge All Files',
 
         // Services tab
         'svc.registration': 'Registration',
@@ -237,6 +240,9 @@ const translations: Record<Locale, Record<string, string>> = {
         'queue.title': 'صف',
         'queue.purge_read': 'پاکسازی خوانده‌شده',
         'queue.purge_all': 'پاکسازی همه',
+        'queue.purge_older': 'پاکسازی قدیمی‌تر از',
+        'queue.purge_files': 'فایل‌های پیام',
+        'queue.purge_all_files': 'پاکسازی همه فایل‌ها',
 
         'svc.registration': 'ثبت‌نام',
         'svc.jit_registration': 'ثبت‌نام آنی',
@@ -405,6 +411,9 @@ const translations: Record<Locale, Record<string, string>> = {
         'queue.title': 'Cola',
         'queue.purge_read': 'Purgar leídos',
         'queue.purge_all': 'Purgar todo',
+        'queue.purge_older': 'Purgar más antiguo que',
+        'queue.purge_files': 'Archivos de Mensajes',
+        'queue.purge_all_files': 'Purgar Todos los Archivos',
 
         'svc.registration': 'Registro',
         'svc.jit_registration': 'Registro JIT',
@@ -573,6 +582,9 @@ const translations: Record<Locale, Record<string, string>> = {
         'queue.title': 'Очередь',
         'queue.purge_read': 'Очистить прочитанные',
         'queue.purge_all': 'Очистить всё',
+        'queue.purge_older': 'Очистить старше',
+        'queue.purge_files': 'Файлы сообщений',
+        'queue.purge_all_files': 'Очистить все файлы',
 
         'svc.registration': 'Регистрация',
         'svc.jit_registration': 'JIT Регистрация',

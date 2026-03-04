@@ -1,5 +1,6 @@
 <script lang="ts">
   import { store } from "$lib/state.svelte";
+  import { api, type ApiConfig } from "$lib/api";
   import { t, getLocale } from "$lib/i18n";
   import {
     Users,
@@ -32,6 +33,67 @@
         ? "bg-warning"
         : "bg-accent",
   );
+
+  // Purge older state
+  let selectedRetention = $state("72h");
+  let purging = $state(false);
+
+  const RETENTION_OPTIONS = [
+    { value: "1h", label: "1 hour" },
+    { value: "6h", label: "6 hours" },
+    { value: "24h", label: "24 hours" },
+    { value: "72h", label: "3 days" },
+    { value: "168h", label: "7 days" },
+    { value: "720h", label: "30 days" },
+  ];
+
+  function cfg(): ApiConfig {
+    return { baseUrl: store.baseUrl, token: store.token };
+  }
+
+  async function purgeOlder() {
+    const label =
+      RETENTION_OPTIONS.find((o) => o.value === selectedRetention)?.label ??
+      selectedRetention;
+    if (!confirm(`Purge all message files older than ${label}?`)) return;
+    purging = true;
+    try {
+      const res = await api.purgeBlobsOlder(cfg(), selectedRetention);
+      if (res.error) {
+        store.notify(res.error, "err");
+      } else {
+        store.notify(
+          (res as any).data?.message ?? `Purged files older than ${label}`,
+        );
+      }
+    } catch (e) {
+      store.notify(String(e), "err");
+    } finally {
+      purging = false;
+    }
+  }
+
+  async function purgeAllBlobs() {
+    if (
+      !confirm(
+        "Delete ALL message files from the server? This cannot be undone!",
+      )
+    )
+      return;
+    purging = true;
+    try {
+      const res = await api.purgeBlobs(cfg());
+      if (res.error) {
+        store.notify(res.error, "err");
+      } else {
+        store.notify((res as any).data?.message ?? "All message files deleted");
+      }
+    } catch (e) {
+      store.notify(String(e), "err");
+    } finally {
+      purging = false;
+    }
+  }
 </script>
 
 {#snippet statCard(Icon: any, label: string, value: string)}
@@ -212,13 +274,46 @@
   </div>
 {/if}
 
-<!-- Queue -->
+<!-- Message Storage -->
+<div class="bg-surface-2 rounded-lg p-4 border border-border mb-4">
+  <h3 class="text-sm font-medium mb-3 flex items-center gap-1.5">
+    <HardDrive size={14} class="text-text-2" />
+    {_("queue.purge_files")}
+  </h3>
+  <div class="flex flex-wrap gap-2 items-center mb-3">
+    <span class="text-xs text-text-2">{_("queue.purge_older")}</span>
+    <select
+      bind:value={selectedRetention}
+      class="px-2 py-1.5 text-xs bg-surface border border-border rounded-lg text-text focus:border-accent outline-none transition"
+    >
+      {#each RETENTION_OPTIONS as opt}
+        <option value={opt.value}>{opt.label}</option>
+      {/each}
+    </select>
+    <button
+      onclick={purgeOlder}
+      disabled={purging}
+      class="px-3 py-1.5 text-xs border border-warning/30 rounded-lg hover:bg-warning/10 text-warning transition-colors flex items-center gap-1 disabled:opacity-50"
+    >
+      <Trash2 size={11} />
+      {purging ? "..." : _("queue.purge_older")}
+    </button>
+    <button
+      onclick={purgeAllBlobs}
+      disabled={purging}
+      class="px-3 py-1.5 text-xs border border-danger/30 rounded-lg hover:bg-danger/10 text-danger transition-colors flex items-center gap-1 disabled:opacity-50 ms-auto"
+      ><Trash2 size={11} /> {_("queue.purge_all_files")}</button
+    >
+  </div>
+</div>
+
+<!-- Queue (DB) -->
 <div class="bg-surface-2 rounded-lg p-4 border border-border">
   <h3 class="text-sm font-medium mb-3 flex items-center gap-1.5">
     <Shield size={14} class="text-text-2" />
     {_("queue.title")}
   </h3>
-  <div class="flex gap-2">
+  <div class="flex flex-wrap gap-2 items-center">
     <button
       onclick={() => store.purge("purge_read")}
       class="px-3 py-1.5 text-xs border border-border rounded-lg hover:bg-surface-3 text-text-2 transition-colors"
