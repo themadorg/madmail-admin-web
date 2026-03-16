@@ -54,6 +54,9 @@ export interface AllSettings {
     turn_enabled: string;
     iroh_enabled: string;
     ss_enabled: string;
+    ss_ws_enabled: string;
+    ss_grpc_enabled: string;
+    http_proxy_enabled: string;
     log_disabled: string;
     admin_web_enabled: string;
     smtp_port: SettingValue;
@@ -63,8 +66,12 @@ export interface AllSettings {
     sasl_port: SettingValue;
     iroh_port: SettingValue;
     ss_port: SettingValue;
+    ss_ws_port: SettingValue;
+    ss_grpc_port: SettingValue;
     http_port: SettingValue;
     https_port: SettingValue;
+    http_proxy_port: SettingValue;
+    http_proxy_path: SettingValue;
     // Per-port access control: "public" or "local"
     smtp_access: string;
     submission_access: string;
@@ -83,6 +90,8 @@ export interface AllSettings {
     iroh_relay_url: SettingValue;
     ss_cipher: SettingValue;
     ss_password: SettingValue;
+    http_proxy_username: SettingValue;
+    http_proxy_password: SettingValue;
     admin_path: SettingValue;
     admin_web_path: SettingValue;
 }

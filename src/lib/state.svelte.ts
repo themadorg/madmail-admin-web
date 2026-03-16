@@ -81,6 +81,8 @@ class AdminState {
             const userinfo = `${cipher}:${password}`;
             const auth = btoa(userinfo).replace(/=+$/, '');
             const tag = encodeURIComponent(url.hostname);
+            // Plain SS URL (raw TCP) — compatible with Delta Chat.
+            // gRPC transport is available on port+1 for v2ray-plugin clients.
             return `ss://${auth}@${url.hostname}:${port}#${tag}`;
         } catch {
             return '';
@@ -172,6 +174,9 @@ class AdminState {
             const res = await api.setToggle(this.cfg(), resource, action);
             if (res.error) { this.notify(res.error, 'err'); return; }
             this.notify(`${resource.split('/').pop()} → ${res.data?.status}`);
+            // Proxy transport toggles require a restart to take effect
+            const restartResources = ['/admin/services/shadowsocks', '/admin/services/ss_ws', '/admin/services/ss_grpc', '/admin/services/http_proxy'];
+            if (restartResources.includes(resource)) this.pendingRestart = true;
             await this.refresh();
         } finally { this.busy = false; }
     }

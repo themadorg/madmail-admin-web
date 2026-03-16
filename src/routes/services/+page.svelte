@@ -7,11 +7,7 @@
     Pencil,
     RotateCcw,
     Dice5,
-    QrCode,
   } from "lucide-svelte";
-  import ShadowsocksQR from "$lib/components/ShadowsocksQR.svelte";
-
-  let showQR = $state(false);
 
   function randomPath(): string {
     const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -210,100 +206,6 @@
       store.settings.admin_web_enabled,
       "enabled",
     )}
-  </div>
-
-  <!-- Shadowsocks Section -->
-  <div class="mt-6 mb-8">
-    <div class="flex items-center justify-between mb-3">
-      <h3 class="text-sm font-medium text-text-2">
-        {_("svc.shadowsocks")}
-      </h3>
-      <button
-        onclick={() =>
-          store.toggleService(
-            "/admin/services/shadowsocks",
-            store.settings!.ss_enabled,
-          )}
-        disabled={isWorking}
-        class="flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full transition-colors disabled:opacity-50
-          {store.settings.ss_enabled === 'enabled'
-          ? 'bg-success/15 text-success border border-success/30'
-          : 'bg-surface-3 text-text-2 border border-border hover:border-text-2/50'}"
-      >
-        {#if store.settings.ss_enabled === "enabled"}
-          <ToggleRight size={14} />
-        {:else}
-          <ToggleLeft size={14} />
-        {/if}
-        {store.settings.ss_enabled}
-      </button>
-    </div>
-
-    <div
-      class="bg-surface-2 rounded-xl border border-border overflow-hidden shadow-sm"
-    >
-      <div class="divide-y divide-border">
-        {@render editableRow("ss_password", _("svc.ss_password"), "", "text")}
-        {@render editableRow(
-          "ss_port",
-          _("port.shadowsocks"),
-          "8388",
-          "number",
-        )}
-        <div class="opacity-70 group hover:opacity-100 transition-opacity">
-          {@render editableRow("ss_cipher", _("svc.ss_cipher"), "", "text")}
-        </div>
-      </div>
-
-      {#if store.shadowsocksUrl}
-        <div class="p-4 bg-accent/5 border-t border-border">
-          <div class="flex items-center justify-between mb-2">
-            <label
-              for="ss-url-main"
-              class="block text-[10px] uppercase tracking-wider text-text-2 font-semibold"
-              >{_("svc.shadowsocks_client_url")}</label
-            >
-            <button
-              onclick={() => (showQR = !showQR)}
-              class="flex items-center gap-1.5 px-2 py-1 text-[10px] font-medium rounded bg-surface-3 border border-border hover:border-accent/50 transition-colors"
-            >
-              <QrCode size={12} />
-              {showQR ? "Hide QR" : "Show QR"}
-            </button>
-          </div>
-
-          {#if showQR}
-            <div
-              class="flex justify-center my-4 animate-in fade-in zoom-in duration-300"
-            >
-              <ShadowsocksQR url={store.shadowsocksUrl} />
-            </div>
-          {/if}
-
-          <div class="flex gap-2 font-mono">
-            <input
-              id="ss-url-main"
-              type="text"
-              readonly
-              value={store.shadowsocksUrl}
-              class="flex-1 bg-surface border border-border rounded-lg px-3 py-2 text-[11px] text-accent outline-none shadow-inner truncate"
-            />
-            <button
-              onclick={() => {
-                navigator.clipboard.writeText(store.shadowsocksUrl);
-                store.notify(_("notify.copied"));
-              }}
-              class="px-4 py-2 bg-accent text-white rounded-lg text-xs font-medium hover:bg-accent-dim transition-all shadow-sm active:scale-95 shrink-0"
-            >
-              {_("action.copy")}
-            </button>
-          </div>
-          <p class="mt-2.5 text-[10px] text-text-2 italic opacity-80">
-            {_("svc.shadowsocks_url_hint")}
-          </p>
-        </div>
-      {/if}
-    </div>
   </div>
 
   <!-- Configuration -->

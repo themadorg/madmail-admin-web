@@ -22,6 +22,7 @@
     Network,
     Users,
     ShieldBan,
+    Shield,
     Sun,
     Moon,
     Server,
@@ -73,6 +74,7 @@
   const NAV_ITEMS = [
     { href: "/", key: "tab.overview", icon: LayoutDashboard },
     { href: "/services", key: "tab.services", icon: Settings },
+    { href: "/proxy", key: "tab.proxy", icon: Shield },
     { href: "/ports", key: "tab.ports", icon: Network },
     { href: "/accounts", key: "tab.accounts", icon: Users },
     { href: "/blocked", key: "tab.blocked", icon: ShieldBan },
