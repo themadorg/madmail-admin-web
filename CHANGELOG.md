@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/themadorg/madmail-admin-web/compare/v1.10.0...v1.11.0) (2026-03-16)
+
+
+### Features
+
+* **proxy:** add proxy management tab with per-transport toggles ([afa3ece](https://github.com/themadorg/madmail-admin-web/commit/afa3eceef149e9f8e5e0626531e430f81a149e35))
+
 # [1.10.0](https://github.com/themadorg/madmail-admin-web/compare/v1.9.0...v1.10.0) (2026-03-04)
 
 
