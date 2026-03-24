@@ -94,6 +94,7 @@ export interface AllSettings {
     http_proxy_password: SettingValue;
     admin_path: SettingValue;
     admin_web_path: SettingValue;
+    language: SettingValue;
 }
 
 export interface AccountList {

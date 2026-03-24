@@ -85,6 +85,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'svc.admin_path': 'Admin API Path',
         'svc.admin_web': 'Admin Web Dashboard',
         'svc.admin_web_path': 'Admin Web Path',
+        'svc.frontpage_language': 'Frontpage Language',
         'svc.shadowsocks_client_url': 'Shadowsocks Client URI',
         'svc.shadowsocks_url_hint': 'Scan this URI with your Shadowsocks client to connect.',
 
@@ -279,6 +280,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'svc.admin_path': 'مسیر API مدیریت',
         'svc.admin_web': 'داشبورد وب مدیریت',
         'svc.admin_web_path': 'مسیر وب مدیریت',
+        'svc.frontpage_language': 'زبان صفحه نخست',
         'svc.shadowsocks_client_url': 'آدرس کلاینت شدوساکس',
         'svc.shadowsocks_url_hint': 'این آدرس را در کلاینت شدوساکس خود اسکن یا وارد کنید.',
 
@@ -466,6 +468,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'svc.admin_path': 'Ruta API Admin',
         'svc.admin_web': 'Panel Web Admin',
         'svc.admin_web_path': 'Ruta Web Admin',
+        'svc.frontpage_language': 'Idioma de Portada',
         'svc.shadowsocks_client_url': 'URI de cliente Shadowsocks',
         'svc.shadowsocks_url_hint': 'Escanea este URI con tu cliente Shadowsocks для conectar.',
 
@@ -653,6 +656,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'svc.admin_path': 'Путь API администратора',
         'svc.admin_web': 'Веб-панель администратора',
         'svc.admin_web_path': 'Путь веб-панели',
+        'svc.frontpage_language': 'Язык главной страницы',
         'svc.shadowsocks_client_url': 'URI клиента Shadowsocks',
         'svc.shadowsocks_url_hint': 'Отсканируйте этот URI вашим клиентом Shadowsocks для подключения.',
 

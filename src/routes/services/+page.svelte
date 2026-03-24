@@ -231,7 +231,78 @@
       "/admin",
       "text",
     )}
+    {@render selectRow(
+      "language", 
+      _("svc.frontpage_language"), 
+      "en", 
+      [
+        { value: "en", label: "English" },
+        { value: "fa", label: "فارسی" },
+        { value: "es", label: "Español" },
+        { value: "ru", label: "Русский" },
+      ]
+    )}
   </div>
 {:else}
   <p class="text-text-2 text-sm">{_("misc.loading")}</p>
 {/if}
+
+{#snippet selectRow(key: string, label: string, fallback: string, options: {value: string, label: string}[])}
+  <div class="flex items-center justify-between bg-surface-2 rounded-lg p-3 border border-border gap-3">
+    <div class="min-w-0 flex-1">
+      <div class="text-sm font-medium">{label}</div>
+      {#if store.editingField === key}
+        <div class="flex gap-2 mt-1.5">
+          <select
+            bind:value={store.editValue}
+            class="flex-1 px-2 py-1 bg-surface border border-border rounded text-xs text-text outline-none focus:border-accent"
+          >
+            {#each options as opt}
+              <option value={opt.value}>{opt.label}</option>
+            {/each}
+          </select>
+          <button
+            onclick={() => store.save(key, store.editValue)}
+            class="px-2 py-1 bg-accent text-white text-xs rounded hover:bg-accent-dim transition-colors"
+          >
+            {_("action.save")}
+          </button>
+          <button
+            onclick={() => (store.editingField = "")}
+            class="px-2 py-1 text-text-2 text-xs border border-border rounded hover:bg-surface-3 transition-colors"
+          >
+            {_("action.cancel")}
+          </button>
+        </div>
+      {:else}
+        <div class="text-xs text-text-2">
+          {options.find(o => o.value === (store.setting(key).is_set ? store.setting(key).value : fallback))?.label ?? fallback}
+          {#if !store.setting(key).is_set}
+            <span class="opacity-50">{_("misc.default")}</span>
+          {/if}
+        </div>
+      {/if}
+    </div>
+    {#if store.editingField !== key}
+      <div class="flex gap-1 shrink-0 items-center">
+        {#if store.setting(key).is_set}
+          <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
+        {/if}
+        <button
+          onclick={() => store.startEdit(key, store.setting(key).is_set ? store.setting(key).value : fallback)}
+          class="p-1.5 text-text-2 border border-border rounded hover:bg-surface-3 transition-colors"
+        >
+          <Pencil size={12} />
+        </button>
+        {#if store.setting(key).is_set}
+          <button
+            onclick={() => store.reset(key)}
+            class="p-1.5 text-danger border border-danger/30 rounded hover:bg-danger/10 transition-colors"
+          >
+            <RotateCcw size={12} />
+          </button>
+        {/if}
+      </div>
+    {/if}
+  </div>
+{/snippet}
