@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/themadorg/madmail-admin-web/compare/v1.11.0...v1.12.0) (2026-03-24)
+
+
+### Features
+
+* add frontpage language setting to services tab ([6169fb5](https://github.com/themadorg/madmail-admin-web/commit/6169fb519c61631249fc24b9ecb19791613788f1))
+
 # [1.11.0](https://github.com/themadorg/madmail-admin-web/compare/v1.10.0...v1.11.0) (2026-03-16)
 
 
