@@ -33,6 +33,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'tab.accounts': 'Accounts',
         'tab.blocked': 'Blocked',
         'tab.dns': 'Endpoints',
+        'tab.exchangers': 'Exchangers',
         'tab.notice': 'Notice',
         'tab.proxy': 'Proxy',
 
@@ -233,6 +234,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'tab.accounts': 'حساب‌ها',
         'tab.blocked': 'مسدود',
         'tab.dns': 'نقاط انتهایی',
+        'tab.exchangers': 'مبادله‌کننده‌ها',
         'tab.notice': 'اعلان',
         'tab.proxy': 'پروکسی',
 
@@ -421,6 +423,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'tab.accounts': 'Cuentas',
         'tab.blocked': 'Bloqueados',
         'tab.dns': 'Endpoints',
+        'tab.exchangers': 'Intercambiadores',
         'tab.notice': 'Aviso',
         'tab.proxy': 'Proxy',
 
@@ -609,6 +612,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'tab.accounts': 'Аккаунты',
         'tab.blocked': 'Заблокированные',
         'tab.dns': 'Endpoints',
+        'tab.exchangers': 'Обменники',
         'tab.notice': 'Уведомление',
         'tab.proxy': 'Прокси',
 

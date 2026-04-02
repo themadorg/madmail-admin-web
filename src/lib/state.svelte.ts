@@ -12,6 +12,7 @@ import {
     type SettingValue,
     type BlocklistResponse,
     type DnsListResponse,
+    type ExchangerListResponse,
     type CreateAccountResponse,
 } from '$lib/api';
 import { t } from '$lib/i18n';
@@ -48,6 +49,7 @@ class AdminState {
     quota = $state<QuotaStats | null>(null);
     blocklist = $state<BlocklistResponse | null>(null);
     endpointOverrides = $state<DnsListResponse | null>(null);
+    exchangers = $state<ExchangerListResponse | null>(null);
 
     // UI
     toast = $state('');
@@ -134,7 +136,7 @@ class AdminState {
         if (this.refreshing) return;
         this.refreshing = true;
         try {
-            const [a, b, c, d, e, f, g] = await Promise.all([
+            const [a, b, c, d, e, f, g, h] = await Promise.all([
                 api.storage(this.cfg()),
                 api.settings(this.cfg()),
                 api.accounts(this.cfg()),
@@ -142,6 +144,7 @@ class AdminState {
                 api.status(this.cfg()),
                 api.blocklist(this.cfg()),
                 api.dns(this.cfg()),
+                api.exchangers(this.cfg()),
             ]);
             if (a.data) this.storage = a.data;
             if (b.data) this.settings = b.data;
@@ -150,6 +153,7 @@ class AdminState {
             if (e.data) this.status = e.data;
             if (f.data) this.blocklist = f.data;
             if (g.data) this.endpointOverrides = g.data;
+            if (h.data) this.exchangers = h.data;
         } finally { this.refreshing = false; }
     }
 
@@ -159,7 +163,7 @@ class AdminState {
         localStorage.removeItem('madmail_token');
         this.baseUrl = '';
         this.token = '';
-        this.status = this.storage = this.settings = this.accounts = this.quota = this.blocklist = this.endpointOverrides = null;
+        this.status = this.storage = this.settings = this.accounts = this.quota = this.blocklist = this.endpointOverrides = this.exchangers = null;
         this.newAccount = null;
     }
 
@@ -407,6 +411,43 @@ class AdminState {
             const res = await api.deleteDns(this.cfg(), lookupKey);
             if (res.error) { this.notify(res.error, 'err'); return; }
             this.notify(t('notify.endpoint_deleted', { key: lookupKey }));
+            await this.refresh();
+        } finally { this.busy = false; }
+    }
+
+    async addExchanger(name: string, url: string, pollInterval: number) {
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const res = await api.addExchanger(this.cfg(), name, url, pollInterval);
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            this.notify(`Exchanger added: ${name}`);
+            await this.refresh();
+        } finally { this.busy = false; }
+    }
+
+    async updateExchanger(name: string, updates: { enabled?: boolean; url?: string; poll_interval?: number }) {
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const res = await api.updateExchanger(this.cfg(), name, updates);
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            if (updates.enabled !== undefined) {
+                this.notify(`Exchanger ${updates.enabled ? 'enabled' : 'disabled'}: ${name}`);
+            } else {
+                this.notify(`Exchanger updated: ${name}`);
+            }
+            await this.refresh();
+        } finally { this.busy = false; }
+    }
+
+    async deleteExchanger(name: string) {
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const res = await api.deleteExchanger(this.cfg(), name);
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            this.notify(`Exchanger deleted: ${name}`);
             await this.refresh();
         } finally { this.busy = false; }
     }

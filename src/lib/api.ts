@@ -130,6 +130,21 @@ export interface DnsListResponse {
     total: number;
 }
 
+export interface ExchangerEntry {
+    name: string;
+    url: string;
+    enabled: boolean;
+    poll_interval: number;
+    last_poll_at?: string;
+}
+
+export interface ExchangerListResponse {
+    exchangers: ExchangerEntry[];
+    total: number;
+}
+
+
+
 export interface ReloadResponse {
     status: string;
     message: string;
@@ -268,6 +283,16 @@ export const api = {
         apiCall<DnsEntry>(c, '/admin/dns', 'POST', { lookup_key, target_host, comment: comment || '' }),
     deleteDns: (c: ApiConfig, lookup_key: string) =>
         apiCall(c, '/admin/dns', 'DELETE', { lookup_key }),
+
+    // Exchangers
+    exchangers: (c: ApiConfig) => apiCall<ExchangerListResponse>(c, '/admin/exchangers'),
+    addExchanger: (c: ApiConfig, name: string, url: string, poll_interval: number) =>
+        apiCall<ExchangerEntry>(c, '/admin/exchangers', 'POST', { name, url, poll_interval }),
+    updateExchanger: (c: ApiConfig, name: string, updates: { enabled?: boolean; url?: string; poll_interval?: number }) =>
+        apiCall(c, '/admin/exchangers', 'PUT', { name, ...updates }),
+    deleteExchanger: (c: ApiConfig, name: string) =>
+        apiCall(c, '/admin/exchangers', 'DELETE', { name }),
+
 
     // Reload
     reload: (c: ApiConfig) => apiCall<ReloadResponse>(c, '/admin/reload', 'POST'),
