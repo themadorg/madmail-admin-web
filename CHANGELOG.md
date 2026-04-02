@@ -1,3 +1,10 @@
+# [1.13.0](https://github.com/themadorg/madmail-admin-web/compare/v1.12.0...v1.13.0) (2026-04-02)
+
+
+### Features
+
+* **exchanger:** implement remote relay management UI ([6af75e2](https://github.com/themadorg/madmail-admin-web/commit/6af75e2ddca470e434a36a10e290720f3b682a09))
+
 # [1.12.0](https://github.com/themadorg/madmail-admin-web/compare/v1.11.0...v1.12.0) (2026-03-24)
 
 
