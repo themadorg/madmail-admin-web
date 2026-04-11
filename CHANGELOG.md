@@ -1,3 +1,10 @@
+## [1.13.1](https://github.com/themadorg/madmail-admin-web/compare/v1.13.0...v1.13.1) (2026-04-11)
+
+
+### Bug Fixes
+
+* add registration token ([1798cd4](https://github.com/themadorg/madmail-admin-web/commit/1798cd42eb9d21440cff81bb68300b97ba225b79))
+
 # [1.13.0](https://github.com/themadorg/madmail-admin-web/compare/v1.12.0...v1.13.0) (2026-04-02)
 
 
