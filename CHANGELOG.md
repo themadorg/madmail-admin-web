@@ -1,3 +1,10 @@
+## [1.13.2](https://github.com/themadorg/madmail-admin-web/compare/v1.13.1...v1.13.2) (2026-04-11)
+
+
+### Performance Improvements
+
+* update dashboard state incrementally and add disk usage statistics to UI ([1da845c](https://github.com/themadorg/madmail-admin-web/commit/1da845ce6a1b0679e3cb57c9cd34eb6705ac75fb))
+
 ## [1.13.1](https://github.com/themadorg/madmail-admin-web/compare/v1.13.0...v1.13.1) (2026-04-11)
 
 
