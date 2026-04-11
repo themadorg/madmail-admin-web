@@ -206,6 +206,12 @@
       store.settings.admin_web_enabled,
       "enabled",
     )}
+    {@render toggleRow(
+      _("svc.auto_purge_seen"),
+      "/admin/services/auto_purge_seen",
+      store.settings.auto_purge_seen_enabled,
+      "enabled",
+    )}
   </div>
 
   <!-- Configuration -->

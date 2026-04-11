@@ -92,6 +92,7 @@ const translations: Record<Locale, Record<string, string>> = {
         // Queue
         'queue.title': 'Queue',
         'queue.purge_read': 'Purge Read',
+        'queue.purge_read_blobs': 'Delete Seen Files',
         'queue.purge_all': 'Purge All',
         'queue.purge_older': 'Purge Older Than',
         'queue.purge_files': 'Message Files',
@@ -100,6 +101,7 @@ const translations: Record<Locale, Record<string, string>> = {
         // Services tab
         'svc.registration': 'Registration',
         'svc.jit_registration': 'JIT Registration',
+        'svc.auto_purge_seen': 'Auto Purge Seen Messages',
         'svc.turn': 'TURN',
         'svc.iroh': 'Iroh Relay',
         'svc.shadowsocks': 'Shadowsocks',
@@ -317,6 +319,7 @@ const translations: Record<Locale, Record<string, string>> = {
 
         'queue.title': 'صف',
         'queue.purge_read': 'پاکسازی خوانده‌شده',
+        'queue.purge_read_blobs': 'حذف فایل‌های خوانده‌شده',
         'queue.purge_all': 'پاکسازی همه',
         'queue.purge_older': 'پاکسازی قدیمی‌تر از',
         'queue.purge_files': 'فایل‌های پیام',
@@ -324,6 +327,7 @@ const translations: Record<Locale, Record<string, string>> = {
 
         'svc.registration': 'ثبت‌نام',
         'svc.jit_registration': 'ثبت‌نام آنی',
+        'svc.auto_purge_seen': 'پاکسازی خودکار پیام‌های خوانده‌شده',
         'svc.turn': 'TURN',
         'svc.iroh': 'رله Iroh',
         'svc.shadowsocks': 'شدوساکس',
@@ -534,6 +538,7 @@ const translations: Record<Locale, Record<string, string>> = {
 
         'queue.title': 'Cola',
         'queue.purge_read': 'Purgar leídos',
+        'queue.purge_read_blobs': 'Eliminar archivos leídos',
         'queue.purge_all': 'Purgar todo',
         'queue.purge_older': 'Purgar más antiguo que',
         'queue.purge_files': 'Archivos de Mensajes',
@@ -541,6 +546,7 @@ const translations: Record<Locale, Record<string, string>> = {
 
         'svc.registration': 'Registro',
         'svc.jit_registration': 'Registro JIT',
+        'svc.auto_purge_seen': 'Purgar automáticamente mensajes leídos',
         'svc.turn': 'TURN',
         'svc.iroh': 'Relé Iroh',
         'svc.shadowsocks': 'Shadowsocks',
@@ -751,6 +757,7 @@ const translations: Record<Locale, Record<string, string>> = {
 
         'queue.title': 'Очередь',
         'queue.purge_read': 'Очистить прочитанные',
+        'queue.purge_read_blobs': 'Удалить файлы прочитанных',
         'queue.purge_all': 'Очистить всё',
         'queue.purge_older': 'Очистить старше',
         'queue.purge_files': 'Файлы сообщений',
@@ -758,6 +765,7 @@ const translations: Record<Locale, Record<string, string>> = {
 
         'svc.registration': 'Регистрация',
         'svc.jit_registration': 'JIT Регистрация',
+        'svc.auto_purge_seen': 'Авто-удаление прочитанных сообщений',
         'svc.turn': 'TURN',
         'svc.iroh': 'Реле Iroh',
         'svc.shadowsocks': 'Shadowsocks',

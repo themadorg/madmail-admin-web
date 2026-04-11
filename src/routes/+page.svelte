@@ -309,6 +309,12 @@
       {purging ? "..." : _("queue.purge_older")}
     </button>
     <button
+      onclick={() => store.purge("purge_read_blobs")}
+      disabled={purging}
+      class="px-3 py-1.5 text-xs border border-border rounded-lg hover:bg-surface-3 text-text-2 transition-colors flex items-center gap-1 disabled:opacity-50"
+      ><Trash2 size={11} /> {_("queue.purge_read_blobs")}</button
+    >
+    <button
       onclick={purgeAllBlobs}
       disabled={purging}
       class="px-3 py-1.5 text-xs border border-danger/30 rounded-lg hover:bg-danger/10 text-danger transition-colors flex items-center gap-1 disabled:opacity-50 ms-auto"

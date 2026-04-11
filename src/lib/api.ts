@@ -54,6 +54,7 @@ export interface AllSettings {
     turn_enabled: string;
     iroh_enabled: string;
     ss_enabled: string;
+    auto_purge_seen_enabled: string;
     ss_ws_enabled: string;
     ss_grpc_enabled: string;
     http_proxy_enabled: string;

@@ -473,6 +473,19 @@ class AdminState {
         } finally { this.busy = false; }
     }
 
+    async toggleAutoPurgeSeen() {
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const current = this.settings?.auto_purge_seen_enabled ?? 'disabled';
+            const action = current === 'enabled' ? 'disable' : 'enable';
+            const res = await api.setToggle(this.cfg(), '/admin/services/auto_purge_seen', action);
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            this.notify(`Auto purge seen: ${action}d`);
+            await this.refresh();
+        } finally { this.busy = false; }
+    }
+
     async toggleTokenRequired() {
         if (this.busy) return;
         this.busy = true;
