@@ -1,6 +1,7 @@
 <script lang="ts">
   import { store } from "$lib/state.svelte";
   import { t, getLocale } from "$lib/i18n";
+  import { base } from "$app/paths";
   import {
     Users,
     Trash2,
@@ -15,6 +16,7 @@
     ChevronLeft,
     ChevronRight,
     Search,
+    Ticket,
   } from "lucide-svelte";
 
   let locale = $state(getLocale());
@@ -189,6 +191,13 @@
       {_("acct.total")}
     </span>
     <div class="flex items-center gap-3 text-xs text-text-2">
+      <a
+        href="{base}/accounts/tokens"
+        class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-accent/15 text-accent border border-accent/30 hover:bg-accent/25 transition-all flex items-center gap-1 no-underline"
+      >
+        <Ticket size={12} />
+        {_("tab.tokens")}
+      </a>
       {#if store.quota}
         <span>
           {store.fmtBytes(store.quota.total_storage_bytes)}

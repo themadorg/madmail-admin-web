@@ -59,6 +59,7 @@ export interface AllSettings {
     http_proxy_enabled: string;
     log_disabled: string;
     admin_web_enabled: string;
+    registration_token_required: string;
     smtp_port: SettingValue;
     submission_port: SettingValue;
     imap_port: SettingValue;
@@ -143,6 +144,21 @@ export interface ExchangerListResponse {
     total: number;
 }
 
+export interface RegistrationTokenEntry {
+    token: string;
+    max_uses: number;
+    used_count: number;
+    pending_reservations: number;
+    comment: string;
+    created_at: string;
+    expires_at?: string;
+    status: 'active' | 'exhausted' | 'expired';
+}
+
+export interface RegistrationTokenListResponse {
+    tokens: RegistrationTokenEntry[];
+    total: number;
+}
 
 
 export interface ReloadResponse {
@@ -305,5 +321,13 @@ export const api = {
         apiCall<{ sent: number; failed: number; errors?: string[] }>(c, '/admin/notice', 'POST', {
             subject, body, recipient: recipient || '',
         }),
+
+    // Registration tokens
+    registrationTokens: (c: ApiConfig) =>
+        apiCall<RegistrationTokenListResponse>(c, '/admin/registration-token'),
+    createRegistrationToken: (c: ApiConfig, opts: { token?: string; max_uses?: number; comment?: string; expires_in?: string }) =>
+        apiCall<RegistrationTokenEntry>(c, '/admin/registration-token', 'POST', opts),
+    deleteRegistrationToken: (c: ApiConfig, token: string) =>
+        apiCall(c, '/admin/registration-token', 'DELETE', { token }),
 };
 

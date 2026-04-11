@@ -30,6 +30,7 @@
     Github,
     Download,
     ArrowDownToLine,
+    Ticket,
   } from "lucide-svelte";
 
   let { children } = $props();

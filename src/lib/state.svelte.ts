@@ -13,6 +13,7 @@ import {
     type BlocklistResponse,
     type DnsListResponse,
     type ExchangerListResponse,
+    type RegistrationTokenListResponse,
     type CreateAccountResponse,
 } from '$lib/api';
 import { t } from '$lib/i18n';
@@ -50,6 +51,7 @@ class AdminState {
     blocklist = $state<BlocklistResponse | null>(null);
     endpointOverrides = $state<DnsListResponse | null>(null);
     exchangers = $state<ExchangerListResponse | null>(null);
+    registrationTokens = $state<RegistrationTokenListResponse | null>(null);
 
     // UI
     toast = $state('');
@@ -136,7 +138,7 @@ class AdminState {
         if (this.refreshing) return;
         this.refreshing = true;
         try {
-            const [a, b, c, d, e, f, g, h] = await Promise.all([
+            const [a, b, c, d, e, f, g, h, i] = await Promise.all([
                 api.storage(this.cfg()),
                 api.settings(this.cfg()),
                 api.accounts(this.cfg()),
@@ -145,6 +147,7 @@ class AdminState {
                 api.blocklist(this.cfg()),
                 api.dns(this.cfg()),
                 api.exchangers(this.cfg()),
+                api.registrationTokens(this.cfg()),
             ]);
             if (a.data) this.storage = a.data;
             if (b.data) this.settings = b.data;
@@ -154,6 +157,7 @@ class AdminState {
             if (f.data) this.blocklist = f.data;
             if (g.data) this.endpointOverrides = g.data;
             if (h.data) this.exchangers = h.data;
+            if (i.data) this.registrationTokens = i.data;
         } finally { this.refreshing = false; }
     }
 
@@ -163,7 +167,7 @@ class AdminState {
         localStorage.removeItem('madmail_token');
         this.baseUrl = '';
         this.token = '';
-        this.status = this.storage = this.settings = this.accounts = this.quota = this.blocklist = this.endpointOverrides = this.exchangers = null;
+        this.status = this.storage = this.settings = this.accounts = this.quota = this.blocklist = this.endpointOverrides = this.exchangers = this.registrationTokens = null;
         this.newAccount = null;
     }
 
@@ -448,6 +452,41 @@ class AdminState {
             const res = await api.deleteExchanger(this.cfg(), name);
             if (res.error) { this.notify(res.error, 'err'); return; }
             this.notify(`Exchanger deleted: ${name}`);
+            await this.refresh();
+        } finally { this.busy = false; }
+    }
+
+    async createRegistrationToken(opts: { token?: string; max_uses?: number; comment?: string; expires_in?: string }) {
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const res = await api.createRegistrationToken(this.cfg(), opts);
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            this.notify('Token created');
+            await this.refresh();
+        } finally { this.busy = false; }
+    }
+
+    async deleteRegistrationToken(token: string) {
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const res = await api.deleteRegistrationToken(this.cfg(), token);
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            this.notify('Token deleted');
+            await this.refresh();
+        } finally { this.busy = false; }
+    }
+
+    async toggleTokenRequired() {
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const current = this.settings?.registration_token_required ?? 'disabled';
+            const action = current === 'enabled' ? 'disable' : 'enable';
+            const res = await api.setToggle(this.cfg(), '/admin/settings/registration_token_required', action);
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            this.notify(`Registration tokens ${action}d`);
             await this.refresh();
         } finally { this.busy = false; }
     }
