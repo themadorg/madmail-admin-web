@@ -138,27 +138,22 @@ class AdminState {
         if (this.refreshing) return;
         this.refreshing = true;
         try {
-            const [a, b, c, d, e, f, g, h, i] = await Promise.all([
-                api.storage(this.cfg()),
-                api.settings(this.cfg()),
-                api.accounts(this.cfg()),
-                api.quota(this.cfg()),
-                api.status(this.cfg()),
-                api.blocklist(this.cfg()),
-                api.dns(this.cfg()),
-                api.exchangers(this.cfg()),
-                api.registrationTokens(this.cfg()),
+            // Fetch everything in parallel but update state as soon as each resolves.
+            // This makes the dashboard feel much faster as results pop in.
+            await Promise.all([
+                api.storage(this.cfg()).then(res => { if (res.data) this.storage = res.data; }),
+                api.settings(this.cfg()).then(res => { if (res.data) this.settings = res.data; }),
+                api.accounts(this.cfg()).then(res => { if (res.data) this.accounts = res.data; }),
+                api.quota(this.cfg()).then(res => { if (res.data) this.quota = res.data; }),
+                api.status(this.cfg()).then(res => { if (res.data) this.status = res.data; }),
+                api.blocklist(this.cfg()).then(res => { if (res.data) this.blocklist = res.data; }),
+                api.dns(this.cfg()).then(res => { if (res.data) this.endpointOverrides = res.data; }),
+                api.exchangers(this.cfg()).then(res => { if (res.data) this.exchangers = res.data; }),
+                api.registrationTokens(this.cfg()).then(res => { if (res.data) this.registrationTokens = res.data; }),
             ]);
-            if (a.data) this.storage = a.data;
-            if (b.data) this.settings = b.data;
-            if (c.data) this.accounts = c.data;
-            if (d.data) this.quota = d.data;
-            if (e.data) this.status = e.data;
-            if (f.data) this.blocklist = f.data;
-            if (g.data) this.endpointOverrides = g.data;
-            if (h.data) this.exchangers = h.data;
-            if (i.data) this.registrationTokens = i.data;
-        } finally { this.refreshing = false; }
+        } finally {
+            this.refreshing = false;
+        }
     }
 
     disconnect() {

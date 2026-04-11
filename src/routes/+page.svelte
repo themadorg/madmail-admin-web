@@ -120,13 +120,23 @@
   )}
   {@render statCard(
     HardDrive,
-    _("stat.disk"),
-    store.storage?.disk ? `${diskPercent.toFixed(0)}%` : "—",
+    _("stat.host_free"),
+    store.storage?.disk
+      ? store.fmtBytes(store.storage.disk.available_bytes)
+      : "—",
   )}
   {@render statCard(
     Server,
-    _("stat.storage"),
-    store.quota ? store.fmtBytes(store.quota.total_storage_bytes) : "—",
+    _("stat.host_total"),
+    store.storage?.disk ? store.fmtBytes(store.storage.disk.total_bytes) : "—",
+  )}
+</div>
+
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+  {@render statCard(
+    HardDrive,
+    _("stat.disk"),
+    store.storage?.disk ? `${diskPercent.toFixed(1)}%` : "—",
   )}
   {@render statCard(
     Mail,
