@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/themadorg/madmail-admin-web/compare/v1.13.2...v1.14.0) (2026-04-11)
+
+
+### Features
+
+* add auto-purge seen configuration and manual purge read blobs action ([309be1a](https://github.com/themadorg/madmail-admin-web/commit/309be1af92210fce362e79c511548adc1c840f15))
+
 ## [1.13.2](https://github.com/themadorg/madmail-admin-web/compare/v1.13.1...v1.13.2) (2026-04-11)
 
 
