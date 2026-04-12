@@ -82,7 +82,7 @@
             id="exc-name"
             type="text"
             bind:value={newName}
-            placeholder="onjast"
+            placeholder="relay1"
           />
         </div>
         <div class="field">
@@ -91,7 +91,7 @@
             id="exc-url"
             type="text"
             bind:value={newUrl}
-            placeholder="https://onjast.com/mxdeliv"
+            placeholder="https://relay.example.com/mxdeliv"
           />
         </div>
       </div>
