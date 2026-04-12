@@ -1,3 +1,10 @@
+# [1.15.0](https://github.com/themadorg/madmail-admin-web/compare/v1.14.0...v1.15.0) (2026-04-12)
+
+
+### Features
+
+* add server version tracking and update checking functionality with UI indicators ([4cc92cc](https://github.com/themadorg/madmail-admin-web/commit/4cc92ccc23987b944b925a3b481a970c6cb15e56))
+
 # [1.14.0](https://github.com/themadorg/madmail-admin-web/compare/v1.13.2...v1.14.0) (2026-04-11)
 
 
