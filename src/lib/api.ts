@@ -15,11 +15,13 @@ export interface ApiResponse<T = unknown> {
     resource: string;
     body: T;
     error: string | null;
+    version: string;
 }
 
 // --- Response types ---
 
 export interface StatusResponse {
+    version: string;
     imap?: { connections: number; unique_ips: number };
     turn?: { relays: number };
     shadowsocks?: { connections: number; unique_ips: number };
@@ -189,7 +191,7 @@ export async function apiCall<T = unknown>(
     resource: string,
     method: string = 'GET',
     body?: unknown
-): Promise<{ data?: T; error?: string; status: number }> {
+): Promise<{ data?: T; error?: string; status: number; version?: string }> {
     try {
         const targetUrl = config.baseUrl.replace(/\/+$/, '');
         const payload = {
@@ -236,9 +238,9 @@ export async function apiCall<T = unknown>(
         }
 
         if (json.error) {
-            return { error: json.error, status: json.status };
+            return { error: json.error, status: json.status, version: json.version };
         }
-        return { data: json.body, status: json.status ?? res.status };
+        return { data: json.body, status: json.status ?? res.status, version: json.version };
     } catch (e) {
         return { error: String(e), status: 0 };
     }

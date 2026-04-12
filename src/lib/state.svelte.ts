@@ -41,6 +41,9 @@ class AdminState {
     connected = $state(false);
     connectError = $state('');
     connecting = $state(false);
+    serverVersion = $state('');
+    latestServerVersion = $state('');
+    checkingUpdates = $state(false);
 
     // Data
     status = $state<StatusResponse | null>(null);
@@ -131,6 +134,7 @@ class AdminState {
         saveServer(this.baseUrl, this.token).catch(() => { });
         this.connected = true;
         if (res.data) this.status = res.data;
+        if ((res as any).version) this.serverVersion = (res as any).version;
         this.refresh();
     }
 
@@ -141,15 +145,15 @@ class AdminState {
             // Fetch everything in parallel but update state as soon as each resolves.
             // This makes the dashboard feel much faster as results pop in.
             await Promise.all([
-                api.storage(this.cfg()).then(res => { if (res.data) this.storage = res.data; }),
-                api.settings(this.cfg()).then(res => { if (res.data) this.settings = res.data; }),
-                api.accounts(this.cfg()).then(res => { if (res.data) this.accounts = res.data; }),
-                api.quota(this.cfg()).then(res => { if (res.data) this.quota = res.data; }),
-                api.status(this.cfg()).then(res => { if (res.data) this.status = res.data; }),
-                api.blocklist(this.cfg()).then(res => { if (res.data) this.blocklist = res.data; }),
-                api.dns(this.cfg()).then(res => { if (res.data) this.endpointOverrides = res.data; }),
-                api.exchangers(this.cfg()).then(res => { if (res.data) this.exchangers = res.data; }),
-                api.registrationTokens(this.cfg()).then(res => { if (res.data) this.registrationTokens = res.data; }),
+                api.storage(this.cfg()).then(res => { if (res.data) this.storage = res.data; if (res.version) this.serverVersion = res.version; }),
+                api.settings(this.cfg()).then(res => { if (res.data) this.settings = res.data; if (res.version) this.serverVersion = res.version; }),
+                api.accounts(this.cfg()).then(res => { if (res.data) this.accounts = res.data; if (res.version) this.serverVersion = res.version; }),
+                api.quota(this.cfg()).then(res => { if (res.data) this.quota = res.data; if (res.version) this.serverVersion = res.version; }),
+                api.status(this.cfg()).then(res => { if (res.data) this.status = res.data; if (res.version) this.serverVersion = res.version; }),
+                api.blocklist(this.cfg()).then(res => { if (res.data) this.blocklist = res.data; if (res.version) this.serverVersion = res.version; }),
+                api.dns(this.cfg()).then(res => { if (res.data) this.endpointOverrides = res.data; if (res.version) this.serverVersion = res.version; }),
+                api.exchangers(this.cfg()).then(res => { if (res.data) this.exchangers = res.data; if (res.version) this.serverVersion = res.version; }),
+                api.registrationTokens(this.cfg()).then(res => { if (res.data) this.registrationTokens = res.data; if (res.version) this.serverVersion = res.version; }),
             ]);
         } finally {
             this.refreshing = false;
@@ -497,6 +501,33 @@ class AdminState {
             this.notify(`Registration tokens ${action}d`);
             await this.refresh();
         } finally { this.busy = false; }
+    }
+
+    async checkServerUpdate() {
+        if (this.checkingUpdates) return;
+        this.checkingUpdates = true;
+        try {
+            const res = await fetch('https://api.github.com/repos/themadorg/madmail/releases/latest');
+            if (res.ok) {
+                const data = await res.json();
+                this.latestServerVersion = data.tag_name;
+                // If the version is different, show a notification
+                const current = (this.status?.version ?? this.serverVersion).split('+')[0];
+                const latest = data.tag_name.replace(/^v/, '');
+                
+                if (current && current !== latest) {
+                    this.notify(`New update available: ${data.tag_name}`, 'ok');
+                } else {
+                    this.notify(`You are on the latest version (${data.tag_name})`);
+                }
+            } else {
+                throw new Error('Failed to fetch from GitHub');
+            }
+        } catch (e) {
+            this.notify(`Update check failed: ${String(e)}`, 'err');
+        } finally {
+            this.checkingUpdates = false;
+        }
     }
 }
 

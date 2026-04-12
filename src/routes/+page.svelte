@@ -1,5 +1,6 @@
 <script lang="ts">
   import { store } from "$lib/state.svelte";
+  import { base } from "$app/paths";
   import { api, type ApiConfig } from "$lib/api";
   import { t, getLocale } from "$lib/i18n";
   import {
@@ -14,10 +15,15 @@
     SendHorizonal,
     Inbox,
     QrCode,
+    RefreshCw,
+    ExternalLink,
+    X,
+    Ticket,
   } from "lucide-svelte";
   import ShadowsocksQR from "$lib/components/ShadowsocksQR.svelte";
 
   let showQR = $state(false);
+  let showUpdateModal = $state(false);
 
   let locale = $state(getLocale());
   function _(key: string, params?: Record<string, string>): string {
@@ -106,38 +112,55 @@
   </div>
 {/snippet}
 
-<!-- Stat Cards -->
+{#snippet linkCard(Icon: any, label: string, value: string, href: string)}
+  <a
+    {href}
+    class="bg-surface-2 rounded-lg p-3 border border-border hover:border-accent/50 transition-colors block"
+  >
+    <div class="flex items-center gap-1.5 text-text-2 text-xs mb-1">
+      <Icon size={12} />
+      {label}
+    </div>
+    <div class="text-xl font-semibold">{value}</div>
+  </a>
+{/snippet}
+
+<!-- Bento Grid -->
 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-  {@render statCard(
+  {@render linkCard(
     Users,
     _("stat.users"),
     String(store.status?.users?.registered ?? "—"),
+    `${base}/accounts`,
   )}
   {@render statCard(
     Clock,
     _("stat.uptime"),
     store.status?.uptime?.duration ?? "—",
   )}
-  {@render statCard(
-    HardDrive,
-    _("stat.host_free"),
-    store.storage?.disk
-      ? store.fmtBytes(store.storage.disk.available_bytes)
-      : "—",
+  <div class="rounded-lg p-3 border border-border relative overflow-hidden">
+    <!-- Background fill showing disk usage -->
+    <div
+      class="absolute inset-0 opacity-15 transition-all duration-700 {diskColor}"
+      style="width: {diskPercent}%"
+    ></div>
+    <div class="relative">
+      <div class="flex items-center gap-1.5 text-text-2 text-xs mb-1">
+        <HardDrive size={12} />
+        {_("stat.host_total")}
+      </div>
+      <div class="text-xl font-semibold">
+        {store.storage?.disk ? `${store.fmtBytes(store.storage.disk.available_bytes)} / ${store.fmtBytes(store.storage.disk.total_bytes)}` : "—"}
+      </div>
+    </div>
+  </div>
+  {@render linkCard(
+    Ticket,
+    "Tokens",
+    String(store.registrationTokens?.total ?? "—"),
+    `${base}/accounts/tokens`,
   )}
-  {@render statCard(
-    Server,
-    _("stat.host_total"),
-    store.storage?.disk ? store.fmtBytes(store.storage.disk.total_bytes) : "—",
-  )}
-</div>
 
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-  {@render statCard(
-    HardDrive,
-    _("stat.disk"),
-    store.storage?.disk ? `${diskPercent.toFixed(1)}%` : "—",
-  )}
   {@render statCard(
     Mail,
     _("stat.sent"),
@@ -159,33 +182,44 @@
       ? store.status.received_messages.toLocaleString()
       : "—",
   )}
-</div>
 
-{#if store.status?.imap || store.status?.turn || store.status?.shadowsocks}
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-    {#if store.status.imap}
-      {@render statCard(
-        Network,
-        _("stat.imap"),
-        `${store.status.imap.connections} (${store.status.imap.unique_ips} IPs)`,
-      )}
-    {/if}
-    {#if store.status.turn}
-      {@render statCard(
-        Server,
-        _("stat.turn_relays"),
-        String(store.status.turn.relays),
-      )}
-    {/if}
-    {#if store.status.shadowsocks}
-      {@render statCard(
-        Shield,
-        _("stat.ss_conns"),
-        `${store.status.shadowsocks.connections} (${store.status.shadowsocks.unique_ips} IPs)`,
-      )}
-    {/if}
-  </div>
-{/if}
+  <!-- Madmail Version Card (clickable, same size as others) -->
+  <button
+    onclick={() => showUpdateModal = true}
+    class="bg-surface-2 rounded-lg p-3 border border-border text-start hover:border-accent/50 transition-colors cursor-pointer"
+  >
+    <div class="flex items-center gap-1.5 text-text-2 text-xs mb-1">
+      <Server size={12} />
+      Madmail Version
+    </div>
+    <div class="text-xl font-semibold truncate">
+      {store.status?.version ?? store.serverVersion ?? "—"}
+    </div>
+  </button>
+
+  {#if store.status?.imap}
+    {@render statCard(
+      Network,
+      _("stat.imap"),
+      `${store.status.imap.connections} (${store.status.imap.unique_ips} IPs)`,
+    )}
+  {/if}
+  {#if store.status?.turn}
+    {@render statCard(
+      Server,
+      _("stat.turn_relays"),
+      String(store.status.turn.relays),
+    )}
+  {/if}
+  {#if store.status?.shadowsocks}
+    {@render linkCard(
+      Shield,
+      _("stat.ss_conns"),
+      `${store.status.shadowsocks.connections} (${store.status.shadowsocks.unique_ips} IPs)`,
+      `${base}/proxy`,
+    )}
+  {/if}
+</div>
 
 <!-- Shadowsocks URL -->
 {#if store.shadowsocksUrl}
@@ -342,3 +376,70 @@
     >
   </div>
 </div>
+
+<!-- Update Modal -->
+{#if showUpdateModal}
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div
+    class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+    onclick={() => showUpdateModal = false}
+  >
+    <div
+      class="bg-surface-2 border border-border rounded-xl w-full max-w-sm p-5 shadow-2xl"
+      onclick={(e) => e.stopPropagation()}
+    >
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-sm font-semibold flex items-center gap-2">
+          <Server size={14} class="text-accent" />
+          Madmail Version
+        </h2>
+        <button
+          onclick={() => showUpdateModal = false}
+          class="p-1 text-text-2 hover:text-text rounded transition-colors"
+        >
+          <X size={14} />
+        </button>
+      </div>
+
+      <div class="bg-surface rounded-lg p-3 border border-border mb-4">
+        <div class="text-text-2 text-[10px] uppercase tracking-wider mb-1">Current Version</div>
+        <div class="text-lg font-semibold font-mono">
+          {store.status?.version ?? store.serverVersion ?? "—"}
+        </div>
+      </div>
+
+      {#if store.latestServerVersion}
+        <div class="bg-surface rounded-lg p-3 border border-border mb-4">
+          <div class="text-text-2 text-[10px] uppercase tracking-wider mb-1">Latest Release</div>
+          <div class="text-lg font-semibold font-mono">{store.latestServerVersion}</div>
+          {#if (store.status?.version ?? store.serverVersion).startsWith(store.latestServerVersion.replace(/^v/, ""))}
+            <div class="mt-1 text-xs text-success flex items-center gap-1">✓ You are up to date</div>
+          {:else}
+            <div class="mt-1 text-xs text-warning flex items-center gap-1">⚠ Update available</div>
+          {/if}
+        </div>
+      {/if}
+
+      <div class="flex gap-2">
+        <button
+          onclick={() => store.checkServerUpdate()}
+          disabled={store.checkingUpdates}
+          class="flex-1 px-3 py-2 text-xs bg-accent/10 text-accent border border-accent/30 rounded-lg hover:bg-accent/20 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+        >
+          <RefreshCw size={12} class={store.checkingUpdates ? "animate-spin" : ""} />
+          {store.checkingUpdates ? "Checking..." : "Check for Updates"}
+        </button>
+        <a
+          href="https://github.com/themadorg/madmail/releases/latest"
+          target="_blank"
+          rel="noopener"
+          class="px-3 py-2 text-xs bg-surface border border-border rounded-lg hover:bg-surface-3 transition-colors flex items-center gap-1.5 text-text-2"
+        >
+          <ExternalLink size={12} />
+          GitHub
+        </a>
+      </div>
+    </div>
+  </div>
+{/if}

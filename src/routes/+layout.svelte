@@ -357,9 +357,7 @@
           <div>
             <div class="flex items-center gap-1.5">
               <h1 class="text-base font-semibold">Madmail</h1>
-              <span class="text-[10px] text-text-2/50 font-mono"
-                >v{appVersion}</span
-              >
+              <span class="text-[10px] text-text-2/50 font-mono">v{appVersion}</span>
             </div>
             <p class="text-text-2 text-[11px] truncate max-w-[200px]">
               {store.baseUrl}
@@ -422,22 +420,26 @@
       </header>
 
       <!-- Navigation -->
-      <nav
-        class="flex gap-0.5 mb-4 sm:mb-5 border-b border-border overflow-x-auto scrollbar-hide -mx-3 px-3 sm:mx-0 sm:px-0"
-      >
-        {#each NAV_ITEMS as item}
-          <a
-            href="{base}{item.href}"
-            class="px-3 py-2 text-sm transition-colors -mb-px flex items-center gap-1.5
-              {isActive(item.href, $page.url.pathname)
-              ? 'text-accent border-b-2 border-accent font-medium'
-              : 'text-text-2 hover:text-text'}"
-          >
-            <item.icon size={13} />
-            {_(item.key)}
-          </a>
-        {/each}
-      </nav>
+      <div class="relative mb-4 sm:mb-5">
+        <nav
+          class="flex gap-0.5 border-b border-border overflow-x-auto scrollbar-hide -mx-3 px-3 sm:mx-0 sm:px-0"
+        >
+          {#each NAV_ITEMS as item}
+            <a
+              href="{base}{item.href}"
+              class="px-3 py-2 text-sm transition-colors -mb-px flex items-center gap-1.5 whitespace-nowrap
+                {isActive(item.href, $page.url.pathname)
+                ? 'text-accent border-b-2 border-accent font-medium'
+                : 'text-text-2 hover:text-text'}"
+            >
+              <item.icon size={13} />
+              {_(item.key)}
+            </a>
+          {/each}
+        </nav>
+        <!-- Right fade hint for scrollable nav -->
+        <div class="absolute top-0 end-0 bottom-0 w-8 pointer-events-none bg-gradient-to-l from-surface to-transparent sm:hidden"></div>
+      </div>
 
       <!-- Page Content -->
       {@render children()}
