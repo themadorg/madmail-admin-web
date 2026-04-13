@@ -80,10 +80,7 @@
     { href: "/proxy", key: "tab.proxy", icon: Shield },
     { href: "/ports", key: "tab.ports", icon: Network },
     { href: "/accounts", key: "tab.accounts", icon: Users },
-    { href: "/blocked", key: "tab.blocked", icon: ShieldBan },
-    { href: "/dns", key: "tab.dns", icon: Globe },
     { href: "/federation", key: "tab.federation", icon: GitBranch },
-    { href: "/exchangers", key: "tab.exchangers", icon: ArrowDownToLine },
     { href: "/notice", key: "tab.notice", icon: Mail },
   ];
 
@@ -422,7 +419,7 @@
       </header>
 
       <!-- Navigation -->
-      <div class="relative mb-4 sm:mb-5">
+      <div class="relative mb-2 sm:mb-3">
         <nav
           class="flex gap-0.5 border-b border-border overflow-x-auto scrollbar-hide -mx-3 px-3 sm:mx-0 sm:px-0"
         >

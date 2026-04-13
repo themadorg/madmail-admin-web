@@ -17,6 +17,8 @@
     ChevronRight,
     Search,
     Ticket,
+    Download,
+    Upload,
   } from "lucide-svelte";
 
   let locale = $state(getLocale());
@@ -185,19 +187,55 @@
   <div
     class="bg-surface-2 rounded-lg border border-border mb-4 p-3 flex flex-wrap justify-between items-center gap-2"
   >
-    <span class="text-sm flex items-center gap-1.5">
-      <Users size={14} class="text-text-2" />
-      {store.accounts.total}
-      {_("acct.total")}
-    </span>
+    <div class="flex items-center gap-4">
+      <span class="text-sm flex items-center gap-1.5 mr-2">
+        <Users size={14} class="text-text-2" />
+        {store.accounts.total}
+        {_("acct.total")}
+      </span>
+
+      <div class="flex items-center gap-2">
+        <button
+          onclick={() => store.exportAccounts()}
+          disabled={store.busy}
+          class="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-border text-text-2 hover:bg-surface-3 transition-all flex items-center gap-1.5 disabled:opacity-50"
+        >
+          <Download size={14} />
+          {_("action.export") || "Export"}
+        </button>
+
+        <label
+          class="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-border text-text-2 hover:bg-surface-3 transition-all flex items-center gap-1.5 cursor-pointer"
+          class:opacity-50={store.busy}
+        >
+          <Upload size={14} />
+          {_("action.import") || "Import"}
+          <input
+            type="file"
+            accept=".json"
+            class="hidden"
+            disabled={store.busy}
+            onchange={(e) => {
+              const file = e.currentTarget.files?.[0];
+              if (file) {
+                store.importAccounts(file);
+                e.currentTarget.value = "";
+              }
+            }}
+          />
+        </label>
+        <button
+          onclick={() => store.deleteAllAccounts()}
+          disabled={store.busy}
+          class="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-danger/30 text-danger hover:bg-danger/10 transition-all flex items-center gap-1.5 disabled:opacity-50"
+        >
+          <Trash2 size={14} />
+          {_("action.delete_all") || "Delete All"}
+        </button>
+      </div>
+    </div>
+
     <div class="flex items-center gap-3 text-xs text-text-2">
-      <a
-        href="{base}/accounts/tokens"
-        class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-accent/15 text-accent border border-accent/30 hover:bg-accent/25 transition-all flex items-center gap-1 no-underline"
-      >
-        <Ticket size={12} />
-        {_("tab.tokens")}
-      </a>
       {#if store.quota}
         <span>
           {store.fmtBytes(store.quota.total_storage_bytes)}

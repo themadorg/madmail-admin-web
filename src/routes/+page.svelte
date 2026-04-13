@@ -413,7 +413,7 @@
         <div class="bg-surface rounded-lg p-3 border border-border mb-4">
           <div class="text-text-2 text-[10px] uppercase tracking-wider mb-1">Latest Release</div>
           <div class="text-lg font-semibold font-mono">{store.latestServerVersion}</div>
-          {#if (store.status?.version ?? store.serverVersion).startsWith(store.latestServerVersion.replace(/^v/, ""))}
+          {#if !store.hasUpdate}
             <div class="mt-1 text-xs text-success flex items-center gap-1">✓ You are up to date</div>
           {:else}
             <div class="mt-1 text-xs text-warning flex items-center gap-1">⚠ Update available</div>

@@ -18,9 +18,11 @@
 <body data-sveltekit-preload-data="hover">
 	<div style="display: contents">%sveltekit.body%</div>
 	<script>
-		// Register service worker
+		// Register service worker (relative path — works at any sub-path)
 		if ('serviceWorker' in navigator) {
-			navigator.serviceWorker.register('/sw.js', { scope: '/' })
+			const swUrl = new URL('sw.js', document.baseURI).href;
+			const scope = new URL('./', document.baseURI).href;
+			navigator.serviceWorker.register(swUrl, { scope })
 				.catch(err => console.warn('SW registration failed:', err));
 		}
 	</script>

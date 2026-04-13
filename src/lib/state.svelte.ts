@@ -126,6 +126,30 @@ class AdminState {
         return `${(b / 1073741824).toFixed(1)} GB`;
     }
 
+    /**
+     * Compares two semantic versions.
+     * Returns 1 if v1 > v2, -1 if v1 < v2, 0 if equal.
+     */
+    compareVersions(v1: string, v2: string): number {
+        const parse = (v: string) => (v || '').replace(/^v/, '').split('+')[0].split('.').map(Number);
+        const p1 = parse(v1);
+        const p2 = parse(v2);
+        for (let i = 0; i < Math.max(p1.length, p2.length); i++) {
+            const n1 = p1[i] || 0;
+            const n2 = p2[i] || 0;
+            if (n1 > n2) return 1;
+            if (n2 > n1) return -1;
+        }
+        return 0;
+    }
+
+    get hasUpdate(): boolean {
+        if (!this.latestServerVersion) return false;
+        const current = this.status?.version ?? this.serverVersion;
+        if (!current) return false;
+        return this.compareVersions(current, this.latestServerVersion) < 0;
+    }
+
     // --- API actions ---
     async connect() {
         if (!this.baseUrl || !this.token || this.connecting) return;
@@ -379,6 +403,54 @@ class AdminState {
         } finally { this.busy = false; }
     }
 
+    async exportAccounts() {
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const res = await api.exportAccounts(this.cfg());
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            if (res.data) {
+                const blob = new Blob([JSON.stringify(res.data.users, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `madmail-accounts-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                this.notify(`Exported ${res.data.total} accounts`);
+            }
+        } catch (e) {
+            this.notify('Export failed: ' + e, 'err');
+        } finally { this.busy = false; }
+    }
+
+    async importAccounts(file: File) {
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const text = await file.text();
+            const users = JSON.parse(text);
+            const res = await api.importAccounts(this.cfg(), users);
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            this.notify(`Imported ${res.data?.imported} users, skipped ${res.data?.skipped}`);
+            await this.refresh();
+        } catch (e) {
+            this.notify('Failed to parse import file: ' + e, 'err');
+        } finally { this.busy = false; }
+    }
+
+    async deleteAllAccounts() {
+        if (!confirm('Are you ABSOLUTELY sure you want to delete ALL user accounts? This cannot be undone.')) return;
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const res = await api.deleteAllAccounts(this.cfg());
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            this.notify(`Deleted ${res.data?.deleted} accounts`);
+            await this.refresh();
+        } finally { this.busy = false; }
+    }
+
     async unblockUser(u: string) {
         if (this.busy) return;
         this.busy = true;
@@ -386,6 +458,18 @@ class AdminState {
             const res = await api.unblockUser(this.cfg(), u);
             if (res.error) { this.notify(res.error, 'err'); return; }
             this.notify(t('notify.unblocked', { username: u }));
+            await this.refresh();
+        } finally { this.busy = false; }
+    }
+
+    async unblockAllAccounts() {
+        if (!confirm('Unblock ALL users?')) return;
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const res = await api.unblockAll(this.cfg());
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            this.notify(`Unblocked ${res.data?.unblocked} users`);
             await this.refresh();
         } finally { this.busy = false; }
     }
@@ -522,10 +606,7 @@ class AdminState {
                 const data = await res.json();
                 this.latestServerVersion = data.tag_name;
                 // If the version is different, show a notification
-                const current = (this.status?.version ?? this.serverVersion).split('+')[0];
-                const latest = data.tag_name.replace(/^v/, '');
-                
-                if (current && current !== latest) {
+                if (this.hasUpdate) {
                     this.notify(`New update available: ${data.tag_name}`, 'ok');
                 } else {
                     this.notify(`You are on the latest version (${data.tag_name})`);

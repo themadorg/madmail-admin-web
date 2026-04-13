@@ -189,6 +189,7 @@ export interface FederationServerEntry {
     success_http: number;
     success_https: number;
     success_smtp: number;
+    inbound_deliveries: number;
     successful_deliveries: number;
     mean_latency_ms: number;
     last_active: number;
@@ -292,6 +293,12 @@ export const api = {
         apiCall<CreateAccountResponse>(c, '/admin/accounts', 'POST'),
     deleteAccount: (c: ApiConfig, username: string) =>
         apiCall(c, '/admin/accounts', 'DELETE', { username }),
+    exportAccounts: (c: ApiConfig) =>
+        apiCall<{ users: { username: string; hash?: string }[]; total: number }>(c, '/admin/accounts', 'PATCH', { action: 'export' }),
+    importAccounts: (c: ApiConfig, users: { username: string; password?: string; hash?: string }[]) =>
+        apiCall<{ imported: number; skipped: number; errors?: string[] }>(c, '/admin/accounts', 'PATCH', { action: 'import', users }),
+    deleteAllAccounts: (c: ApiConfig) =>
+        apiCall<{ deleted: number; errors?: string[] }>(c, '/admin/accounts', 'PATCH', { action: 'delete_all' }),
     quota: (c: ApiConfig) => apiCall<QuotaStats>(c, '/admin/quota'),
     setDefaultQuota: (c: ApiConfig, maxBytes: number) =>
         apiCall(c, '/admin/quota', 'PUT', { max_bytes: maxBytes }),
@@ -307,6 +314,8 @@ export const api = {
         apiCall(c, '/admin/blocklist', 'POST', { username, reason: reason || 'manually blocked' }),
     unblockUser: (c: ApiConfig, username: string) =>
         apiCall(c, '/admin/blocklist', 'DELETE', { username }),
+    unblockAll: (c: ApiConfig) =>
+        apiCall<{ unblocked: number; errors?: string[] }>(c, '/admin/blocklist', 'PATCH', { action: 'delete_all' }),
 
     // Toggles
     getToggle: (c: ApiConfig, resource: string) =>

@@ -56,11 +56,24 @@
   <div
     class="bg-surface-2 rounded-lg border border-border mb-4 p-3 flex flex-wrap justify-between items-center gap-2"
   >
-    <span class="text-sm flex items-center gap-1.5">
-      <ShieldBan size={14} class="text-danger/70" />
-      {store.blocklist.total}
-      {_("acct.blocked")}
-    </span>
+    <div class="flex items-center gap-4">
+      <span class="text-sm flex items-center gap-1.5 mr-2">
+        <ShieldBan size={14} class="text-danger/70" />
+        {store.blocklist.total}
+        {_("acct.blocked")}
+      </span>
+
+      {#if store.blocklist.total > 0}
+        <button
+          onclick={() => store.unblockAllAccounts()}
+          disabled={store.busy}
+          class="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-border text-accent hover:bg-accent/10 transition-all flex items-center gap-1.5 disabled:opacity-50"
+        >
+          <ShieldCheck size={14} />
+          {_("acct.unblock_all") || "Unblock All"}
+        </button>
+      {/if}
+    </div>
   </div>
 
   <!-- Search -->

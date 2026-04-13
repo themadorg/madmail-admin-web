@@ -1,7 +1,7 @@
 // Service worker update checker.
-// Polls version.json every 5 minutes and on page load.
-// When a new version is detected, it posts CLEAR_CACHE to the SW
-// and notifies the app via a callback.
+// Polls version.json every 5 minutes and on page visibility change.
+// When a new version is detected, it notifies the app via a callback.
+// The caller can then trigger applyUpdate() to clear the SW cache and reload.
 
 import { base } from '$app/paths';
 
@@ -14,7 +14,11 @@ const CHECK_MS = 5 * 60 * 1000; // 5 minutes
 
 async function fetchVersion(): Promise<string | null> {
     try {
-        const res = await fetch(VERSION_URL, { cache: 'no-store' });
+        // Always bypass cache for version checks
+        const res = await fetch(VERSION_URL, {
+            cache: 'no-store',
+            headers: { 'Cache-Control': 'no-cache' }
+        });
         if (!res.ok) return null;
         const data = await res.json();
         return data.version ?? null;
@@ -28,7 +32,8 @@ async function checkForUpdate() {
     if (!remote) return;
 
     if (currentVersion && remote !== currentVersion) {
-        // New version detected
+        // New version detected — notify the app
+        console.log(`[sw-update] New version detected: ${currentVersion} → ${remote}`);
         onUpdateAvailable?.(remote);
     }
 
@@ -45,7 +50,7 @@ export function startVersionChecker(cb: (newVersion: string) => void) {
     if (checkInterval) clearInterval(checkInterval);
     checkInterval = setInterval(checkForUpdate, CHECK_MS);
 
-    // Also check when page becomes visible
+    // Also check when page becomes visible (user returns to tab)
     if (typeof document !== 'undefined') {
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
@@ -55,6 +60,12 @@ export function startVersionChecker(cb: (newVersion: string) => void) {
     }
 }
 
+/**
+ * Applies a detected update:
+ *   1. Tells the SW to clear all caches
+ *   2. Waits for confirmation
+ *   3. Hard-reloads the page
+ */
 export function applyUpdate() {
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage('CLEAR_CACHE');
@@ -67,7 +78,7 @@ export function applyUpdate() {
         // Fallback: reload after 2s even if no confirmation
         setTimeout(() => window.location.reload(), 2000);
     } else {
-        // No SW, just hard reload
+        // No SW controller, just hard reload
         window.location.reload();
     }
 }
