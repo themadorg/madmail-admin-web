@@ -1,3 +1,10 @@
+# [1.17.0](https://github.com/themadorg/madmail-admin-web/compare/v1.16.0...v1.17.0) (2026-04-13)
+
+
+### Features
+
+* add federation management UI and API support for rules, settings, and server monitoring ([17c063d](https://github.com/themadorg/madmail-admin-web/commit/17c063d55f34e3ada678620fbbbacda7154bfc7f))
+
 # [1.16.0](https://github.com/themadorg/madmail-admin-web/compare/v1.15.0...v1.16.0) (2026-04-13)
 
 
