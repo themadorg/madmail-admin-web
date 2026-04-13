@@ -1,3 +1,10 @@
+# [1.18.0](https://github.com/themadorg/madmail-admin-web/compare/v1.17.0...v1.18.0) (2026-04-13)
+
+
+### Features
+
+* restructure admin web routes to organize federation and account management pages ([514b03b](https://github.com/themadorg/madmail-admin-web/commit/514b03b787460a99972dd7730a435b3f22cd6c5b))
+
 # [1.17.0](https://github.com/themadorg/madmail-admin-web/compare/v1.16.0...v1.17.0) (2026-04-13)
 
 
