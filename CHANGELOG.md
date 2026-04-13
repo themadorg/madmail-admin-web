@@ -1,3 +1,10 @@
+# [1.16.0](https://github.com/themadorg/madmail-admin-web/compare/v1.15.0...v1.16.0) (2026-04-13)
+
+
+### Features
+
+* add webimap and websmtp service toggle controls to admin UI ([ccb38d2](https://github.com/themadorg/madmail-admin-web/commit/ccb38d2d3292166a1f46b72c0c658cd100503ecb))
+
 # [1.15.0](https://github.com/themadorg/madmail-admin-web/compare/v1.14.0...v1.15.0) (2026-04-12)
 
 
