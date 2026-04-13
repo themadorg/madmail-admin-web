@@ -15,6 +15,9 @@ import {
     type ExchangerListResponse,
     type RegistrationTokenListResponse,
     type CreateAccountResponse,
+    type FederationSettingsResponse,
+    type FederationRulesResponse,
+    type FederationServersResponse,
 } from '$lib/api';
 import { t } from '$lib/i18n';
 import { saveServer } from '$lib/servers';
@@ -55,6 +58,9 @@ class AdminState {
     endpointOverrides = $state<DnsListResponse | null>(null);
     exchangers = $state<ExchangerListResponse | null>(null);
     registrationTokens = $state<RegistrationTokenListResponse | null>(null);
+    federationSettings = $state<FederationSettingsResponse | null>(null);
+    federationRules = $state<FederationRulesResponse | null>(null);
+    federationServers = $state<FederationServersResponse | null>(null);
 
     // UI
     toast = $state('');
@@ -154,6 +160,9 @@ class AdminState {
                 api.dns(this.cfg()).then(res => { if (res.data) this.endpointOverrides = res.data; if (res.version) this.serverVersion = res.version; }),
                 api.exchangers(this.cfg()).then(res => { if (res.data) this.exchangers = res.data; if (res.version) this.serverVersion = res.version; }),
                 api.registrationTokens(this.cfg()).then(res => { if (res.data) this.registrationTokens = res.data; if (res.version) this.serverVersion = res.version; }),
+                api.federationSettings(this.cfg()).then(res => { if (res.data) this.federationSettings = res.data; }),
+                api.federationRules(this.cfg()).then(res => { if (res.data) this.federationRules = res.data; }),
+                api.federationServers(this.cfg()).then(res => { if (res.data) this.federationServers = res.data; }),
             ]);
         } finally {
             this.refreshing = false;
@@ -167,6 +176,7 @@ class AdminState {
         this.baseUrl = '';
         this.token = '';
         this.status = this.storage = this.settings = this.accounts = this.quota = this.blocklist = this.endpointOverrides = this.exchangers = this.registrationTokens = null;
+        this.federationSettings = this.federationRules = this.federationServers = null;
         this.newAccount = null;
     }
 
@@ -528,6 +538,52 @@ class AdminState {
         } finally {
             this.checkingUpdates = false;
         }
+    }
+
+    // --- Federation ---
+    async setFederationPolicy(policy: string) {
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const res = await api.setFederationSettings(this.cfg(), { policy });
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            this.notify(`Federation policy set to ${policy}`);
+            await this.refresh();
+        } finally { this.busy = false; }
+    }
+
+    async toggleFederationEnabled() {
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const enabled = !(this.federationSettings?.enabled ?? false);
+            const res = await api.setFederationSettings(this.cfg(), { enabled });
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            this.notify(`Federation ${enabled ? 'enabled' : 'disabled'}`);
+            await this.refresh();
+        } finally { this.busy = false; }
+    }
+
+    async addFederationRule(domain: string) {
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const res = await api.addFederationRule(this.cfg(), domain);
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            this.notify(`Rule added: ${domain}`);
+            await this.refresh();
+        } finally { this.busy = false; }
+    }
+
+    async deleteFederationRule(domain: string) {
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const res = await api.deleteFederationRule(this.cfg(), domain);
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            this.notify(`Rule removed: ${domain}`);
+            await this.refresh();
+        } finally { this.busy = false; }
     }
 }
 

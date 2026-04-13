@@ -165,6 +165,40 @@ export interface RegistrationTokenListResponse {
     total: number;
 }
 
+export interface FederationSettingsResponse {
+    enabled: boolean;
+    policy: string;
+}
+
+export interface FederationRuleEntry {
+    domain: string;
+    created_at: number;
+}
+
+export interface FederationRulesResponse {
+    rules: FederationRuleEntry[];
+    total: number;
+}
+
+export interface FederationServerEntry {
+    domain: string;
+    queued_messages: number;
+    failed_http: number;
+    failed_https: number;
+    failed_smtp: number;
+    success_http: number;
+    success_https: number;
+    success_smtp: number;
+    successful_deliveries: number;
+    mean_latency_ms: number;
+    last_active: number;
+}
+
+export interface FederationServersResponse {
+    servers: FederationServerEntry[];
+    total: number;
+}
+
 
 export interface ReloadResponse {
     status: string;
@@ -334,5 +368,19 @@ export const api = {
         apiCall<RegistrationTokenEntry>(c, '/admin/registration-token', 'POST', opts),
     deleteRegistrationToken: (c: ApiConfig, token: string) =>
         apiCall(c, '/admin/registration-token', 'DELETE', { token }),
+
+    // Federation
+    federationSettings: (c: ApiConfig) =>
+        apiCall<FederationSettingsResponse>(c, '/admin/settings/federation'),
+    setFederationSettings: (c: ApiConfig, opts: { enabled?: boolean; policy?: string }) =>
+        apiCall<FederationSettingsResponse>(c, '/admin/settings/federation', 'POST', opts),
+    federationRules: (c: ApiConfig) =>
+        apiCall<FederationRulesResponse>(c, '/admin/federation/rules'),
+    addFederationRule: (c: ApiConfig, domain: string) =>
+        apiCall(c, '/admin/federation/rules', 'POST', { domain }),
+    deleteFederationRule: (c: ApiConfig, domain: string) =>
+        apiCall(c, '/admin/federation/rules', 'DELETE', { domain }),
+    federationServers: (c: ApiConfig) =>
+        apiCall<FederationServersResponse>(c, '/admin/federation/servers'),
 };
 

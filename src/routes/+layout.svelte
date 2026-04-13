@@ -31,6 +31,7 @@
     Download,
     ArrowDownToLine,
     Ticket,
+    GitBranch,
   } from "lucide-svelte";
 
   let { children } = $props();
@@ -81,6 +82,7 @@
     { href: "/accounts", key: "tab.accounts", icon: Users },
     { href: "/blocked", key: "tab.blocked", icon: ShieldBan },
     { href: "/dns", key: "tab.dns", icon: Globe },
+    { href: "/federation", key: "tab.federation", icon: GitBranch },
     { href: "/exchangers", key: "tab.exchangers", icon: ArrowDownToLine },
     { href: "/notice", key: "tab.notice", icon: Mail },
   ];
