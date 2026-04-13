@@ -1,3 +1,10 @@
+# [1.19.0](https://github.com/themadorg/madmail-admin-web/compare/v1.18.0...v1.19.0) (2026-04-13)
+
+
+### Features
+
+* move account statistics and management actions to the accounts layout header ([2700861](https://github.com/themadorg/madmail-admin-web/commit/2700861341a861402835a533af1e34afc3ba34e7))
+
 # [1.18.0](https://github.com/themadorg/madmail-admin-web/compare/v1.17.0...v1.18.0) (2026-04-13)
 
 
