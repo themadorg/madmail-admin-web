@@ -16,9 +16,6 @@
     ChevronLeft,
     ChevronRight,
     Search,
-    Ticket,
-    Download,
-    Upload,
   } from "lucide-svelte";
 
   let locale = $state(getLocale());
@@ -30,14 +27,17 @@
     locale = getLocale();
   });
 
+  /** Focus element on mount for inline editing */
+  function focusOnMount(el: HTMLInputElement) {
+    el.focus();
+    el.select();
+  }
+
   let sortBy = $state<"name" | "size" | "date" | "login">("name");
   let sortAsc = $state(true);
   let copied = $state(false);
   let searchQuery = $state("");
 
-  // Quota editing state
-  let editingDefaultQuota = $state(false);
-  let defaultQuotaInput = $state("");
   let editingUserQuota = $state(""); // username being edited
   let userQuotaInput = $state("");
 
@@ -48,14 +48,14 @@
     const n = parseFloat(m[1]);
     if (isNaN(n) || n < 0) return null;
     const unit = (m[2] || "b").toUpperCase();
-    const mult: Record<string, number> = {
+    const multipliers: Record<string, number> = {
       B: 1,
       KB: 1024,
-      MB: 1048576,
-      GB: 1073741824,
-      TB: 1099511627776,
+      MB: 1024 * 1024,
+      GB: 1024 * 1024 * 1024,
+      TB: 1024 * 1024 * 1024 * 1024,
     };
-    return Math.round(n * (mult[unit] ?? 1));
+    return Math.floor(n * (multipliers[unit] || 1));
   }
 
   function fmtDate(ts: number): string {
@@ -184,115 +184,6 @@
 </script>
 
 {#if store.accounts}
-  <div
-    class="bg-surface-2 rounded-lg border border-border mb-4 p-3 flex flex-wrap justify-between items-center gap-2"
-  >
-    <div class="flex items-center gap-4">
-      <span class="text-sm flex items-center gap-1.5 mr-2">
-        <Users size={14} class="text-text-2" />
-        {store.accounts.total}
-        {_("acct.total")}
-      </span>
-
-      <div class="flex items-center gap-2">
-        <button
-          onclick={() => store.exportAccounts()}
-          disabled={store.busy}
-          class="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-border text-text-2 hover:bg-surface-3 transition-all flex items-center gap-1.5 disabled:opacity-50"
-        >
-          <Download size={14} />
-          {_("action.export") || "Export"}
-        </button>
-
-        <label
-          class="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-border text-text-2 hover:bg-surface-3 transition-all flex items-center gap-1.5 cursor-pointer"
-          class:opacity-50={store.busy}
-        >
-          <Upload size={14} />
-          {_("action.import") || "Import"}
-          <input
-            type="file"
-            accept=".json"
-            class="hidden"
-            disabled={store.busy}
-            onchange={(e) => {
-              const file = e.currentTarget.files?.[0];
-              if (file) {
-                store.importAccounts(file);
-                e.currentTarget.value = "";
-              }
-            }}
-          />
-        </label>
-        <button
-          onclick={() => store.deleteAllAccounts()}
-          disabled={store.busy}
-          class="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-danger/30 text-danger hover:bg-danger/10 transition-all flex items-center gap-1.5 disabled:opacity-50"
-        >
-          <Trash2 size={14} />
-          {_("action.delete_all") || "Delete All"}
-        </button>
-      </div>
-    </div>
-
-    <div class="flex items-center gap-3 text-xs text-text-2">
-      {#if store.quota}
-        <span>
-          {store.fmtBytes(store.quota.total_storage_bytes)}
-          {_("acct.used")}
-        </span>
-        <span class="text-text-2/40">·</span>
-        {#if editingDefaultQuota}
-          <form
-            class="flex items-center gap-1"
-            onsubmit={(e) => {
-              e.preventDefault();
-              const bytes = parseSize(defaultQuotaInput);
-              if (bytes !== null) {
-                store.setDefaultQuota(bytes);
-                editingDefaultQuota = false;
-              }
-            }}
-          >
-            <input
-              type="text"
-              class="w-20 px-1.5 py-0.5 text-xs rounded border border-accent/40 bg-surface-1 text-text-1 focus:outline-none focus:border-accent"
-              bind:value={defaultQuotaInput}
-              placeholder="e.g. 100MB"
-            />
-            <button
-              type="submit"
-              class="px-1.5 py-0.5 text-[10px] rounded bg-accent text-white hover:bg-accent/80"
-            >
-              {_("action.save")}
-            </button>
-            <button
-              type="button"
-              onclick={() => (editingDefaultQuota = false)}
-              class="px-1.5 py-0.5 text-[10px] rounded border border-border text-text-2 hover:bg-surface-2"
-            >
-              {_("action.cancel")}
-            </button>
-          </form>
-        {:else}
-          <button
-            class="flex items-center gap-1 hover:text-accent transition-colors cursor-pointer"
-            onclick={() => {
-              defaultQuotaInput = store.quota
-                ? (store.quota.default_quota_bytes / 1048576).toFixed(0) + "MB"
-                : "";
-              editingDefaultQuota = true;
-            }}
-          >
-            {store.fmtBytes(store.quota.default_quota_bytes)}
-            {_("acct.default_quota")}
-            <Pencil size={10} class="opacity-40" />
-          </button>
-        {/if}
-      {/if}
-    </div>
-  </div>
-
   <!-- Create Account Button — only when registration is closed -->
   {#if isRegistrationClosed}
     <div class="mb-4 p-3 rounded-lg border border-amber-500/20 bg-amber-500/5">

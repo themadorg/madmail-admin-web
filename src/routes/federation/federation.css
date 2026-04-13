@@ -89,7 +89,7 @@
   align-items: center;
   gap: 0.75rem;
   flex-shrink: 0;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
 }
 
 /* ── Toggle ── */
@@ -157,13 +157,20 @@
   animation: slide-in 0.15s ease-out;
 }
 
-/* ── Tabs ── */
 .tab-bar {
   display: flex;
-  gap: 1rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex-wrap: nowrap;
+  gap: 1.25rem;
   margin-bottom: 0.5rem;
   border-bottom: 1px solid var(--th-border);
   padding: 0 0.5rem;
+  -webkit-overflow-scrolling: touch;
+}
+.tab-bar::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
@@ -181,6 +188,8 @@
   transition: all 0.15s;
   text-decoration: none;
   margin-bottom: -1px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .tab:hover {
   color: var(--th-text);
