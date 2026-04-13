@@ -212,6 +212,18 @@
       store.settings.auto_purge_seen_enabled,
       "enabled",
     )}
+    {@render toggleRow(
+      _("svc.webimap"),
+      "/admin/services/webimap",
+      store.settings.webimap_enabled,
+      "enabled",
+    )}
+    {@render toggleRow(
+      _("svc.websmtp"),
+      "/admin/services/websmtp",
+      store.settings.websmtp_enabled,
+      "enabled",
+    )}
   </div>
 
   <!-- Configuration -->

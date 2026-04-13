@@ -62,6 +62,8 @@ export interface AllSettings {
     http_proxy_enabled: string;
     log_disabled: string;
     admin_web_enabled: string;
+    webimap_enabled: string;
+    websmtp_enabled: string;
     registration_token_required: string;
     smtp_port: SettingValue;
     submission_port: SettingValue;
