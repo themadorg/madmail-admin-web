@@ -137,7 +137,7 @@
 
   async function copyToken(token: string) {
     try {
-      await navigator.clipboard.writeText(token);
+      await copyToClipboard(token)
       store.notify(_("notify.copied"));
     } catch {
       store.notify("Copy failed", "err");
@@ -155,11 +155,32 @@
 
   async function copyInviteLink(token: string) {
     try {
-      await navigator.clipboard.writeText(getInviteUrl(token));
+      await copyToClipboard(getInviteUrl(token))
       store.notify(_("notify.copied"));
     } catch {
       store.notify("Copy failed", "err");
     }
+  }
+
+  async function copyToClipboard(text: string) {
+    if (window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      var textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";  //avoid scrolling to bottom
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        var successful = document.execCommand('copy');
+        if (!successful) throw new Error('Copy command failed');
+      } finally {
+        document.body.removeChild(textArea)
+      }
+    }
+    
   }
 </script>
 
