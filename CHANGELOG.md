@@ -1,3 +1,10 @@
+## [1.19.2](https://github.com/themadorg/madmail-admin-web/compare/v1.19.1...v1.19.2) (2026-04-17)
+
+
+### Bug Fixes
+
+* update dclogin URL parameters to use SSL for secure connections ([0cca4a9](https://github.com/themadorg/madmail-admin-web/commit/0cca4a90f2cecb44de04e6ae9dbdc086a1383f26))
+
 ## [1.19.1](https://github.com/themadorg/madmail-admin-web/compare/v1.19.0...v1.19.1) (2026-04-14)
 
 
