@@ -157,7 +157,7 @@
     const imapPort = store.settings?.imap_port?.value || "993";
     const smtpPort = store.settings?.submission_port?.value || "465";
 
-    return `dclogin:${email}/?p=${encodeURIComponent(password)}&v=1&ih=${host}&ip=${imapPort}&sh=${host}&sp=${smtpPort}&ic=3&ss=default`;
+    return `dclogin:${email}/?p=${encodeURIComponent(password)}&v=1&ih=${host}&ip=${imapPort}&is=ssl&sh=${host}&sp=${smtpPort}&ss=ssl&ic=3`;
   }
 
   function copyDclogin() {
