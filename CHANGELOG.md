@@ -1,3 +1,10 @@
+## [1.19.1](https://github.com/themadorg/madmail-admin-web/compare/v1.19.0...v1.19.1) (2026-04-14)
+
+
+### Bug Fixes
+
+* Copy to clipboard work in insecure admin websites ([e77824e](https://github.com/themadorg/madmail-admin-web/commit/e77824eaca99b8f6b24a04d582d31b0ca3c9e123))
+
 # [1.19.0](https://github.com/themadorg/madmail-admin-web/compare/v1.18.0...v1.19.0) (2026-04-13)
 
 
