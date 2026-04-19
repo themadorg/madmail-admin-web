@@ -1,3 +1,10 @@
+## [1.19.3](https://github.com/themadorg/madmail-admin-web/compare/v1.19.2...v1.19.3) (2026-04-19)
+
+
+### Bug Fixes
+
+* enhance internationalization support by adding new translation keys and updating existing components to utilize them ([b5a6c54](https://github.com/themadorg/madmail-admin-web/commit/b5a6c54d067a3339e7a9a660cd564342a4043e13))
+
 ## [1.19.2](https://github.com/themadorg/madmail-admin-web/compare/v1.19.1...v1.19.2) (2026-04-17)
 
 
