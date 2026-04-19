@@ -281,7 +281,7 @@
         <div class="flex gap-2 mt-1.5">
           <select
             bind:value={store.editValue}
-            class="flex-1 px-2 py-1 bg-surface border border-border rounded text-xs text-text outline-none focus:border-accent"
+            class="flex-1 min-w-0 py-1 ps-2 pe-8 rtl:ps-8 rtl:pe-2 bg-surface border border-border rounded text-xs text-text outline-none focus:border-accent"
           >
             {#each options as opt}
               <option value={opt.value}>{opt.label}</option>

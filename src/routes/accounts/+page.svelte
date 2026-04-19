@@ -292,7 +292,7 @@
         )}/{sortedAccounts.length}
       </span>
       <select
-        class="bg-surface-1 border border-border rounded px-1 py-0.5 text-[10px] text-text-1 focus:outline-none focus:border-accent cursor-pointer"
+        class="bg-surface-1 border border-border rounded ps-1 pe-5 py-0.5 text-[10px] text-text-1 focus:outline-none focus:border-accent cursor-pointer rtl:ps-5 rtl:pe-1"
         value={pageSize}
         onchange={(e) => {
           pageSize = Number((e.target as HTMLSelectElement).value);

@@ -331,7 +331,7 @@
     <span class="text-xs text-text-2">{_("queue.purge_older")}</span>
     <select
       bind:value={selectedRetention}
-      class="px-2 py-1.5 text-xs bg-surface border border-border rounded-lg text-text focus:border-accent outline-none transition"
+      class="min-w-[7.5rem] py-1.5 ps-2 pe-8 text-xs bg-surface border border-border rounded-lg text-text focus:border-accent outline-none transition rtl:ps-8 rtl:pe-2"
     >
       {#each RETENTION_KEYS as opt}
         <option value={opt.value}>{_(opt.key)}</option>
