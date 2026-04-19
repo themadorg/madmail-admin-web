@@ -95,7 +95,7 @@
             id="exc-name"
             type="text"
             bind:value={newName}
-            placeholder="relay1"
+            placeholder={_("exc.ph_name")}
           />
         </div>
         <div class="field">
@@ -104,7 +104,7 @@
             id="exc-url"
             type="text"
             bind:value={newUrl}
-            placeholder="https://relay.example.com/mxdeliv"
+            placeholder={_("exc.ph_url")}
           />
         </div>
       </div>
@@ -168,7 +168,7 @@
                     use:focusOnMount
                     class="interval-input"
                   />
-                  <span class="unit">s</span>
+                  <span class="unit">{_("misc.unit_seconds")}</span>
                 </div>
               {:else}
                 <!-- svelte-ignore a11y_click_events_have_key_events -->

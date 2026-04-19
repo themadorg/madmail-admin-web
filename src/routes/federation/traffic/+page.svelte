@@ -63,8 +63,8 @@
 
   function formatLatency(ms: number): string {
     if (!ms || ms === 0) return "—";
-    if (ms < 1000) return `${Math.round(ms)}ms`;
-    return `${((ms || 0) / 1000).toFixed(1)}s`;
+    if (ms < 1000) return _("latency.ms", { n: String(Math.round(ms)) });
+    return _("latency.s", { n: ((ms || 0) / 1000).toFixed(1) });
   }
 
   function timeAgo(ts: number): string {
@@ -87,7 +87,11 @@
   <div class="section-bar">
     <span class="section-count">
       {totalItems} {_("fed.tracked_servers")}
-      {#if search} ({_("tok.no_results").replace(':','')}: {store.federationServers?.total ?? 0}){/if}
+      {#if search}
+        ({_("fed.matching_total", {
+          shown: String(totalItems),
+          total: String(store.federationServers?.total ?? 0),
+        })}){/if}
     </span>
   </div>
 
@@ -197,9 +201,9 @@
                 <span class="stat-value danger">
                   {totalFailed}
                   <span class="failure-breakdown">
-                    ({#if server.failed_https > 0}HTTPS:{server.failed_https}{/if}
-                    {#if server.failed_http > 0} HTTP:{server.failed_http}{/if}
-                    {#if server.failed_smtp > 0} SMTP:{server.failed_smtp}{/if})
+                    ({#if server.failed_https > 0}{_("fed.transport_https")}:{server.failed_https}{/if}
+                    {#if server.failed_http > 0} {_("fed.transport_http")}:{server.failed_http}{/if}
+                    {#if server.failed_smtp > 0} {_("fed.transport_smtp")}:{server.failed_smtp}{/if})
                   </span>
                 </span>
               </div>

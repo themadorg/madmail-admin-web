@@ -464,7 +464,7 @@
       <!-- dclogin link display -->
       <div class="mb-4 p-3 rounded-lg bg-black/30 border border-border">
         <p class="text-[10px] text-text-2 mb-1 uppercase tracking-wider">
-          dclogin
+          {_("acct.dclogin_label")}
         </p>
         <p
           class="text-xs font-mono text-accent break-all select-all leading-relaxed"

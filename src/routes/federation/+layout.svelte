@@ -81,8 +81,8 @@
 
   function formatLatency(ms: number): string {
     if (!ms || ms === 0) return "—";
-    if (ms < 1000) return `${Math.round(ms)}ms`;
-    return `${((ms || 0) / 1000).toFixed(1)}s`;
+    if (ms < 1000) return _("latency.ms", { n: String(Math.round(ms)) });
+    return _("latency.s", { n: ((ms || 0) / 1000).toFixed(1) });
   }
 </script>
 

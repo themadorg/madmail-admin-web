@@ -406,6 +406,63 @@ const translations: Record<Locale, Record<string, string>> = {
         'exc.disable': 'Disable',
         'exc.enable': 'Enable',
         'exc.delete_aria': 'Delete {name}',
+
+        'exc.ph_name': 'relay1',
+        'exc.ph_url': 'https://relay.example.com/mxdeliv',
+        'misc.unit_seconds': 's',
+        'fed.matching_total': '{shown} of {total}',
+        'acct.dclogin_label': 'dclogin',
+        'latency.ms': '{n} ms',
+        'latency.s': '{n} s',
+
+        'confirm.delete_all_accounts':
+            'Are you ABSOLUTELY sure you want to delete ALL user accounts? This cannot be undone.',
+        'confirm.unblock_all': 'Unblock ALL blocked users?',
+
+        'queue.confirm_queue_purge_read': 'Purge read messages from the message queue database?',
+        'queue.confirm_queue_purge_all':
+            'Purge ALL messages from the message queue database? This may remove unread mail.',
+        'queue.confirm_queue_purge_blobs': 'Delete seen message files from storage?',
+
+        'queue.purge_notify_read': 'Purge read',
+        'queue.purge_notify_all': 'Purge all (queue)',
+        'queue.purge_notify_blobs': 'Delete seen files',
+
+        'notify.export_done': 'Exported {count} accounts',
+        'notify.export_failed': 'Export failed: {error}',
+        'notify.import_done': 'Imported {imported} accounts, skipped {skipped}',
+        'notify.import_failed': 'Failed to parse import file: {error}',
+        'notify.delete_all_done': 'Deleted {count} accounts',
+        'notify.unblock_all_done': 'Unblocked {count} users',
+
+        'notify.exchanger_added': 'Exchanger added: {name}',
+        'notify.exchanger_deleted': 'Exchanger deleted: {name}',
+        'notify.exchanger_updated': 'Exchanger updated: {name}',
+        'notify.exchanger_enabled': 'Exchanger enabled: {name}',
+        'notify.exchanger_disabled': 'Exchanger disabled: {name}',
+
+        'notify.token_created': 'Registration code created',
+        'notify.token_deleted': 'Registration code deleted',
+
+        'notify.auto_purge_enabled': 'Auto purge seen messages enabled',
+        'notify.auto_purge_disabled': 'Auto purge seen messages disabled',
+        'notify.reg_tokens_required_on': 'Registration codes required for signup',
+        'notify.reg_tokens_required_off': 'Registration codes not required',
+
+        'notify.update_available_short': 'New release: {version}',
+        'notify.already_latest': 'You are on the latest version ({version})',
+        'notify.update_check_failed': 'Update check failed: {error}',
+        'notify.github_unreachable': 'Could not reach GitHub',
+
+        'notify.federation_policy': 'Federation policy set to {policy}',
+        'notify.federation_on': 'Federation enabled',
+        'notify.federation_off': 'Federation disabled',
+        'notify.fed_rule_added': 'Rule added: {domain}',
+        'notify.fed_rule_removed': 'Rule removed: {domain}',
+
+        'notify.toggle_arrow': '{service} → {status}',
+        'svc.toggle_open': 'open',
+        'svc.toggle_closed': 'closed',
     },
 
     fa: {
@@ -771,6 +828,63 @@ const translations: Record<Locale, Record<string, string>> = {
         'exc.disable': 'غیرفعال کردن',
         'exc.enable': 'فعال کردن',
         'exc.delete_aria': 'حذف {name}',
+
+        'exc.ph_name': 'relay1',
+        'exc.ph_url': 'https://relay.example.com/mxdeliv',
+        'misc.unit_seconds': 'ث',
+        'fed.matching_total': '{shown} از {total}',
+        'acct.dclogin_label': 'dclogin',
+        'latency.ms': '{n} میلی‌ثانیه',
+        'latency.s': '{n} ثانیه',
+
+        'confirm.delete_all_accounts':
+            'مطمئن هستید می‌خواهید همه حساب‌های کاربری را حذف کنید؟ این عمل برگشت‌ناپذیر است.',
+        'confirm.unblock_all': 'رفع مسدودی همه کاربران مسدود؟',
+
+        'queue.confirm_queue_purge_read': 'پیام‌های خوانده‌شده از صف پاک شود؟',
+        'queue.confirm_queue_purge_all':
+            'همه پیام‌ها از صف پایگاه داده پاک شوند؟ ممکن است خوانده‌نشده‌ها هم حذف شوند.',
+        'queue.confirm_queue_purge_blobs': 'فایل‌های پیام خوانده‌شده از ذخیره حذف شوند؟',
+
+        'queue.purge_notify_read': 'پاکسازی خوانده‌شده',
+        'queue.purge_notify_all': 'پاکسازی همه (صف)',
+        'queue.purge_notify_blobs': 'حذف فایل‌های خوانده‌شده',
+
+        'notify.export_done': '{count} حساب برون‌ریزی شد',
+        'notify.export_failed': 'خطا در برون‌ریزی: {error}',
+        'notify.import_done': '{imported} حساب وارد شد، {skipped} رد شد',
+        'notify.import_failed': 'خطا در خواندن فایل ورودی: {error}',
+        'notify.delete_all_done': '{count} حساب حذف شد',
+        'notify.unblock_all_done': '{count} کاربر رفع مسدودی شد',
+
+        'notify.exchanger_added': 'مبادله‌کننده اضافه شد: {name}',
+        'notify.exchanger_deleted': 'مبادله‌کننده حذف شد: {name}',
+        'notify.exchanger_updated': 'مبادله‌کننده به‌روز شد: {name}',
+        'notify.exchanger_enabled': 'مبادله‌کننده فعال شد: {name}',
+        'notify.exchanger_disabled': 'مبادله‌کننده غیرفعال شد: {name}',
+
+        'notify.token_created': 'کد ثبت‌نام ایجاد شد',
+        'notify.token_deleted': 'کد ثبت‌نام حذف شد',
+
+        'notify.auto_purge_enabled': 'پاکسازی خودکار پیام‌های خوانده‌شده فعال شد',
+        'notify.auto_purge_disabled': 'پاکسازی خودکار پیام‌های خوانده‌شده غیرفعال شد',
+        'notify.reg_tokens_required_on': 'کد ثبت‌نام برای ثبت‌نام الزامی است',
+        'notify.reg_tokens_required_off': 'کد ثبت‌نام الزامی نیست',
+
+        'notify.update_available_short': 'نسخه جدید: {version}',
+        'notify.already_latest': 'نسخه شما به‌روز است ({version})',
+        'notify.update_check_failed': 'خطا در بررسی به‌روزرسانی: {error}',
+        'notify.github_unreachable': 'اتصال به GitHub ناموفق بود',
+
+        'notify.federation_policy': 'سیاست فدراسیون: {policy}',
+        'notify.federation_on': 'فدراسیون فعال شد',
+        'notify.federation_off': 'فدراسیون غیرفعال شد',
+        'notify.fed_rule_added': 'قانون اضافه شد: {domain}',
+        'notify.fed_rule_removed': 'قانون حذف شد: {domain}',
+
+        'notify.toggle_arrow': '{service} → {status}',
+        'svc.toggle_open': 'باز',
+        'svc.toggle_closed': 'بسته',
     },
 
     es: {
@@ -1136,6 +1250,65 @@ const translations: Record<Locale, Record<string, string>> = {
         'exc.disable': 'Desactivar',
         'exc.enable': 'Activar',
         'exc.delete_aria': 'Eliminar {name}',
+
+        'exc.ph_name': 'relay1',
+        'exc.ph_url': 'https://relay.example.com/mxdeliv',
+        'misc.unit_seconds': 's',
+        'fed.matching_total': '{shown} de {total}',
+        'acct.dclogin_label': 'dclogin',
+        'latency.ms': '{n} ms',
+        'latency.s': '{n} s',
+
+        'confirm.delete_all_accounts':
+            '¿Está SEGURO de que quiere eliminar TODAS las cuentas de usuario? ¡Esto no se puede deshacer!',
+        'confirm.unblock_all': '¿Desbloquear TODOS los usuarios bloqueados?',
+
+        'queue.confirm_queue_purge_read':
+            '¿Purgar mensajes leídos de la cola en la base de datos?',
+        'queue.confirm_queue_purge_all':
+            '¿Purgar TODOS los mensajes de la cola en la base de datos? Esto puede borrar correo no leído.',
+        'queue.confirm_queue_purge_blobs':
+            '¿Eliminar archivos de mensajes leídos del almacenamiento?',
+
+        'queue.purge_notify_read': 'Purgar leídos',
+        'queue.purge_notify_all': 'Purgar todo (cola)',
+        'queue.purge_notify_blobs': 'Eliminar archivos leídos',
+
+        'notify.export_done': 'Exportadas {count} cuentas',
+        'notify.export_failed': 'Error al exportar: {error}',
+        'notify.import_done': 'Importadas {imported} cuentas, omitidas {skipped}',
+        'notify.import_failed': 'No se pudo analizar el archivo de importación: {error}',
+        'notify.delete_all_done': 'Eliminadas {count} cuentas',
+        'notify.unblock_all_done': 'Desbloqueados {count} usuarios',
+
+        'notify.exchanger_added': 'Intercambiador añadido: {name}',
+        'notify.exchanger_deleted': 'Intercambiador eliminado: {name}',
+        'notify.exchanger_updated': 'Intercambiador actualizado: {name}',
+        'notify.exchanger_enabled': 'Intercambiador activado: {name}',
+        'notify.exchanger_disabled': 'Intercambiador desactivado: {name}',
+
+        'notify.token_created': 'Código de registro creado',
+        'notify.token_deleted': 'Código de registro eliminado',
+
+        'notify.auto_purge_enabled': 'Purgar automáticamente mensajes leídos activado',
+        'notify.auto_purge_disabled': 'Purgar automáticamente mensajes leídos desactivado',
+        'notify.reg_tokens_required_on': 'Códigos de registro obligatorios para registrarse',
+        'notify.reg_tokens_required_off': 'Códigos de registro no obligatorios',
+
+        'notify.update_available_short': 'Nueva versión: {version}',
+        'notify.already_latest': 'Tiene la última versión ({version})',
+        'notify.update_check_failed': 'Error al buscar actualizaciones: {error}',
+        'notify.github_unreachable': 'No se pudo contactar con GitHub',
+
+        'notify.federation_policy': 'Política de federación: {policy}',
+        'notify.federation_on': 'Federación activada',
+        'notify.federation_off': 'Federación desactivada',
+        'notify.fed_rule_added': 'Regla añadida: {domain}',
+        'notify.fed_rule_removed': 'Regla eliminada: {domain}',
+
+        'notify.toggle_arrow': '{service} → {status}',
+        'svc.toggle_open': 'abierto',
+        'svc.toggle_closed': 'cerrado',
     },
 
     ru: {
@@ -1501,6 +1674,65 @@ const translations: Record<Locale, Record<string, string>> = {
         'exc.disable': 'Отключить',
         'exc.enable': 'Включить',
         'exc.delete_aria': 'Удалить {name}',
+
+        'exc.ph_name': 'relay1',
+        'exc.ph_url': 'https://relay.example.com/mxdeliv',
+        'misc.unit_seconds': 'с',
+        'fed.matching_total': '{shown} из {total}',
+        'acct.dclogin_label': 'dclogin',
+        'latency.ms': '{n} мс',
+        'latency.s': '{n} с',
+
+        'confirm.delete_all_accounts':
+            'Вы АБСОЛЮТНО уверены, что хотите удалить ВСЕ учётные записи? Это необратимо.',
+        'confirm.unblock_all': 'Разблокировать ВСЕХ заблокированных пользователей?',
+
+        'queue.confirm_queue_purge_read':
+            'Удалить прочитанные сообщения из очереди в базе данных?',
+        'queue.confirm_queue_purge_all':
+            'Удалить ВСЕ сообщения из очереди в базе данных? Это может удалить непрочитанную почту.',
+        'queue.confirm_queue_purge_blobs':
+            'Удалить файлы прочитанных сообщений из хранилища?',
+
+        'queue.purge_notify_read': 'Очистить прочитанные',
+        'queue.purge_notify_all': 'Очистить всё (очередь)',
+        'queue.purge_notify_blobs': 'Удалить файлы прочитанных',
+
+        'notify.export_done': 'Экспортировано аккаунтов: {count}',
+        'notify.export_failed': 'Ошибка экспорта: {error}',
+        'notify.import_done': 'Импортировано {imported}, пропущено {skipped}',
+        'notify.import_failed': 'Не удалось разобрать файл импорта: {error}',
+        'notify.delete_all_done': 'Удалено аккаунтов: {count}',
+        'notify.unblock_all_done': 'Разблокировано пользователей: {count}',
+
+        'notify.exchanger_added': 'Обменник добавлен: {name}',
+        'notify.exchanger_deleted': 'Обменник удалён: {name}',
+        'notify.exchanger_updated': 'Обменник обновлён: {name}',
+        'notify.exchanger_enabled': 'Обменник включён: {name}',
+        'notify.exchanger_disabled': 'Обменник выключен: {name}',
+
+        'notify.token_created': 'Код регистрации создан',
+        'notify.token_deleted': 'Код регистрации удалён',
+
+        'notify.auto_purge_enabled': 'Автоудаление прочитанных сообщений включено',
+        'notify.auto_purge_disabled': 'Автоудаление прочитанных сообщений выключено',
+        'notify.reg_tokens_required_on': 'Для регистрации нужны коды',
+        'notify.reg_tokens_required_off': 'Коды регистрации не обязательны',
+
+        'notify.update_available_short': 'Новая версия: {version}',
+        'notify.already_latest': 'У вас последняя версия ({version})',
+        'notify.update_check_failed': 'Ошибка проверки обновлений: {error}',
+        'notify.github_unreachable': 'Не удалось связаться с GitHub',
+
+        'notify.federation_policy': 'Политика федерации: {policy}',
+        'notify.federation_on': 'Федерация включена',
+        'notify.federation_off': 'Федерация выключена',
+        'notify.fed_rule_added': 'Правило добавлено: {domain}',
+        'notify.fed_rule_removed': 'Правило удалено: {domain}',
+
+        'notify.toggle_arrow': '{service} → {status}',
+        'svc.toggle_open': 'открыта',
+        'svc.toggle_closed': 'закрыта',
     },
 };
 

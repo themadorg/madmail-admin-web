@@ -89,7 +89,11 @@
   <div class="section-bar">
     <span class="section-count">
       {totalItems} {_("fed.exceptions")}
-      {#if search} ({_("tok.no_results").replace(':','')}: {store.federationRules?.total ?? 0}){/if}
+      {#if search}
+        ({_("fed.matching_total", {
+          shown: String(totalItems),
+          total: String(store.federationRules?.total ?? 0),
+        })}){/if}
     </span>
     <button class="btn-add" onclick={() => (showAdd = !showAdd)}>
       <Plus size={12} />

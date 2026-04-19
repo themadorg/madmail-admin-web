@@ -22,6 +22,50 @@ import {
 import { t } from '$lib/i18n';
 import { saveServer } from '$lib/servers';
 
+/** Map admin toggle API paths to i18n keys for toast labels */
+const TOGGLE_RESOURCE_I18N: Record<string, string> = {
+    '/admin/registration': 'svc.registration',
+    '/admin/registration/jit': 'svc.jit_registration',
+    '/admin/services/turn': 'svc.turn',
+    '/admin/services/iroh': 'svc.iroh',
+    '/admin/services/admin_web': 'svc.admin_web',
+    '/admin/services/auto_purge_seen': 'svc.auto_purge_seen',
+    '/admin/services/webimap': 'svc.webimap',
+    '/admin/services/websmtp': 'svc.websmtp',
+    '/admin/services/shadowsocks': 'svc.shadowsocks',
+    '/admin/services/ss_ws': 'proxy.ws',
+    '/admin/services/ss_grpc': 'proxy.grpc',
+    '/admin/services/http_proxy': 'proxy.http_proxy',
+};
+
+function toggleResourceLabel(resource: string): string {
+    const key = TOGGLE_RESOURCE_I18N[resource];
+    return key ? t(key) : (resource.split('/').pop() ?? resource);
+}
+
+function toggleStatusLabel(status: string | undefined): string {
+    if (!status) return '';
+    if (status === 'enabled' || status === 'disabled') {
+        return t(status === 'enabled' ? 'proxy.enabled' : 'proxy.disabled');
+    }
+    if (status === 'open' || status === 'closed') {
+        return t(status === 'open' ? 'svc.toggle_open' : 'svc.toggle_closed');
+    }
+    return status;
+}
+
+const PURGE_CONFIRM_KEYS: Record<string, string> = {
+    purge_read: 'queue.confirm_queue_purge_read',
+    purge_all: 'queue.confirm_queue_purge_all',
+    purge_read_blobs: 'queue.confirm_queue_purge_blobs',
+};
+
+const PURGE_NOTIFY_KEYS: Record<string, string> = {
+    purge_read: 'queue.purge_notify_read',
+    purge_all: 'queue.purge_notify_all',
+    purge_read_blobs: 'queue.purge_notify_blobs',
+};
+
 // --- Initialization ---
 let savedUrl = '';
 let savedToken = '';
@@ -214,7 +258,12 @@ class AdminState {
                 : resource === '/admin/registration' ? 'open' : 'enable';
             const res = await api.setToggle(this.cfg(), resource, action);
             if (res.error) { this.notify(res.error, 'err'); return; }
-            this.notify(`${resource.split('/').pop()} → ${res.data?.status}`);
+            this.notify(
+                t('notify.toggle_arrow', {
+                    service: toggleResourceLabel(resource),
+                    status: toggleStatusLabel(res.data?.status),
+                }),
+            );
             // Proxy transport toggles require a restart to take effect
             const restartResources = ['/admin/services/shadowsocks', '/admin/services/ss_ws', '/admin/services/ss_grpc', '/admin/services/http_proxy'];
             if (restartResources.includes(resource)) this.pendingRestart = true;
@@ -417,10 +466,10 @@ class AdminState {
                 a.download = `madmail-accounts-${new Date().toISOString().split('T')[0]}.json`;
                 a.click();
                 URL.revokeObjectURL(url);
-                this.notify(`Exported ${res.data.total} accounts`);
+                this.notify(t('notify.export_done', { count: String(res.data.total) }));
             }
         } catch (e) {
-            this.notify('Export failed: ' + e, 'err');
+            this.notify(t('notify.export_failed', { error: String(e) }), 'err');
         } finally { this.busy = false; }
     }
 
@@ -432,21 +481,26 @@ class AdminState {
             const users = JSON.parse(text);
             const res = await api.importAccounts(this.cfg(), users);
             if (res.error) { this.notify(res.error, 'err'); return; }
-            this.notify(`Imported ${res.data?.imported} users, skipped ${res.data?.skipped}`);
+            this.notify(
+                t('notify.import_done', {
+                    imported: String(res.data?.imported ?? 0),
+                    skipped: String(res.data?.skipped ?? 0),
+                }),
+            );
             await this.refresh();
         } catch (e) {
-            this.notify('Failed to parse import file: ' + e, 'err');
+            this.notify(t('notify.import_failed', { error: String(e) }), 'err');
         } finally { this.busy = false; }
     }
 
     async deleteAllAccounts() {
-        if (!confirm('Are you ABSOLUTELY sure you want to delete ALL user accounts? This cannot be undone.')) return;
+        if (!confirm(t('confirm.delete_all_accounts'))) return;
         if (this.busy) return;
         this.busy = true;
         try {
             const res = await api.deleteAllAccounts(this.cfg());
             if (res.error) { this.notify(res.error, 'err'); return; }
-            this.notify(`Deleted ${res.data?.deleted} accounts`);
+            this.notify(t('notify.delete_all_done', { count: String(res.data?.deleted ?? 0) }));
             await this.refresh();
         } finally { this.busy = false; }
     }
@@ -463,25 +517,31 @@ class AdminState {
     }
 
     async unblockAllAccounts() {
-        if (!confirm('Unblock ALL users?')) return;
+        if (!confirm(t('confirm.unblock_all'))) return;
         if (this.busy) return;
         this.busy = true;
         try {
             const res = await api.unblockAll(this.cfg());
             if (res.error) { this.notify(res.error, 'err'); return; }
-            this.notify(`Unblocked ${res.data?.unblocked} users`);
+            this.notify(t('notify.unblock_all_done', { count: String(res.data?.unblocked ?? 0) }));
             await this.refresh();
         } finally { this.busy = false; }
     }
 
     async purge(action: string) {
         if (this.busy) return;
-        if (!confirm(`${action}?`)) return;
+        const ckey = PURGE_CONFIRM_KEYS[action];
+        if (!confirm(ckey ? t(ckey) : `${action}?`)) return;
         this.busy = true;
         try {
             const res = await api.purgeQueue(this.cfg(), action);
             if (res.error) { this.notify(res.error, 'err'); return; }
-            this.notify(t('notify.purge_done', { action }));
+            const nk = PURGE_NOTIFY_KEYS[action];
+            this.notify(
+                t('notify.purge_done', {
+                    action: nk ? t(nk) : action,
+                }),
+            );
         } finally { this.busy = false; }
     }
 
@@ -518,7 +578,7 @@ class AdminState {
         try {
             const res = await api.addExchanger(this.cfg(), name, url, pollInterval);
             if (res.error) { this.notify(res.error, 'err'); return; }
-            this.notify(`Exchanger added: ${name}`);
+            this.notify(t('notify.exchanger_added', { name }));
             await this.refresh();
         } finally { this.busy = false; }
     }
@@ -530,9 +590,13 @@ class AdminState {
             const res = await api.updateExchanger(this.cfg(), name, updates);
             if (res.error) { this.notify(res.error, 'err'); return; }
             if (updates.enabled !== undefined) {
-                this.notify(`Exchanger ${updates.enabled ? 'enabled' : 'disabled'}: ${name}`);
+                this.notify(
+                    updates.enabled
+                        ? t('notify.exchanger_enabled', { name })
+                        : t('notify.exchanger_disabled', { name }),
+                );
             } else {
-                this.notify(`Exchanger updated: ${name}`);
+                this.notify(t('notify.exchanger_updated', { name }));
             }
             await this.refresh();
         } finally { this.busy = false; }
@@ -544,7 +608,7 @@ class AdminState {
         try {
             const res = await api.deleteExchanger(this.cfg(), name);
             if (res.error) { this.notify(res.error, 'err'); return; }
-            this.notify(`Exchanger deleted: ${name}`);
+            this.notify(t('notify.exchanger_deleted', { name }));
             await this.refresh();
         } finally { this.busy = false; }
     }
@@ -555,7 +619,7 @@ class AdminState {
         try {
             const res = await api.createRegistrationToken(this.cfg(), opts);
             if (res.error) { this.notify(res.error, 'err'); return; }
-            this.notify('Token created');
+            this.notify(t('notify.token_created'));
             await this.refresh();
         } finally { this.busy = false; }
     }
@@ -566,7 +630,7 @@ class AdminState {
         try {
             const res = await api.deleteRegistrationToken(this.cfg(), token);
             if (res.error) { this.notify(res.error, 'err'); return; }
-            this.notify('Token deleted');
+            this.notify(t('notify.token_deleted'));
             await this.refresh();
         } finally { this.busy = false; }
     }
@@ -579,7 +643,9 @@ class AdminState {
             const action = current === 'enabled' ? 'disable' : 'enable';
             const res = await api.setToggle(this.cfg(), '/admin/services/auto_purge_seen', action);
             if (res.error) { this.notify(res.error, 'err'); return; }
-            this.notify(`Auto purge seen: ${action}d`);
+            this.notify(
+                action === 'enable' ? t('notify.auto_purge_enabled') : t('notify.auto_purge_disabled'),
+            );
             await this.refresh();
         } finally { this.busy = false; }
     }
@@ -592,7 +658,9 @@ class AdminState {
             const action = current === 'enabled' ? 'disable' : 'enable';
             const res = await api.setToggle(this.cfg(), '/admin/settings/registration_token_required', action);
             if (res.error) { this.notify(res.error, 'err'); return; }
-            this.notify(`Registration tokens ${action}d`);
+            this.notify(
+                action === 'enable' ? t('notify.reg_tokens_required_on') : t('notify.reg_tokens_required_off'),
+            );
             await this.refresh();
         } finally { this.busy = false; }
     }
@@ -607,15 +675,15 @@ class AdminState {
                 this.latestServerVersion = data.tag_name;
                 // If the version is different, show a notification
                 if (this.hasUpdate) {
-                    this.notify(`New update available: ${data.tag_name}`, 'ok');
+                    this.notify(t('notify.update_available_short', { version: data.tag_name }), 'ok');
                 } else {
-                    this.notify(`You are on the latest version (${data.tag_name})`);
+                    this.notify(t('notify.already_latest', { version: data.tag_name }));
                 }
             } else {
-                throw new Error('Failed to fetch from GitHub');
+                throw new Error(t('notify.github_unreachable'));
             }
         } catch (e) {
-            this.notify(`Update check failed: ${String(e)}`, 'err');
+            this.notify(t('notify.update_check_failed', { error: String(e) }), 'err');
         } finally {
             this.checkingUpdates = false;
         }
@@ -628,7 +696,7 @@ class AdminState {
         try {
             const res = await api.setFederationSettings(this.cfg(), { policy });
             if (res.error) { this.notify(res.error, 'err'); return; }
-            this.notify(`Federation policy set to ${policy}`);
+            this.notify(t('notify.federation_policy', { policy }));
             await this.refresh();
         } finally { this.busy = false; }
     }
@@ -640,7 +708,7 @@ class AdminState {
             const enabled = !(this.federationSettings?.enabled ?? false);
             const res = await api.setFederationSettings(this.cfg(), { enabled });
             if (res.error) { this.notify(res.error, 'err'); return; }
-            this.notify(`Federation ${enabled ? 'enabled' : 'disabled'}`);
+            this.notify(enabled ? t('notify.federation_on') : t('notify.federation_off'));
             await this.refresh();
         } finally { this.busy = false; }
     }
@@ -651,7 +719,7 @@ class AdminState {
         try {
             const res = await api.addFederationRule(this.cfg(), domain);
             if (res.error) { this.notify(res.error, 'err'); return; }
-            this.notify(`Rule added: ${domain}`);
+            this.notify(t('notify.fed_rule_added', { domain }));
             await this.refresh();
         } finally { this.busy = false; }
     }
@@ -662,7 +730,7 @@ class AdminState {
         try {
             const res = await api.deleteFederationRule(this.cfg(), domain);
             if (res.error) { this.notify(res.error, 'err'); return; }
-            this.notify(`Rule removed: ${domain}`);
+            this.notify(t('notify.fed_rule_removed', { domain }));
             await this.refresh();
         } finally { this.busy = false; }
     }

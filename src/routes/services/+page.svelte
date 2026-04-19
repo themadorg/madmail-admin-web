@@ -33,6 +33,14 @@
   }
 
   let isWorking = $derived(store.refreshing || store.busy || store.reloading);
+
+  function formatToggleState(s: string): string {
+    if (s === "enabled") return _("proxy.enabled");
+    if (s === "disabled") return _("proxy.disabled");
+    if (s === "open") return _("svc.toggle_open");
+    if (s === "closed") return _("svc.toggle_closed");
+    return s;
+  }
 </script>
 
 {#if store.settings}
@@ -62,7 +70,7 @@
         {:else}
           <ToggleLeft size={14} />
         {/if}
-        {current}
+        {formatToggleState(current)}
       </button>
     </div>
   {/snippet}
