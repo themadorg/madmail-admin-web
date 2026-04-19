@@ -99,7 +99,9 @@
       </div>
       {#if store.quota?.percent_used}
         <div class="text-[10px] text-text-2 mt-1">
-          {store.quota.percent_used.toFixed(1)}% of pool
+          {_("acct.pool_pct", {
+            pct: store.quota.percent_used.toFixed(1),
+          })}
         </div>
       {/if}
     </div>

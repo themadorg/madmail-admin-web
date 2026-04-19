@@ -136,8 +136,8 @@
 </script>
 
 <svelte:head>
-  <title>Madmail Admin</title>
-  <meta name="description" content="Madmail server administration dashboard" />
+  <title>{_("app.title")}</title>
+  <meta name="description" content={_("app.description")} />
 </svelte:head>
 
 {#snippet langPicker()}
@@ -179,11 +179,11 @@
     class="fixed top-0 inset-x-0 z-[60] bg-accent/95 text-white px-4 py-2.5 flex items-center justify-center gap-3 text-sm font-medium shadow-lg backdrop-blur-sm"
   >
     <Download size={16} />
-    <span>v{updateAvailable} available</span>
+    <span>{_("update.available", { version: updateAvailable })}</span>
     <button
       onclick={() => applyUpdate()}
       class="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-md text-xs font-semibold transition-colors"
-      >Update</button
+      >{_("update.button")}</button
     >
     <button
       onclick={() => (updateAvailable = "")}
@@ -262,17 +262,16 @@
             <div
               class="mt-2 p-2 bg-warning/10 border border-warning/20 rounded-md text-warning text-xs"
             >
-              <p class="font-medium mb-1">Certificate not trusted?</p>
+              <p class="font-medium mb-1">{_("login.cert_title")}</p>
               <p class="text-text-2 mb-2">
-                Open the API URL below, accept the certificate in your browser,
-                then come back and try again.
+                {_("login.cert_hint")}
               </p>
               <a
                 href={store.baseUrl}
                 target="_blank"
                 rel="noopener"
                 class="inline-flex items-center gap-1 text-accent hover:underline font-medium"
-                >Open {store.baseUrl} ↗</a
+                >{_("login.cert_open", { url: store.baseUrl })}</a
               >
             </div>
           {/if}
@@ -318,7 +317,7 @@
                 <button
                   onclick={(e: MouseEvent) => deleteSavedServer(e, s.id)}
                   class="p-1 text-text-2 opacity-0 group-hover:opacity-100 hover:text-danger transition-all rounded"
-                  title="Remove"
+                  title={_("login.remove_saved")}
                 >
                   <Trash2 size={12} />
                 </button>
@@ -382,14 +381,14 @@
             target="_blank"
             rel="noopener"
             class="p-1.5 text-text-2 border border-border rounded-lg hover:bg-surface-3 transition-colors"
-            title="GitHub"
+            title={_("misc.github")}
           >
             <Github size={14} />
           </a>
           <button
             onclick={toggleTheme}
             class="p-1.5 text-text-2 border border-border rounded-lg hover:bg-surface-3 transition-colors"
-            title={isDark ? "Light mode" : "Dark mode"}
+            title={isDark ? _("theme.light") : _("theme.dark")}
           >
             {#if isDark}
               <Sun size={14} />

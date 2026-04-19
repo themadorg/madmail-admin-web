@@ -129,7 +129,7 @@
                 <button
                   onclick={() => (store.editValue = randomPassword())}
                   class="p-1.5 text-text-2 border border-border rounded hover:bg-surface-3 transition-colors"
-                  title="Generate random password"
+                  title={_("svc.random_password")}
                 >
                   <Dice5 size={12} />
                 </button>
@@ -138,9 +138,9 @@
                 <button
                   onclick={() => (store.editValue = "madmail")}
                   class="p-1.5 text-text-2 border border-border rounded hover:bg-surface-3 transition-colors text-[10px]"
-                  title="Set default username"
+                  title={_("proxy.username_default")}
                 >
-                  default
+                  {_("proxy.btn_default")}
                 </button>
               {/if}
             {/if}
@@ -263,7 +263,7 @@
               class="flex items-center gap-1.5 px-2 py-1 text-[10px] font-medium rounded bg-surface-3 border border-border hover:border-accent/50 transition-colors"
             >
               <QrCode size={12} />
-              {showQR ? "Hide QR" : "Show QR"}
+              {showQR ? _("misc.qr_hide") : _("misc.qr_show")}
             </button>
           </div>
 
@@ -451,7 +451,8 @@
           <label
             for="http-proxy-url"
             class="block text-[10px] uppercase tracking-wider text-text-2 font-semibold mb-2"
-          >Connection String</label>
+          >{_("proxy.connection_string")}</label
+          >
           <div class="flex gap-2 font-mono">
             <input
               id="http-proxy-url"

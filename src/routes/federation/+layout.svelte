@@ -199,7 +199,7 @@
   {#if !isEnabled}
     <div class="inactive-banner">
       <AlertTriangle size={14} />
-      <span>Federation enforcement is <strong>inactive</strong>. Enable it to enforce policy rules on inbound and outbound traffic.</span>
+      <span>{@html _("fed.inactive_banner_html")}</span>
     </div>
   {/if}
 

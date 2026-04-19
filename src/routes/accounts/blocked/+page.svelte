@@ -70,7 +70,7 @@
           class="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-border text-accent hover:bg-accent/10 transition-all flex items-center gap-1.5 disabled:opacity-50"
         >
           <ShieldCheck size={14} />
-          {_("acct.unblock_all") || "Unblock All"}
+          {_("acct.unblock_all")}
         </button>
       {/if}
     </div>
@@ -82,7 +82,7 @@
       <input
         type="text"
         bind:value={search}
-        placeholder="Search blocked users..."
+        placeholder={_("blocked.search_placeholder")}
         class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-text placeholder-text-2/40 focus:border-accent focus:ring-1 focus:ring-accent/30 outline-none transition"
       />
     </div>
@@ -91,12 +91,14 @@
   {#if filtered.length === 0 && store.blocklist.total === 0}
     <div class="flex flex-col items-center justify-center py-16 text-text-2/50">
       <ShieldCheck size={32} class="mb-2" />
-      <p class="text-sm">No blocked users</p>
+      <p class="text-sm">{_("blocked.empty")}</p>
     </div>
   {:else if filtered.length === 0}
     <div class="flex flex-col items-center justify-center py-12 text-text-2/50">
       <SearchX size={24} class="mb-2" />
-      <p class="text-sm">No results for "{search}"</p>
+      <p class="text-sm">
+        {_("blocked.no_results", { query: search })}
+      </p>
     </div>
   {:else}
     <div class="space-y-1">
@@ -122,7 +124,9 @@
             <button
               onclick={() => requestUnblock(entry.username)}
               class="px-2 py-1.5 text-accent/60 border border-transparent rounded-lg hover:border-accent/30 hover:bg-accent/10 transition-all text-xs flex items-center gap-1"
-              aria-label="Unblock {entry.username}"
+              aria-label={_("acct.unblock_aria", {
+                username: entry.username,
+              })}
             >
               <ShieldCheck size={12} />
               <span class="hidden sm:inline">{_("acct.unblock")}</span>

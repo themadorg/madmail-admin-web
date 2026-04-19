@@ -140,7 +140,7 @@
       await copyToClipboard(token)
       store.notify(_("notify.copied"));
     } catch {
-      store.notify("Copy failed", "err");
+      store.notify(_("notify.copy_failed"), "err");
     }
   }
 
@@ -158,7 +158,7 @@
       await copyToClipboard(getInviteUrl(token))
       store.notify(_("notify.copied"));
     } catch {
-      store.notify("Copy failed", "err");
+      store.notify(_("notify.copy_failed"), "err");
     }
   }
 

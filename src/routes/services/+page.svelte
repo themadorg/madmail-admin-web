@@ -98,7 +98,7 @@
                 <button
                   onclick={() => (store.editValue = randomPath())}
                   class="p-1.5 text-text-2 border border-border rounded hover:bg-surface-3 transition-colors"
-                  title="Generate random path"
+                  title={_("svc.random_path")}
                 >
                   <Dice5 size={12} />
                 </button>
@@ -107,7 +107,7 @@
                 <button
                   onclick={() => (store.editValue = randomPassword())}
                   class="p-1.5 text-text-2 border border-border rounded hover:bg-surface-3 transition-colors"
-                  title="Generate random password"
+                  title={_("svc.random_password")}
                 >
                   <Dice5 size={12} />
                 </button>

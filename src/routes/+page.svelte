@@ -44,13 +44,13 @@
   let selectedRetention = $state("72h");
   let purging = $state(false);
 
-  const RETENTION_OPTIONS = [
-    { value: "1h", label: "1 hour" },
-    { value: "6h", label: "6 hours" },
-    { value: "24h", label: "24 hours" },
-    { value: "72h", label: "3 days" },
-    { value: "168h", label: "7 days" },
-    { value: "720h", label: "30 days" },
+  const RETENTION_KEYS = [
+    { value: "1h", key: "queue.ret_1h" },
+    { value: "6h", key: "queue.ret_6h" },
+    { value: "24h", key: "queue.ret_24h" },
+    { value: "72h", key: "queue.ret_72h" },
+    { value: "168h", key: "queue.ret_168h" },
+    { value: "720h", key: "queue.ret_720h" },
   ];
 
   function cfg(): ApiConfig {
@@ -58,10 +58,9 @@
   }
 
   async function purgeOlder() {
-    const label =
-      RETENTION_OPTIONS.find((o) => o.value === selectedRetention)?.label ??
-      selectedRetention;
-    if (!confirm(`Purge all message files older than ${label}?`)) return;
+    const ret = RETENTION_KEYS.find((o) => o.value === selectedRetention);
+    const label = ret ? _(ret.key) : selectedRetention;
+    if (!confirm(_("queue.purge_confirm_older", { label }))) return;
     purging = true;
     try {
       const res = await api.purgeBlobsOlder(cfg(), selectedRetention);
@@ -69,7 +68,8 @@
         store.notify(res.error, "err");
       } else {
         store.notify(
-          (res as any).data?.message ?? `Purged files older than ${label}`,
+          (res as any).data?.message ??
+            _("notify.blobs_purged_older", { label }),
         );
       }
     } catch (e) {
@@ -80,19 +80,16 @@
   }
 
   async function purgeAllBlobs() {
-    if (
-      !confirm(
-        "Delete ALL message files from the server? This cannot be undone!",
-      )
-    )
-      return;
+    if (!confirm(_("queue.purge_confirm_all"))) return;
     purging = true;
     try {
       const res = await api.purgeBlobs(cfg());
       if (res.error) {
         store.notify(res.error, "err");
       } else {
-        store.notify((res as any).data?.message ?? "All message files deleted");
+        store.notify(
+          (res as any).data?.message ?? _("notify.all_files_deleted"),
+        );
       }
     } catch (e) {
       store.notify(String(e), "err");
@@ -156,7 +153,7 @@
   </div>
   {@render linkCard(
     Ticket,
-    "Tokens",
+    _("tab.tokens"),
     String(store.registrationTokens?.total ?? "—"),
     `${base}/accounts/tokens`,
   )}
@@ -190,7 +187,7 @@
   >
     <div class="flex items-center gap-1.5 text-text-2 text-xs mb-1">
       <Server size={12} />
-      Madmail Version
+      {_("stat.madmail_version")}
     </div>
     <div class="text-xl font-semibold truncate">
       {store.status?.version ?? store.serverVersion ?? "—"}
@@ -201,7 +198,10 @@
     {@render statCard(
       Network,
       _("stat.imap"),
-      `${store.status.imap.connections} (${store.status.imap.unique_ips} IPs)`,
+      _("stat.imap_detail", {
+        connections: String(store.status.imap.connections),
+        unique_ips: String(store.status.imap.unique_ips),
+      }),
     )}
   {/if}
   {#if store.status?.turn}
@@ -215,7 +215,10 @@
     {@render linkCard(
       Shield,
       _("stat.ss_conns"),
-      `${store.status.shadowsocks.connections} (${store.status.shadowsocks.unique_ips} IPs)`,
+      _("stat.ss_detail", {
+        connections: String(store.status.shadowsocks.connections),
+        unique_ips: String(store.status.shadowsocks.unique_ips),
+      }),
       `${base}/proxy`,
     )}
   {/if}
@@ -237,7 +240,7 @@
         <button
           onclick={() => (showQR = !showQR)}
           class="p-1.5 bg-surface-3 border border-border rounded hover:border-accent/50 transition-colors text-text-2"
-          title="Show QR Code"
+          title={_("misc.qr_show")}
         >
           <QrCode size={14} />
         </button>
@@ -330,8 +333,8 @@
       bind:value={selectedRetention}
       class="px-2 py-1.5 text-xs bg-surface border border-border rounded-lg text-text focus:border-accent outline-none transition"
     >
-      {#each RETENTION_OPTIONS as opt}
-        <option value={opt.value}>{opt.label}</option>
+      {#each RETENTION_KEYS as opt}
+        <option value={opt.value}>{_(opt.key)}</option>
       {/each}
     </select>
     <button
@@ -392,7 +395,7 @@
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-sm font-semibold flex items-center gap-2">
           <Server size={14} class="text-accent" />
-          Madmail Version
+          {_("version.title")}
         </h2>
         <button
           onclick={() => showUpdateModal = false}
@@ -403,7 +406,9 @@
       </div>
 
       <div class="bg-surface rounded-lg p-3 border border-border mb-4">
-        <div class="text-text-2 text-[10px] uppercase tracking-wider mb-1">Current Version</div>
+        <div class="text-text-2 text-[10px] uppercase tracking-wider mb-1"
+          >{_("version.current")}</div
+        >
         <div class="text-lg font-semibold font-mono">
           {store.status?.version ?? store.serverVersion ?? "—"}
         </div>
@@ -411,12 +416,18 @@
 
       {#if store.latestServerVersion}
         <div class="bg-surface rounded-lg p-3 border border-border mb-4">
-          <div class="text-text-2 text-[10px] uppercase tracking-wider mb-1">Latest Release</div>
+          <div class="text-text-2 text-[10px] uppercase tracking-wider mb-1"
+            >{_("version.latest")}</div
+          >
           <div class="text-lg font-semibold font-mono">{store.latestServerVersion}</div>
           {#if !store.hasUpdate}
-            <div class="mt-1 text-xs text-success flex items-center gap-1">✓ You are up to date</div>
+            <div class="mt-1 text-xs text-success flex items-center gap-1"
+              >{_("version.up_to_date")}</div
+            >
           {:else}
-            <div class="mt-1 text-xs text-warning flex items-center gap-1">⚠ Update available</div>
+            <div class="mt-1 text-xs text-warning flex items-center gap-1"
+              >{_("version.update_available")}</div
+            >
           {/if}
         </div>
       {/if}
@@ -428,7 +439,9 @@
           class="flex-1 px-3 py-2 text-xs bg-accent/10 text-accent border border-accent/30 rounded-lg hover:bg-accent/20 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
         >
           <RefreshCw size={12} class={store.checkingUpdates ? "animate-spin" : ""} />
-          {store.checkingUpdates ? "Checking..." : "Check for Updates"}
+          {store.checkingUpdates
+            ? _("version.checking")
+            : _("version.check_updates")}
         </button>
         <a
           href="https://github.com/themadorg/madmail/releases/latest"
@@ -437,7 +450,7 @@
           class="px-3 py-2 text-xs bg-surface border border-border rounded-lg hover:bg-surface-3 transition-colors flex items-center gap-1.5 text-text-2"
         >
           <ExternalLink size={12} />
-          GitHub
+          {_("misc.github")}
         </a>
       </div>
     </div>

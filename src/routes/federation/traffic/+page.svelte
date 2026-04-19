@@ -68,12 +68,14 @@
   }
 
   function timeAgo(ts: number): string {
-    if (!ts) return "never";
+    if (!ts) return _("time.never");
     const diff = Math.floor(Date.now() / 1000 - ts);
-    if (diff < 60) return `${diff}s ago`;
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    return `${Math.floor(diff / 86400)}d ago`;
+    if (diff < 60) return _("time.seconds_ago", { n: String(diff) });
+    if (diff < 3600)
+      return _("time.minutes_ago", { n: String(Math.floor(diff / 60)) });
+    if (diff < 86400)
+      return _("time.hours_ago", { n: String(Math.floor(diff / 3600)) });
+    return _("time.days_ago", { n: String(Math.floor(diff / 86400)) });
   }
 
   function fmtDomain(d: string): string {
@@ -99,15 +101,15 @@
   </div>
 
   {#if !store.federationServers}
-    <p class="loading">Loading traffic data…</p>
+    <p class="loading">{_("fed.loading_traffic")}</p>
   {:else if filteredServers.length === 0}
     <div class="empty-state">
       {#if search}
         <SearchX size={32} />
-        <p>{_("tok.no_results")} "{search}"</p>
+        <p>{_("fed.rule_no_results", { query: search })}</p>
       {:else}
         <Activity size={32} />
-        <p>{_("tok.empty")}</p>
+        <p>{_("fed.no_traffic_yet")}</p>
       {/if}
     </div>
   {:else}
@@ -134,7 +136,7 @@
                   onclick={() => store.deleteFederationRule(domain)}
                   disabled={store.busy}
                   class="flex items-center gap-1.5 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded border border-accent/30 text-accent hover:bg-accent/10 transition-all disabled:opacity-50"
-                  title="Remove restriction for {domain}"
+                  title={_("fed.remove_restriction", { domain })}
                 >
                   <ShieldCheck size={12} />
                   {_("fed.status_restricted")}
@@ -165,13 +167,16 @@
               {#if server.success_https > 0 || server.success_http > 0 || server.success_smtp > 0}
                 <span class="transport-breakdown">
                   {#if server.success_https > 0}<span class="transport-tag https"
-                      >HTTPS {server.success_https}</span
+                      >{_("fed.transport_https")}
+                      {server.success_https}</span
                     >{/if}
                   {#if server.success_http > 0}<span class="transport-tag http"
-                      >HTTP {server.success_http}</span
+                      >{_("fed.transport_http")}
+                      {server.success_http}</span
                     >{/if}
                   {#if server.success_smtp > 0}<span class="transport-tag smtp"
-                      >SMTP {server.success_smtp}</span
+                      >{_("fed.transport_smtp")}
+                      {server.success_smtp}</span
                     >{/if}
                 </span>
               {/if}
@@ -211,20 +216,23 @@
           class="btn-page"
           disabled={currentPage === 1}
           onclick={() => (currentPage -= 1)}
-          aria-label="Previous page"
+          aria-label={_("misc.page_prev")}
         >
           <ChevronLeft size={14} />
         </button>
 
         <span class="page-info">
-          Page <strong>{currentPage}</strong> of {totalPages}
+          {_("misc.page_of", {
+            current: String(currentPage),
+            total: String(totalPages),
+          })}
         </span>
 
         <button
           class="btn-page"
           disabled={currentPage === totalPages}
           onclick={() => (currentPage += 1)}
-          aria-label="Next page"
+          aria-label={_("misc.page_next")}
         >
           <ChevronRight size={14} />
         </button>

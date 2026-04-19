@@ -31,16 +31,16 @@
     https_port: "https",
   };
 
-  /** Map port keys to their display labels for the confirmation modal */
-  const portLabels: Record<string, string> = {
-    smtp_port: "SMTP",
-    submission_port: "Submission",
-    imap_port: "IMAP",
-    turn_port: "TURN",
-    sasl_port: "SASL",
-    iroh_port: "Iroh",
-    http_port: "HTTP",
-    https_port: "HTTPS",
+  /** Map port keys to i18n keys for confirmation modals */
+  const PORT_LABEL_KEYS: Record<string, string> = {
+    smtp_port: "port.smtp",
+    submission_port: "port.submission",
+    imap_port: "port.imap",
+    turn_port: "port.turn",
+    sasl_port: "port.sasl",
+    iroh_port: "port.iroh",
+    http_port: "port.http",
+    https_port: "port.https",
   };
 
   function getAccess(portKey: string): string | null {
@@ -56,7 +56,8 @@
 
   function requestMakeLocal(portKey: string) {
     confirmingPort = portKey;
-    confirmingLabel = portLabels[portKey] || portKey;
+    const lk = PORT_LABEL_KEYS[portKey];
+    confirmingLabel = lk ? _(lk) : portKey;
   }
 
   function cancelConfirm() {
@@ -292,7 +293,10 @@
           </div>
           <h3 class="text-base font-semibold text-text">
             {_("port.client_warn_title", {
-              port: portLabels[pendingSaveKey] || pendingSaveKey,
+              port:
+                pendingSaveKey && PORT_LABEL_KEYS[pendingSaveKey]
+                  ? _(PORT_LABEL_KEYS[pendingSaveKey])
+                  : pendingSaveKey ?? "",
             })}
           </h3>
         </div>

@@ -63,10 +63,19 @@
     const d = new Date(ts * 1000);
     const now = Date.now();
     const diff = now - d.getTime();
-    if (diff < 60_000) return "just now";
-    if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`;
-    if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`;
-    if (diff < 7 * 86_400_000) return `${Math.floor(diff / 86_400_000)}d ago`;
+    if (diff < 60_000) return _("time.just_now");
+    if (diff < 3_600_000)
+      return _("time.minutes_ago", {
+        n: String(Math.floor(diff / 60_000)),
+      });
+    if (diff < 86_400_000)
+      return _("time.hours_ago", {
+        n: String(Math.floor(diff / 3_600_000)),
+      });
+    if (diff < 7 * 86_400_000)
+      return _("time.days_ago", {
+        n: String(Math.floor(diff / 86_400_000)),
+      });
     return d.toLocaleDateString(undefined, {
       month: "short",
       day: "numeric",
@@ -353,7 +362,7 @@
                   type="text"
                   class="w-16 px-1 py-0.5 text-[10px] rounded border border-accent/40 bg-surface-1 text-text-1 focus:outline-none"
                   bind:value={userQuotaInput}
-                  placeholder="e.g. 200MB"
+                  placeholder={_("acct.quota_placeholder")}
                 />
                 <button
                   type="submit"
@@ -399,7 +408,9 @@
           <button
             onclick={() => store.requestDelete(acct.username)}
             class="p-1.5 text-danger/60 border border-transparent rounded hover:border-danger/30 hover:bg-danger/10 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
-            aria-label="Delete {acct.username}"
+            aria-label={_("acct.delete_aria", {
+              username: acct.username,
+            })}
           >
             <Trash2 size={12} />
           </button>
@@ -474,7 +485,7 @@
           >
             {#if copied}
               <Check size={12} />
-              Copied!
+              {_("acct.copied_button")}
             {:else}
               <Copy size={12} />
               {_("acct.copy_dclogin")}
@@ -522,7 +533,9 @@
         </div>
         <div class="min-w-0">
           <h3 class="text-sm font-semibold text-text-1 mb-1">
-            {_("acct.confirm_delete", { username: "" })}
+            {_("acct.confirm_delete", {
+              username: store.confirmingDelete,
+            })}
           </h3>
           <p class="text-xs text-text-2 font-mono break-all">
             {store.confirmingDelete}

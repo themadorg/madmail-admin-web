@@ -154,7 +154,7 @@
   {:else if filteredRules.length === 0}
     <div class="empty-state">
       <SearchX size={24} />
-      <p>No results for "{search}"</p>
+      <p>{_("fed.rule_no_results", { query: search })}</p>
     </div>
   {:else}
     <div class="entry-list">
@@ -163,7 +163,7 @@
           <div class="entry-info">
             <div class="entry-domain">
               <span class="rule-type-badge" class:blocklist={isAccept}>
-                {isAccept ? "BLOCK" : "ALLOW"}
+                {isAccept ? _("fed.badge_block") : _("fed.badge_allow")}
               </span>
               <span class="domain-text">{fmtDomain(rule.domain)}</span>
             </div>
@@ -176,7 +176,9 @@
             <button
               class="btn-delete"
               onclick={() => requestDelete(rule.domain)}
-              aria-label="Delete {rule.domain}"
+              aria-label={_("fed.delete_rule_aria", {
+                domain: rule.domain,
+              })}
             >
               <Trash2 size={13} />
             </button>
@@ -192,20 +194,23 @@
           class="btn-page"
           disabled={currentPage === 1}
           onclick={() => (currentPage -= 1)}
-          aria-label="Previous page"
+          aria-label={_("misc.page_prev")}
         >
           <ChevronLeft size={14} />
         </button>
 
         <span class="page-info">
-          Page <strong>{currentPage}</strong> of {totalPages}
+          {_("misc.page_of", {
+            current: String(currentPage),
+            total: String(totalPages),
+          })}
         </span>
 
         <button
           class="btn-page"
           disabled={currentPage === totalPages}
           onclick={() => (currentPage += 1)}
-          aria-label="Next page"
+          aria-label={_("misc.page_next")}
         >
           <ChevronRight size={14} />
         </button>
@@ -237,7 +242,7 @@
           {_("action.cancel")}
         </button>
         <button class="btn-danger" onclick={handleConfirmDelete}>
-          {_("acct.unblock")}
+          {_("action.delete")}
         </button>
       </div>
     </div>

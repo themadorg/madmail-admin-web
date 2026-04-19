@@ -1,6 +1,16 @@
 <script lang="ts">
   import { store } from "$lib/state.svelte";
+  import { t, getLocale } from "$lib/i18n";
   import { ArrowDownToLine, Trash2, Plus, ToggleLeft, ToggleRight, Clock, Zap } from "lucide-svelte";
+
+  let locale = $state(getLocale());
+  function _(key: string, params?: Record<string, string>): string {
+    void locale;
+    return t(key, params);
+  }
+  $effect(() => {
+    locale = getLocale();
+  });
 
   let showAdd = $state(false);
   let newName = $state("");
@@ -44,13 +54,14 @@
   }
 
   function fmtPollTime(iso?: string): string {
-    if (!iso) return "Never";
+    if (!iso) return _("time.never");
     const d = new Date(iso);
     const now = new Date();
     const diff = Math.floor((now.getTime() - d.getTime()) / 1000);
-    if (diff < 5) return "Just now";
-    if (diff < 60) return `${diff}s ago`;
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 5) return _("time.just_now");
+    if (diff < 60) return _("time.seconds_ago", { n: String(diff) });
+    if (diff < 3600)
+      return _("time.minutes_ago", { n: String(Math.floor(diff / 60)) });
     return d.toLocaleTimeString();
   }
 
@@ -64,11 +75,13 @@
   <div class="exc-header">
     <span class="exc-count">
       <ArrowDownToLine size={14} />
-      {store.exchangers.total} exchanger{store.exchangers.total !== 1 ? 's' : ''}
+      {store.exchangers.total === 1
+        ? _("exc.count_one")
+        : _("exc.count_many", { n: String(store.exchangers.total) })}
     </span>
     <button class="btn-add" onclick={() => (showAdd = !showAdd)}>
       <Plus size={12} />
-      Add Exchanger
+      {_("exc.add")}
     </button>
   </div>
 
@@ -77,7 +90,7 @@
     <div class="add-form">
       <div class="form-grid">
         <div class="field">
-          <label for="exc-name">Name</label>
+          <label for="exc-name">{_("exc.name")}</label>
           <input
             id="exc-name"
             type="text"
@@ -86,7 +99,7 @@
           />
         </div>
         <div class="field">
-          <label for="exc-url">Endpoint URL</label>
+          <label for="exc-url">{_("exc.url")}</label>
           <input
             id="exc-url"
             type="text"
@@ -96,7 +109,7 @@
         </div>
       </div>
       <div class="field">
-        <label for="exc-interval">Poll Interval (seconds)</label>
+        <label for="exc-interval">{_("exc.poll_seconds")}</label>
         <input
           id="exc-interval"
           type="number"
@@ -107,14 +120,14 @@
       </div>
       <div class="form-actions">
         <button class="btn-cancel" onclick={() => (showAdd = false)}>
-          Cancel
+          {_("action.cancel")}
         </button>
         <button
           class="btn-submit"
           onclick={handleAdd}
           disabled={!newName.trim() || !newUrl.trim()}
         >
-          Add Exchanger
+          {_("exc.add")}
         </button>
       </div>
     </div>
@@ -123,11 +136,11 @@
   {#if store.exchangers.total === 0 && !showAdd}
     <div class="empty-state">
       <ArrowDownToLine size={32} />
-      <p>No exchangers configured</p>
-      <p class="empty-hint">Exchangers let this server pull messages from remote relays.</p>
+      <p>{_("exc.empty")}</p>
+      <p class="empty-hint">{_("exc.empty_hint")}</p>
       <button class="btn-add" onclick={() => (showAdd = true)}>
         <Plus size={12} />
-        Add Exchanger
+        {_("exc.add")}
       </button>
     </div>
   {:else}
@@ -138,7 +151,7 @@
             <div class="entry-header">
               <span class="entry-name">{ex.name}</span>
               <span class="entry-status" class:status-on={ex.enabled} class:status-off={!ex.enabled}>
-                {ex.enabled ? 'Active' : 'Disabled'}
+                {ex.enabled ? _("exc.status_on") : _("exc.status_off")}
               </span>
             </div>
             <span class="entry-url">{ex.url}</span>
@@ -163,10 +176,10 @@
                 <span 
                   class="meta-item clickable-meta" 
                   onclick={() => (editingInterval = { name: ex.name, value: String(ex.poll_interval) })}
-                  title="Click to edit interval"
+                  title={_("exc.edit_interval")}
                 >
                   <Clock size={10} />
-                  {ex.poll_interval}s interval
+                  {_("exc.interval_label", { n: String(ex.poll_interval) })}
                 </span>
               {/if}
               <span class="meta-item">
@@ -179,7 +192,7 @@
             <button
               class="btn-toggle"
               onclick={() => store.updateExchanger(ex.name, { enabled: !ex.enabled })}
-              title={ex.enabled ? 'Disable' : 'Enable'}
+              title={ex.enabled ? _("exc.disable") : _("exc.enable")}
             >
               {#if ex.enabled}
                 <ToggleRight size={18} />
@@ -190,7 +203,7 @@
             <button
               class="btn-delete"
               onclick={() => requestDelete(ex.name)}
-              aria-label="Delete {ex.name}"
+              aria-label={_("exc.delete_aria", { name: ex.name })}
             >
               <Trash2 size={13} />
             </button>
@@ -200,7 +213,7 @@
     </div>
   {/if}
 {:else}
-  <p class="loading">Loading exchangers…</p>
+  <p class="loading">{_("exc.loading")}</p>
 {/if}
 
 <!-- Delete confirmation modal -->
@@ -217,16 +230,16 @@
           <Trash2 size={18} />
         </div>
         <div class="modal-title">
-          <h3>Delete exchanger?</h3>
+          <h3>{_("exc.delete_title")}</h3>
           <p class="modal-detail">{confirmingDelete}</p>
         </div>
       </div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick={() => (confirmingDelete = "")}>
-          Cancel
+          {_("action.cancel")}
         </button>
         <button class="btn-danger" onclick={handleConfirmDelete}>
-          Delete
+          {_("action.delete")}
         </button>
       </div>
     </div>

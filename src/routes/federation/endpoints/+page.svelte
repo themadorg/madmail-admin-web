@@ -77,7 +77,7 @@
             id="dns-lookup"
             type="text"
             bind:value={newLookup}
-            placeholder="example.com or 1.2.3.4"
+            placeholder={_("dns.placeholder_lookup")}
           />
         </div>
         <div class="field">
@@ -86,7 +86,7 @@
             id="dns-target"
             type="text"
             bind:value={newTarget}
-            placeholder="5.6.7.8"
+            placeholder={_("dns.placeholder_target")}
           />
         </div>
       </div>
@@ -96,7 +96,7 @@
           id="dns-comment"
           type="text"
           bind:value={newComment}
-          placeholder="Optional note..."
+          placeholder={_("dns.placeholder_comment")}
         />
       </div>
       <div class="form-actions">
@@ -120,7 +120,7 @@
       <input
         type="text"
         bind:value={search}
-        placeholder="Search overrides..."
+        placeholder={_("dns.search_placeholder")}
         class="search-input"
       />
     </div>
@@ -138,7 +138,7 @@
   {:else if filtered.length === 0 && store.endpointOverrides.total > 0}
     <div class="empty-state">
       <SearchX size={24} />
-      <p>No results for "{search}"</p>
+      <p>{_("dns.no_results", { query: search })}</p>
     </div>
   {:else}
     <div class="entry-list">
@@ -158,7 +158,9 @@
             <button
               class="btn-delete"
               onclick={() => requestDelete(entry.lookup_key)}
-              aria-label="Delete {entry.lookup_key}"
+              aria-label={_("dns.delete_aria", {
+                key: entry.lookup_key,
+              })}
             >
               <Trash2 size={13} />
             </button>
@@ -185,7 +187,7 @@
           <Trash2 size={18} />
         </div>
         <div class="modal-title">
-          <h3>{_("dns.confirm_delete", { key: "" })}</h3>
+          <h3>{_("dns.modal_title")}</h3>
           <p class="modal-detail">{confirmingDelete}</p>
         </div>
       </div>
@@ -194,7 +196,7 @@
           {_("action.cancel")}
         </button>
         <button class="btn-danger" onclick={handleConfirmDelete}>
-          Delete
+          {_("action.delete")}
         </button>
       </div>
     </div>
