@@ -16,26 +16,41 @@
     return t(key, params);
   }
 
+  type AccessInfo = { accessField: string; localOnlySetting: string };
+
   /**
-   * Map port setting keys to their access control key prefix.
+   * Map each port row to its access field and local-only setting key.
    * Ports without access control (like Shadowsocks itself, SASL) are excluded.
    */
-  const accessKeyMap: Record<string, string> = {
-    smtp_port: "smtp",
-    submission_port: "submission",
-    imap_port: "imap",
-    turn_port: "turn",
-    sasl_port: "sasl",
-    iroh_port: "iroh",
-    http_port: "http",
-    https_port: "https",
+  const accessKeyMap: Record<string, AccessInfo> = {
+    smtp_port: { accessField: "smtp_access", localOnlySetting: "smtp_local_only" },
+    submission_port: {
+      accessField: "submission_access",
+      localOnlySetting: "submission_local_only",
+    },
+    submission_tls_port: {
+      accessField: "submission_tls_access",
+      localOnlySetting: "submission_tls_local_only",
+    },
+    imap_port: { accessField: "imap_access", localOnlySetting: "imap_local_only" },
+    imap_tls_port: {
+      accessField: "imap_tls_access",
+      localOnlySetting: "imap_tls_local_only",
+    },
+    turn_port: { accessField: "turn_access", localOnlySetting: "turn_local_only" },
+    sasl_port: { accessField: "sasl_access", localOnlySetting: "sasl_local_only" },
+    iroh_port: { accessField: "iroh_access", localOnlySetting: "iroh_local_only" },
+    http_port: { accessField: "http_access", localOnlySetting: "http_local_only" },
+    https_port: { accessField: "https_access", localOnlySetting: "https_local_only" },
   };
 
   /** Map port keys to i18n keys for confirmation modals */
   const PORT_LABEL_KEYS: Record<string, string> = {
     smtp_port: "port.smtp",
     submission_port: "port.submission",
+    submission_tls_port: "port.submission_tls",
     imap_port: "port.imap",
+    imap_tls_port: "port.imap_tls",
     turn_port: "port.turn",
     sasl_port: "port.sasl",
     iroh_port: "port.iroh",
@@ -44,9 +59,9 @@
   };
 
   function getAccess(portKey: string): string | null {
-    const prefix = accessKeyMap[portKey];
-    if (!prefix || !store.settings) return null;
-    const accessKey = `${prefix}_access` as keyof typeof store.settings;
+    const info = accessKeyMap[portKey];
+    if (!info || !store.settings) return null;
+    const accessKey = info.accessField as keyof typeof store.settings;
     return (store.settings[accessKey] as string) || "public";
   }
 
@@ -67,16 +82,22 @@
 
   async function confirmMakeLocal() {
     if (!confirmingPort) return;
-    const prefix = accessKeyMap[confirmingPort];
-    if (prefix) {
-      await store.togglePortAccess(prefix, "public");
+    const info = accessKeyMap[confirmingPort];
+    if (info) {
+      await store.togglePortAccess(info.localOnlySetting, "public");
     }
     confirmingPort = null;
     confirmingLabel = "";
   }
 
   // Client-affecting port change warning
-  const clientPorts = new Set(["smtp_port", "submission_port", "imap_port"]);
+  const clientPorts = new Set([
+    "smtp_port",
+    "submission_port",
+    "submission_tls_port",
+    "imap_port",
+    "imap_tls_port",
+  ]);
   let pendingSaveKey = $state<string | null>(null);
   let pendingSaveValue = $state("");
 
@@ -152,11 +173,11 @@
             {#if access}
               <button
                 onclick={() => {
-                  const prefix = accessKeyMap[key];
-                  if (!prefix || !access) return;
+                  const info = accessKeyMap[key];
+                  if (!info || !access) return;
                   if (access === "local") {
                     // Going local → public: safe, do it directly
-                    store.togglePortAccess(prefix, access);
+                    store.togglePortAccess(info.localOnlySetting, access);
                   } else {
                     // Going public → local: show confirmation modal
                     requestMakeLocal(key);
@@ -212,7 +233,9 @@
 
     {@render editableRow("smtp_port", _("port.smtp"), "25")}
     {@render editableRow("submission_port", _("port.submission"), "587")}
-    {@render editableRow("imap_port", _("port.imap"), "993")}
+    {@render editableRow("submission_tls_port", _("port.submission_tls"), "465")}
+    {@render editableRow("imap_port", _("port.imap"), "143")}
+    {@render editableRow("imap_tls_port", _("port.imap_tls"), "993")}
     {@render editableRow("turn_port", _("port.turn"), "3478")}
     {@render editableRow("sasl_port", _("port.sasl"), "24")}
     {@render editableRow("iroh_port", _("port.iroh"), "3340")}

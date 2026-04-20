@@ -363,17 +363,16 @@ class AdminState {
         }, 1000);
     }
 
-    async togglePortAccess(portKey: string, currentAccess: string) {
+    async togglePortAccess(localOnlySettingKey: string, currentAccess: string) {
         if (this.busy) return;
         this.busy = true;
         try {
-            const settingKey = portKey + '_local_only';
             if (currentAccess === 'public') {
                 // Make local-only
-                await api.setSetting(this.cfg(), settingKey, 'true');
+                await api.setSetting(this.cfg(), localOnlySettingKey, 'true');
             } else {
                 // Make public
-                await api.resetSetting(this.cfg(), settingKey);
+                await api.resetSetting(this.cfg(), localOnlySettingKey);
             }
             this.pendingRestart = true;
             await this.refresh();

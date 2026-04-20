@@ -245,6 +245,26 @@
     {@render editableRow("turn_relay_ip", _("svc.turn_relay_ip"), "", "text")}
     {@render editableRow("turn_ttl", _("svc.turn_ttl"), "", "number")}
     {@render editableRow("iroh_relay_url", _("svc.iroh_relay_url"), "", "text")}
+    {@render selectRow(
+      "dclogin_imap_security",
+      _("svc.dclogin_imap_security"),
+      "ssl",
+      [
+        { value: "ssl", label: _("svc.dclogin_mode_ssl") },
+        { value: "starttls", label: _("svc.dclogin_mode_starttls") },
+        { value: "default", label: _("svc.dclogin_mode_default") },
+      ]
+    )}
+    {@render selectRow(
+      "dclogin_smtp_security",
+      _("svc.dclogin_smtp_security"),
+      "ssl",
+      [
+        { value: "ssl", label: _("svc.dclogin_mode_ssl") },
+        { value: "starttls", label: _("svc.dclogin_mode_starttls") },
+        { value: "default", label: _("svc.dclogin_mode_default") },
+      ]
+    )}
     {@render editableRow(
       "admin_path",
       _("svc.admin_path"),

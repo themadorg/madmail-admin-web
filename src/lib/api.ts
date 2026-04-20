@@ -67,7 +67,9 @@ export interface AllSettings {
     registration_token_required: string;
     smtp_port: SettingValue;
     submission_port: SettingValue;
+    submission_tls_port: SettingValue;
     imap_port: SettingValue;
+    imap_tls_port: SettingValue;
     turn_port: SettingValue;
     sasl_port: SettingValue;
     iroh_port: SettingValue;
@@ -81,7 +83,9 @@ export interface AllSettings {
     // Per-port access control: "public" or "local"
     smtp_access: string;
     submission_access: string;
+    submission_tls_access: string;
     imap_access: string;
+    imap_tls_access: string;
     turn_access: string;
     sasl_access: string;
     iroh_access: string;
@@ -100,6 +104,8 @@ export interface AllSettings {
     http_proxy_password: SettingValue;
     admin_path: SettingValue;
     admin_web_path: SettingValue;
+    dclogin_imap_security: SettingValue;
+    dclogin_smtp_security: SettingValue;
     language: SettingValue;
 }
 
