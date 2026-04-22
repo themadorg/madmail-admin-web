@@ -1,3 +1,10 @@
+# [1.20.0](https://github.com/themadorg/madmail-admin-web/compare/v1.19.4...v1.20.0) (2026-04-22)
+
+
+### Features
+
+* **config:** add separate TLS/STARTTLS ports and dclogin security settings ([92c0df1](https://github.com/themadorg/madmail-admin-web/commit/92c0df10f9bb0661f32e7c6f49af269b12ebabb8))
+
 ## [1.19.4](https://github.com/themadorg/madmail-admin-web/compare/v1.19.3...v1.19.4) (2026-04-19)
 
 
