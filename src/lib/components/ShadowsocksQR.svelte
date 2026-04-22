@@ -1,21 +1,27 @@
 <script lang="ts">
-  import QRCode from "qrcode";
-  import { onMount } from "svelte";
-
   let { url }: { url: string } = $props();
   let canvas: HTMLCanvasElement | null = $state(null);
 
   $effect(() => {
-    if (canvas && url) {
-      QRCode.toCanvas(canvas, url, {
+    if (!canvas || !url) return;
+
+    let cancelled = false;
+
+    import("qrcode").then(({ toCanvas }) => {
+      if (cancelled || !canvas) return;
+      return toCanvas(canvas, url, {
         width: 200,
         margin: 2,
         color: {
           dark: "#000000",
           light: "#ffffff",
         },
-      }).catch(console.error);
-    }
+      });
+    }).catch(console.error);
+
+    return () => {
+      cancelled = true;
+    };
   });
 </script>
 

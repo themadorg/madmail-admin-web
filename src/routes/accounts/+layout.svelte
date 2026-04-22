@@ -131,8 +131,9 @@
           />
         </form>
       {:else}
-        <div 
-          class="text-xl font-semibold flex items-center gap-1.5 cursor-pointer hover:text-accent transition-colors"
+        <button
+          type="button"
+          class="text-xl font-semibold flex items-center gap-1.5 cursor-pointer hover:text-accent transition-colors w-full text-start bg-transparent border-0 p-0 m-0 font-inherit"
           onclick={() => {
             defaultQuotaInput = store.quota
               ? (store.quota.default_quota_bytes / 1048576).toFixed(0) + "MB"
@@ -142,7 +143,7 @@
         >
           {store.quota ? store.fmtBytes(store.quota.default_quota_bytes) : "—"}
           <Pencil size={10} class="opacity-30" />
-        </div>
+        </button>
       {/if}
     </div>
   </div>
