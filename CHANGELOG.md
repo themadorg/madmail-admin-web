@@ -1,3 +1,10 @@
+## [1.20.1](https://github.com/themadorg/madmail-admin-web/compare/v1.20.0...v1.20.1) (2026-04-23)
+
+
+### Bug Fixes
+
+* **admin-web:** sync admin API URL and reload after port changes ([1bfac14](https://github.com/themadorg/madmail-admin-web/commit/1bfac148a25c9ba6002ba09b581dd653d01b63e1))
+
 # [1.20.0](https://github.com/themadorg/madmail-admin-web/compare/v1.19.4...v1.20.0) (2026-04-22)
 
 
