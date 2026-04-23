@@ -18,7 +18,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'login.title': 'Madmail Admin',
         'login.subtitle': 'Connect to your server',
         'login.url_label': 'Admin API URL',
-        'login.url_placeholder': 'https://your-server.com:443/api/admin',
+        'login.url_placeholder': 'https://your-server.com/api/admin',
         'login.token_label': 'Admin Token',
         'login.token_placeholder': 'Paste token here',
         'login.connect': 'Connect',
@@ -166,6 +166,10 @@ const translations: Record<Locale, Record<string, string>> = {
         'port.client_warn_title': 'Change {port} Port?',
         'port.client_warn_body': 'Changing this port will disconnect existing clients. All users will need to update their email client settings to use the new port.',
         'port.client_warn_confirm': 'Change port',
+        'port.restart_listener_title': 'Apply {port} change?',
+        'port.restart_listener_body':
+            'The mail service will restart now so the new port takes effect. You may be briefly disconnected; the admin panel will reconnect automatically when the service is back.',
+        'port.restart_listener_confirm': 'Apply & restart',
         'port.confirm_no': 'Cancel',
 
         // Accounts tab
@@ -476,7 +480,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'login.title': 'مدیریت مدمیل',
         'login.subtitle': 'اتصال به سرور شما',
         'login.url_label': 'آدرس API مدیریت',
-        'login.url_placeholder': 'https://your-server.com:443/api/admin',
+        'login.url_placeholder': 'https://your-server.com/api/admin',
         'login.token_label': 'توکن مدیریت',
         'login.token_placeholder': 'توکن را اینجا وارد کنید',
         'login.connect': 'اتصال',
@@ -615,6 +619,10 @@ const translations: Record<Locale, Record<string, string>> = {
         'port.client_warn_title': 'تغییر پورت {port}؟',
         'port.client_warn_body': 'تغییر این پورت باعث قطع ارتباط کاربران فعلی می‌شود. همه کاربران باید تنظیمات ایمیل خود را به‌روز کنند.',
         'port.client_warn_confirm': 'تغییر پورت',
+        'port.restart_listener_title': 'اعمال تغییر {port}؟',
+        'port.restart_listener_body':
+            'سرویس اکنون ری‌استارت می‌شود تا پورت جدید اعمال شود. ممکن است موقتاً قطع شوید؛ پنل مدیریت پس از بالا آمدن سرویس دوباره وصل می‌شود.',
+        'port.restart_listener_confirm': 'اعمال و ری‌استارت',
         'port.confirm_no': 'لغو',
 
         'acct.total': 'حساب',
@@ -905,7 +913,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'login.title': 'Admin Madmail',
         'login.subtitle': 'Conectar a tu servidor',
         'login.url_label': 'URL de API Admin',
-        'login.url_placeholder': 'https://tu-servidor.com:443/api/admin',
+        'login.url_placeholder': 'https://tu-servidor.com/api/admin',
         'login.token_label': 'Token de Admin',
         'login.token_placeholder': 'Pegar token aquí',
         'login.connect': 'Conectar',
@@ -1044,6 +1052,10 @@ const translations: Record<Locale, Record<string, string>> = {
         'port.client_warn_title': '¿Cambiar puerto {port}?',
         'port.client_warn_body': 'Cambiar este puerto desconectará a los clientes existentes. Todos los usuarios deberán actualizar su configuración de correo.',
         'port.client_warn_confirm': 'Cambiar puerto',
+        'port.restart_listener_title': '¿Aplicar cambio de {port}?',
+        'port.restart_listener_body':
+            'El servicio de correo se reiniciará ahora para aplicar el nuevo puerto. Puedes perder la conexión un momento; el panel se reconectará solo cuando vuelva el servicio.',
+        'port.restart_listener_confirm': 'Aplicar y reiniciar',
         'port.confirm_no': 'Cancelar',
 
         'acct.total': 'cuentas',
@@ -1336,7 +1348,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'login.title': 'Админ Madmail',
         'login.subtitle': 'Подключение к серверу',
         'login.url_label': 'URL API администратора',
-        'login.url_placeholder': 'https://ваш-сервер.com:443/api/admin',
+        'login.url_placeholder': 'https://ваш-сервер.com/api/admin',
         'login.token_label': 'Токен администратора',
         'login.token_placeholder': 'Вставьте токен сюда',
         'login.connect': 'Подключить',
@@ -1475,6 +1487,10 @@ const translations: Record<Locale, Record<string, string>> = {
         'port.client_warn_title': 'Изменить порт {port}?',
         'port.client_warn_body': 'Изменение этого порта отключит существующих клиентов. Всем пользователям необходимо обновить настройки почтового клиента.',
         'port.client_warn_confirm': 'Изменить порт',
+        'port.restart_listener_title': 'Применить изменение {port}?',
+        'port.restart_listener_body':
+            'Служба почты будет перезапущена, чтобы вступил в силу новый порт. Соединение на короткое время пропадёт; панель переподключится сама, когда сервис снова поднимется.',
+        'port.restart_listener_confirm': 'Применить и перезапустить',
         'port.confirm_no': 'Отмена',
 
         'acct.total': 'аккаунтов',

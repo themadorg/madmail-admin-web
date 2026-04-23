@@ -20,6 +20,7 @@ import {
     type FederationServersResponse,
 } from '$lib/api';
 import { t } from '$lib/i18n';
+import { applySettingsToAdminBaseUrl } from '$lib/adminUrl';
 import { saveServer } from '$lib/servers';
 
 /** Map admin toggle API paths to i18n keys for toast labels */
@@ -195,6 +196,51 @@ class AdminState {
     }
 
     // --- API actions ---
+    /**
+     * If the DB override for admin_web_path does not match the current browser path,
+     * navigate to the configured path (e.g. after a CLI change) so the SPA keeps working.
+     */
+    /**
+     * Keep the stored admin API base URL in sync with server-side overrides
+     * (hostname, https/http port, admin path) so the bar matches madmail admin-token.
+     */
+    syncConnectionBaseUrlWithSettings() {
+        if (!this.connected || !this.settings || !this.baseUrl) {
+            return;
+        }
+        const next = applySettingsToAdminBaseUrl(this.baseUrl, this.settings);
+        if (next === this.baseUrl) {
+            return;
+        }
+        this.baseUrl = next;
+        if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('madmail_url', next);
+        }
+        saveServer(next, this.token).catch(() => { });
+    }
+
+    syncAdminWebPathFromSettings() {
+        if (typeof window === 'undefined' || !this.settings) {
+            return;
+        }
+        const s = this.settings.admin_web_path;
+        if (!s.is_set || !s.value?.trim()) {
+            return;
+        }
+        const raw = s.value.trim();
+        const want =
+            (raw.startsWith('/') ? raw : `/${raw}`).replace(/\/+$/, '') || '/';
+        const cur =
+            window.location.pathname.replace(/\/+$/, '') || '/';
+        if (want === cur) {
+            return;
+        }
+        const u = new URL(want + '/', window.location.origin);
+        u.search = window.location.search;
+        u.hash = window.location.hash;
+        window.location.replace(u.toString());
+    }
+
     async connect() {
         if (!this.baseUrl || !this.token || this.connecting) return;
         this.connecting = true;
@@ -232,6 +278,8 @@ class AdminState {
                 api.federationRules(this.cfg()).then(res => { if (res.data) this.federationRules = res.data; }),
                 api.federationServers(this.cfg()).then(res => { if (res.data) this.federationServers = res.data; }),
             ]);
+            this.syncConnectionBaseUrlWithSettings();
+            this.syncAdminWebPathFromSettings();
         } finally {
             this.refreshing = false;
         }
@@ -305,8 +353,51 @@ class AdminState {
                 }, 1000);
                 return;
             }
+            // Admin web UI path: reload config then full navigation (same origin, new path prefix)
+            if (key === 'admin_web_path' && value) {
+                const v = value.trim();
+                const path = (v.startsWith('/') ? v : `/${v}`).replace(/\/+$/, '') || '/';
+                await api.reload(this.cfg());
+                this.pendingRestart = false;
+                this.notify(t('action.restarting'));
+                const u = new URL(path + '/', window.location.origin);
+                u.search = window.location.search;
+                u.hash = window.location.hash;
+                window.location.replace(u.toString());
+                return;
+            }
+            // HTTP/HTTPS listener ports: restart immediately so the UI reconnects on the new port
+            if ((key === 'http_port' || key === 'https_port') && res.data?.restart_required) {
+                this.patchPortSettingAfterSave(key, value);
+                this.syncConnectionBaseUrlWithSettings();
+                this.pendingRestart = false;
+                await this.reload();
+                return;
+            }
             await this.refresh();
         } finally { this.busy = false; }
+    }
+
+    /** Update local settings snapshot so baseUrl can follow the new port before reload. */
+    patchPortSettingAfterSave(key: 'http_port' | 'https_port', value: string) {
+        if (!this.settings) return;
+        if (key === 'https_port') {
+            this.settings.https_port = { ...this.settings.https_port, value, is_set: true };
+        } else {
+            this.settings.http_port = { ...this.settings.http_port, value, is_set: true };
+        }
+    }
+
+    patchPortSettingAfterReset(
+        key: 'http_port' | 'https_port',
+        res: Pick<SettingValue, 'key' | 'value' | 'is_set'>,
+    ) {
+        if (!this.settings) return;
+        if (key === 'https_port') {
+            this.settings.https_port = { ...this.settings.https_port, value: res.value, is_set: res.is_set };
+        } else {
+            this.settings.http_port = { ...this.settings.http_port, value: res.value, is_set: res.is_set };
+        }
     }
 
     async reset(key: string) {
@@ -337,6 +428,33 @@ class AdminState {
                     }
                     this.notify(t('notify.restart_pending'), 'err');
                 }, 1000);
+                return;
+            }
+            if (key === 'admin_web_path') {
+                await api.reload(this.cfg());
+                this.pendingRestart = false;
+                this.notify(t('action.restarting'));
+                const u = new URL('/admin/', window.location.origin);
+                u.search = window.location.search;
+                u.hash = window.location.hash;
+                window.location.replace(u.toString());
+                return;
+            }
+            if (
+                (key === 'http_port' || key === 'https_port') &&
+                res.data?.restart_required
+            ) {
+                this.patchPortSettingAfterReset(
+                    key,
+                    {
+                        key: res.data.key,
+                        value: res.data.value,
+                        is_set: res.data.is_set,
+                    },
+                );
+                this.syncConnectionBaseUrlWithSettings();
+                this.pendingRestart = false;
+                await this.reload();
                 return;
             }
             await this.refresh();

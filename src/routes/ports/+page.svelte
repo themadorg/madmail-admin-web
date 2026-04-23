@@ -98,13 +98,20 @@
     "imap_port",
     "imap_tls_port",
   ]);
+  // HTTP/HTTPS: confirm then save + service reload (so the UI moves to the new port)
+  const listenerRestartPorts = new Set(["http_port", "https_port"]);
   let pendingSaveKey = $state<string | null>(null);
   let pendingSaveValue = $state("");
+  let pendingListenerKey = $state<string | null>(null);
+  let pendingListenerValue = $state("");
 
   function handleSave(key: string, value: string) {
     if (clientPorts.has(key)) {
       pendingSaveKey = key;
       pendingSaveValue = value;
+    } else if (listenerRestartPorts.has(key)) {
+      pendingListenerKey = key;
+      pendingListenerValue = value;
     } else {
       store.save(key, value);
     }
@@ -120,6 +127,19 @@
   function cancelPortChange() {
     pendingSaveKey = null;
     pendingSaveValue = "";
+  }
+
+  function cancelListenerPortChange() {
+    pendingListenerKey = null;
+    pendingListenerValue = "";
+  }
+
+  async function confirmListenerPortChange() {
+    if (!pendingListenerKey) return;
+    const k = pendingListenerKey;
+    const v = pendingListenerValue;
+    cancelListenerPortChange();
+    await store.save(k, v);
   }
 </script>
 
@@ -296,6 +316,53 @@
             class="px-3 py-1.5 bg-warning text-black text-xs font-medium rounded-lg hover:bg-warning/80 transition-colors disabled:opacity-50"
           >
             {_("port.confirm_yes")}
+          </button>
+        </div>
+      </div>
+    </div>
+  {/if}
+
+  <!-- HTTP/HTTPS: restart after save -->
+  {#if pendingListenerKey}
+    <div
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+    >
+      <div
+        class="bg-surface-2 border border-border rounded-xl p-5 max-w-sm w-full shadow-2xl"
+      >
+        <div class="flex items-center gap-2 mb-3">
+          <div class="p-2 bg-warning/15 rounded-lg">
+            <AlertTriangle size={20} class="text-warning" />
+          </div>
+          <h3 class="text-base font-semibold text-text">
+            {_("port.restart_listener_title", {
+              port:
+                pendingListenerKey && PORT_LABEL_KEYS[pendingListenerKey]
+                  ? _(PORT_LABEL_KEYS[pendingListenerKey])
+                  : pendingListenerKey ?? "",
+            })}
+          </h3>
+        </div>
+
+        <p class="text-sm text-text-2 mb-5 leading-relaxed">
+          {_("port.restart_listener_body")}
+        </p>
+
+        <div class="flex gap-2 justify-end">
+          <button
+            type="button"
+            onclick={cancelListenerPortChange}
+            class="px-3 py-1.5 text-text-2 text-xs border border-border rounded-lg hover:bg-surface-3 transition-colors"
+          >
+            {_("port.confirm_no")}
+          </button>
+          <button
+            type="button"
+            onclick={confirmListenerPortChange}
+            disabled={store.busy}
+            class="px-3 py-1.5 bg-warning text-black text-xs font-medium rounded-lg hover:bg-warning/80 transition-colors disabled:opacity-50"
+          >
+            {_("port.restart_listener_confirm")}
           </button>
         </div>
       </div>
