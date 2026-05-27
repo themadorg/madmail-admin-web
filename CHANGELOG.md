@@ -1,3 +1,10 @@
+## [1.26.1](https://github.com/themadorg/madmail-admin-web/compare/v1.26.0...v1.26.1) (2026-05-27)
+
+
+### Bug Fixes
+
+* update Icon component styling for improved visibility ([ab8e8bc](https://github.com/themadorg/madmail-admin-web/commit/ab8e8bc01d40d0258435e2ab5981b4d61a34948a))
+
 # [1.26.0](https://github.com/themadorg/madmail-admin-web/compare/v1.25.1...v1.26.0) (2026-05-27)
 
 
