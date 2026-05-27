@@ -12,6 +12,8 @@
     removeServer,
     type SavedServer,
   } from "$lib/servers";
+  import { consumeLoginFromLocation } from "$lib/adminLoginQr";
+  import LoginQrScanner from "$lib/components/LoginQrScanner.svelte";
   import ThemeSwitcher from "$lib/components/ThemeSwitcher.svelte";
   import { dragScroll } from "$lib/actions/dragScroll";
   import { matrixRain } from "$lib/actions/matrixRain";
@@ -51,6 +53,7 @@
     ArrowDownToLine,
     Ticket,
     GitBranch,
+    QrCode,
   } from "lucide-svelte";
 
   let { children } = $props();
@@ -92,6 +95,25 @@
 
   // Saved servers from IndexedDB
   let savedServers = $state<SavedServer[]>([]);
+  let showLoginQr = $state(false);
+  let loginQueryApplied = false;
+
+  /** QR / link with `#base64` login hash (from `madmail admin-token` QR). */
+  $effect.pre(() => {
+    if (typeof window === "undefined" || loginQueryApplied) return;
+    loginQueryApplied = true;
+    const creds = consumeLoginFromLocation(window.location);
+    if (creds) {
+      store.baseUrl = creds.url;
+      store.token = creds.token;
+    }
+  });
+
+  function onLoginQrScan(creds: { url: string; token: string }) {
+    store.baseUrl = creds.url;
+    store.token = creds.token;
+    void connectWithMorph();
+  }
 
   async function loadSavedServers() {
     savedServers = await getSavedServers();
@@ -622,13 +644,12 @@
 <!-- Login Gate (stays visible during logo handoff so it is one continuous motion) -->
 {#if !store.connected || loginHandoff}
   <div
-    class="login-gate min-h-screen bg-surface text-text flex flex-col items-center justify-center p-4"
+    class="login-gate bg-surface text-text"
     class:login-gate--handoff={loginHandoff}
     style="font-family: 'Inter', system-ui, sans-serif;"
   >
-    <div
-      class="login-gate__card ui-card ui-card--panel w-full max-w-sm p-6"
-    >
+    <div class="login-gate__scroll">
+      <div class="login-gate__card ui-card ui-card--panel w-full max-w-sm p-6">
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-3">
           <img
@@ -702,17 +723,29 @@
         </div>
       {/if}
 
-      <button
-        onclick={() => connectWithMorph()}
-        disabled={!canConnect}
-        class="w-full py-2.5 bg-accent hover:bg-accent-dim text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-      >
-        {#if store.connecting}
-          <RefreshCw size={14} class="animate-spin" /> {_("login.connecting")}
-        {:else}
-          <Plug size={14} /> {_("login.connect")}
-        {/if}
-      </button>
+      <div class="flex gap-2">
+        <button
+          onclick={() => connectWithMorph()}
+          disabled={!canConnect}
+          class="flex-1 py-2.5 bg-accent hover:bg-accent-dim text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {#if store.connecting}
+            <RefreshCw size={14} class="animate-spin" /> {_("login.connecting")}
+          {:else}
+            <Plug size={14} /> {_("login.connect")}
+          {/if}
+        </button>
+        <button
+          type="button"
+          onclick={() => (showLoginQr = true)}
+          disabled={store.connecting}
+          class="px-3 py-2.5 bg-surface border border-border rounded-lg hover:border-accent/50 hover:bg-surface-3 transition-colors disabled:opacity-40 shrink-0"
+          title={_("login.scan_qr")}
+          aria-label={_("login.scan_qr")}
+        >
+          <QrCode size={18} class="text-accent" />
+        </button>
+      </div>
 
       <!-- Saved Servers -->
       {#if savedServers.length > 0}
@@ -750,17 +783,20 @@
           </div>
         </div>
       {/if}
+      </div>
+      <a
+        href="https://github.com/themadorg/madmail-admin-web"
+        target="_blank"
+        rel="noopener"
+        class="login-gate__version text-text-2/40 hover:text-text-2/70 text-[10px] mt-4 text-center flex items-center justify-center gap-1 transition-colors shrink-0"
+      >
+        <Github size={10} />
+        v{appVersion}
+      </a>
     </div>
-    <a
-      href="https://github.com/themadorg/madmail-admin-web"
-      target="_blank"
-      rel="noopener"
-      class="text-text-2/40 hover:text-text-2/70 text-[10px] mt-4 text-center flex items-center justify-center gap-1 transition-colors"
-    >
-      <Github size={10} />
-      v{appVersion}
-    </a>
   </div>
+
+  <LoginQrScanner bind:open={showLoginQr} onScan={onLoginQrScan} />
 {/if}
 
 {#if store.connected}

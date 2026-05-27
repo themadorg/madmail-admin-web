@@ -43,6 +43,7 @@
 	},
 	"dependencies": {
 		"@types/qrcode": "^1.5.6",
+		"html5-qrcode": "^2.3.8",
 		"lucide-svelte": "^0.574.0",
 		"qrcode": "^1.5.4"
 	}
