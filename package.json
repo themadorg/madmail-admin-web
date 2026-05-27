@@ -30,6 +30,7 @@
 		"@tailwindcss/typography": "^0.5.19",
 		"@tailwindcss/vite": "^4.1.18",
 		"@types/node": "^25.2.3",
+		"@vitejs/plugin-basic-ssl": "^2.1.0",
 		"electron": "^35.1.2",
 		"electron-builder": "^26.0.12",
 		"sass": "^1.100.0",
