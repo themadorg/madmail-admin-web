@@ -54,7 +54,7 @@
 
 {#if store.blocklist}
   <div
-    class="bg-surface-2 rounded-lg border border-border mb-4 p-3 flex flex-wrap justify-between items-center gap-2"
+    class="ui-card ui-card--rounded mb-4 p-3 flex flex-wrap justify-between items-center gap-2"
   >
     <div class="flex items-center gap-4">
       <span class="text-sm flex items-center gap-1.5 mr-2">
@@ -104,7 +104,7 @@
     <div class="space-y-1">
       {#each filtered as entry (entry.username)}
         <div
-          class="flex items-center justify-between bg-surface-2 rounded-lg px-3 py-2.5 border border-border group"
+          class="ui-card ui-card--rounded ui-card-row px-3 py-2.5 group"
         >
           <div class="min-w-0 flex-1">
             <span

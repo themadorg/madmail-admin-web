@@ -1,0 +1,246 @@
+/**
+ * Madmail admin — global design tokens & shared components.
+ * Imported from `src/routes/layout.css` (loaded on every page via `+layout.svelte`).
+ * Theme mode: `data-theme` on `<html>` (`light` | `dark`), set by `$lib/stores/theme.svelte`.
+ */
+
+html {
+	scrollbar-gutter: stable;
+	background-color: var(--th-surface);
+	color: var(--th-text);
+	scrollbar-color: var(--th-surface-3) var(--th-surface);
+}
+
+html::-webkit-scrollbar {
+	width: 10px;
+}
+
+html::-webkit-scrollbar-track {
+	background: var(--th-surface);
+}
+
+html::-webkit-scrollbar-thumb {
+	background: var(--th-surface-3);
+	border-radius: 9999px;
+	border: 2px solid var(--th-surface);
+}
+
+body {
+	background-color: var(--th-surface);
+	min-height: 100%;
+}
+
+/* ── Dark theme (default) ── */
+:root {
+	--th-surface: #111113;
+	--th-surface-1: #111113;
+	--th-surface-2: #18181b;
+	--th-surface-3: #27272a;
+	--th-border: #3f3f46;
+	--th-text: #fafafa;
+	--th-text-1: #fafafa;
+	--th-text-2: #a1a1aa;
+	--th-accent: #818cf8;
+	--th-accent-dim: #6366f1;
+	--th-success: #34d399;
+	--th-danger: #f87171;
+	--th-warning: #fbbf24;
+	color-scheme: dark;
+
+	/* Style-guide aliases */
+	--ui-color-accent: var(--th-accent);
+	--ui-color-accent-dim: var(--th-accent-dim);
+	--ui-color-success: var(--th-success);
+	--ui-color-danger: var(--th-danger);
+	--ui-color-warning: var(--th-warning);
+	--ui-color-border: var(--th-border);
+	--ui-color-text: var(--th-text);
+	--ui-color-text-muted: var(--th-text-2);
+
+	/* Federation health card borders */
+	--ui-border-health-perfect: color-mix(in srgb, var(--th-success) 40%, transparent);
+	--ui-border-health-federated: color-mix(in srgb, var(--th-accent) 40%, transparent);
+	--ui-border-health-bad: color-mix(in srgb, var(--th-danger) 40%, transparent);
+	--ui-ring-health-perfect: color-mix(in srgb, var(--th-success) 30%, transparent);
+	--ui-ring-health-federated: color-mix(in srgb, var(--th-accent) 30%, transparent);
+	--ui-ring-health-bad: color-mix(in srgb, var(--th-danger) 30%, transparent);
+}
+
+/* ── Light theme ── */
+:root[data-theme='light'] {
+	--th-surface: #f8f9fa;
+	--th-surface-1: #ffffff;
+	--th-surface-2: #f1f3f5;
+	--th-surface-3: #e9ecef;
+	--th-border: #dee2e6;
+	--th-text: #212529;
+	--th-text-1: #212529;
+	--th-text-2: #6c757d;
+	--th-accent: #6366f1;
+	--th-accent-dim: #4f46e5;
+	--th-success: #059669;
+	--th-danger: #dc2626;
+	--th-warning: #d97706;
+	color-scheme: light;
+}
+
+@layer components {
+	/* Base surface */
+	.ui-card {
+		background-color: var(--th-surface-2);
+		border: 1px solid var(--th-border);
+	}
+
+	.ui-card--rounded {
+		border-radius: 0.5rem;
+	}
+
+	.ui-card--panel {
+		border-radius: 0.75rem;
+		overflow: hidden;
+	}
+
+	.ui-card--interactive {
+		transition:
+			border-color 0.15s ease,
+			background-color 0.15s ease;
+	}
+
+	.ui-card--interactive:hover {
+		border-color: color-mix(in srgb, var(--ui-color-accent) 50%, transparent);
+	}
+
+	.ui-card-rows > * + * {
+		border-top: 1px solid var(--ui-color-border);
+	}
+
+	.ui-card-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		padding: 0.75rem;
+	}
+
+	.ui-card-rows .ui-card-row {
+		border: none;
+		border-radius: 0;
+		background-color: transparent;
+	}
+
+	/* Semantic text (when not using Tailwind `text-*` utilities) */
+	.text-ui-accent {
+		color: var(--ui-color-accent);
+	}
+
+	.text-ui-success {
+		color: var(--ui-color-success);
+	}
+
+	.text-ui-danger {
+		color: var(--ui-color-danger);
+	}
+
+	.text-ui-warning {
+		color: var(--ui-color-warning);
+	}
+
+	/* Federation health tier cards */
+	.ui-health-card--perfect {
+		border-color: var(--ui-border-health-perfect);
+	}
+
+	.ui-health-card--perfect .ui-health-card__icon,
+	.ui-health-card--perfect .ui-health-card__value {
+		color: var(--ui-color-success);
+	}
+
+	.ui-health-card--federated {
+		border-color: var(--ui-border-health-federated);
+	}
+
+	.ui-health-card--federated .ui-health-card__icon,
+	.ui-health-card--federated .ui-health-card__value {
+		color: var(--ui-color-accent);
+	}
+
+	.ui-health-card--bad {
+		border-color: var(--ui-border-health-bad);
+	}
+
+	.ui-health-card--bad .ui-health-card__icon,
+	.ui-health-card--bad .ui-health-card__value {
+		color: var(--ui-color-danger);
+	}
+
+	.ui-health-card--active.ui-health-card--perfect {
+		border-color: var(--ui-color-success);
+		outline: 2px solid var(--ui-ring-health-perfect);
+		outline-offset: 0;
+	}
+
+	.ui-health-card--active.ui-health-card--federated {
+		border-color: var(--ui-color-accent);
+		outline: 2px solid var(--ui-ring-health-federated);
+		outline-offset: 0;
+	}
+
+	.ui-health-card--active.ui-health-card--bad {
+		border-color: var(--ui-color-danger);
+		outline: 2px solid var(--ui-ring-health-bad);
+		outline-offset: 0;
+	}
+
+	/* Federation health tier grid — 3-up on mobile */
+	.fed-health-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0.5rem;
+	}
+
+	@media (min-width: 640px) {
+		.fed-health-grid {
+			gap: 0.75rem;
+		}
+	}
+
+	.fed-health-card {
+		padding: 0.625rem 0.5rem;
+		min-width: 0;
+		min-height: 4.5rem;
+	}
+
+	@media (min-width: 640px) {
+		.fed-health-card {
+			padding: 0.75rem;
+			min-height: 0;
+		}
+	}
+
+	.fed-health-card__mobile {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.375rem;
+		height: 100%;
+		text-align: center;
+	}
+
+	.fed-health-card__mobile-top {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.375rem;
+		width: 100%;
+	}
+
+	.fed-health-card__mobile-label {
+		font-size: 0.5625rem;
+		font-weight: 600;
+		line-height: 1.2;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--th-text-2);
+	}
+}

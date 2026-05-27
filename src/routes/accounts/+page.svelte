@@ -17,6 +17,7 @@
     ChevronRight,
     Search,
   } from "lucide-svelte";
+  import Select from "$lib/components/Select.svelte";
 
   let locale = $state(getLocale());
   function _(key: string, params?: Record<string, string>): string {
@@ -25,6 +26,10 @@
   }
   $effect(() => {
     locale = getLocale();
+  });
+
+  $effect(() => {
+    if (store.connected) store.loadSettings();
   });
 
   /** Focus element on mount for inline editing */
@@ -291,18 +296,17 @@
           sortedAccounts.length,
         )}/{sortedAccounts.length}
       </span>
-      <select
-        class="bg-surface-1 border border-border rounded ps-1 pe-5 py-0.5 text-[10px] text-text-1 focus:outline-none focus:border-accent cursor-pointer rtl:ps-5 rtl:pe-1"
-        value={pageSize}
-        onchange={(e) => {
-          pageSize = Number((e.target as HTMLSelectElement).value);
+      <Select
+        class="bg-surface-1 py-0.5 text-[10px] w-auto flex-none"
+        bind:value={pageSize}
+        onchange={() => {
           page = 1;
         }}
       >
         <option value={25}>25</option>
         <option value={50}>50</option>
         <option value={100}>100</option>
-      </select>
+      </Select>
       <button
         onclick={() => {
           page = Math.max(1, page - 1);
@@ -330,7 +334,7 @@
   <div class="space-y-1">
     {#each pagedAccounts as acct (acct.username)}
       <div
-        class="flex items-center justify-between bg-surface-2 rounded-lg px-3 py-2 border border-border group"
+        class="ui-card ui-card--rounded ui-card-row px-3 py-2 group"
       >
         <div class="min-w-0 flex-1">
           <span class="text-xs sm:text-sm font-mono truncate block"

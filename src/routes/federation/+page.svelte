@@ -21,6 +21,10 @@
     locale = getLocale();
   });
 
+  $effect(() => {
+    if (store.connected) store.loadFederationRules();
+  });
+
   let showAdd = $state(false);
   let newDomain = $state("");
   let confirmingDelete = $state("");
@@ -85,7 +89,7 @@
   }
 </script>
 
-<div class="federation-rules">
+<div class="tab-pane federation-rules">
   <div class="section-bar">
     <span class="section-count">
       {totalItems} {_("fed.exceptions")}

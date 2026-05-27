@@ -1,13 +1,9 @@
 <script lang="ts">
   import { store } from "$lib/state.svelte";
   import { t, getLocale } from "$lib/i18n";
-  import {
-    ToggleLeft,
-    ToggleRight,
-    Pencil,
-    RotateCcw,
-    Dice5,
-  } from "lucide-svelte";
+  import { Pencil, RotateCcw, Dice5 } from "lucide-svelte";
+  import ToggleSwitch from "$lib/components/ToggleSwitch.svelte";
+  import Select from "$lib/components/Select.svelte";
 
   function randomPath(): string {
     const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -34,13 +30,10 @@
 
   let isWorking = $derived(store.refreshing || store.busy || store.reloading);
 
-  function formatToggleState(s: string): string {
-    if (s === "enabled") return _("proxy.enabled");
-    if (s === "disabled") return _("proxy.disabled");
-    if (s === "open") return _("svc.toggle_open");
-    if (s === "closed") return _("svc.toggle_closed");
-    return s;
-  }
+  $effect(() => {
+    if (store.connected) store.loadSettings();
+  });
+
 </script>
 
 {#if store.settings}
@@ -51,27 +44,18 @@
     onLabel: string,
   )}
     <div
-      class="flex items-center justify-between bg-surface-2 rounded-lg p-3 border border-border"
+      class="ui-card ui-card--rounded ui-card-row"
     >
       <div>
         <div class="text-sm font-medium">{label}</div>
         <div class="text-xs text-text-2 font-mono">{resource}</div>
       </div>
-      <button
-        onclick={() => store.toggleService(resource, current)}
+      <ToggleSwitch
+        checked={current === onLabel}
         disabled={isWorking}
-        class="flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full transition-colors disabled:opacity-50
-          {current === onLabel
-          ? 'bg-success/15 text-success border border-success/30'
-          : 'bg-surface-3 text-text-2 border border-border hover:border-text-2/50'}"
-      >
-        {#if current === onLabel}
-          <ToggleRight size={14} />
-        {:else}
-          <ToggleLeft size={14} />
-        {/if}
-        {formatToggleState(current)}
-      </button>
+        label={label}
+        onclick={() => store.toggleService(resource, current)}
+      />
     </div>
   {/snippet}
 
@@ -82,7 +66,7 @@
     inputType: string,
   )}
     <div
-      class="flex items-center justify-between bg-surface-2 rounded-lg p-3 border border-border gap-3"
+      class="ui-card ui-card--rounded ui-card-row gap-3"
     >
       <div class="min-w-0 flex-1">
         <div class="text-sm font-medium">{label}</div>
@@ -294,19 +278,16 @@
 {/if}
 
 {#snippet selectRow(key: string, label: string, fallback: string, options: {value: string, label: string}[])}
-  <div class="flex items-center justify-between bg-surface-2 rounded-lg p-3 border border-border gap-3">
+  <div class="ui-card ui-card--rounded ui-card-row gap-3">
     <div class="min-w-0 flex-1">
       <div class="text-sm font-medium">{label}</div>
       {#if store.editingField === key}
         <div class="flex gap-2 mt-1.5">
-          <select
-            bind:value={store.editValue}
-            class="flex-1 min-w-0 py-1 ps-2 pe-8 rtl:ps-8 rtl:pe-2 bg-surface border border-border rounded text-xs text-text outline-none focus:border-accent"
-          >
+          <Select bind:value={store.editValue} class="flex-1 rounded">
             {#each options as opt}
               <option value={opt.value}>{opt.label}</option>
             {/each}
-          </select>
+          </Select>
           <button
             onclick={() => store.save(key, store.editValue)}
             class="px-2 py-1 bg-accent text-white text-xs rounded hover:bg-accent-dim transition-colors"

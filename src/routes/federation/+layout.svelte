@@ -3,10 +3,26 @@
   import { page } from "$app/stores";
   import { base } from "$app/paths";
   import { t, getLocale } from "$lib/i18n";
-  import { 
-    GitBranch, ShieldCheck, ShieldOff, ToggleLeft, ToggleRight,
-    AlertTriangle, Activity, Clock, Globe, ArrowDownToLine
+  import {
+    GitBranch,
+    ShieldCheck,
+    ShieldOff,
+    AlertTriangle,
+    Activity,
+    Globe,
+    ArrowDownToLine,
   } from "lucide-svelte";
+  import FederationStatsGrid from "$lib/components/FederationStatsGrid.svelte";
+  import ToggleSwitch from "$lib/components/ToggleSwitch.svelte";
+  import {
+    aggregateFederationServers,
+    classifyFederationServers,
+  } from "$lib/federationStats";
+  import type { FederationHealthTier } from "$lib/federationStats";
+  import {
+    parseHealthParam,
+    toggleFederationHealthFilter,
+  } from "$lib/federationHealthNav";
   import "./federation.css";
 
   let { children } = $props();
@@ -18,6 +34,10 @@
   }
   $effect(() => {
     locale = getLocale();
+  });
+
+  $effect(() => {
+    if (store.connected) store.loadFederationSection();
   });
 
   // Derived state from store
@@ -46,43 +66,32 @@
     return names;
   });
 
-  function fmtDomain(d: string): string {
-    return (d || "").replace(/^\[(.*)\]$/, "$1");
-  }
-
-  // Global aggregates (excluding self)
   let stats = $derived.by(() => {
     if (!store.federationServers) return null;
-    let inbound = 0;
-    let outbound = 0;
-    let queued = 0;
-    let expired = 0;
-    let latencySum = 0;
-    let latencyCount = 0;
-    for (const s of store.federationServers.servers) {
-      if (localHostnames.has(fmtDomain(s.domain).toLowerCase())) continue;
-      inbound += s.inbound_deliveries;
-      outbound += s.successful_deliveries;
-      queued += s.queued_messages;
-      expired += (s.failed_http || 0) + (s.failed_https || 0) + (s.failed_smtp || 0);
-      if (s.mean_latency_ms > 0) {
-        latencySum += s.mean_latency_ms;
-        latencyCount++;
-      }
-    }
-    return {
-      inbound,
-      outbound,
-      queued,
-      expired,
-      latency: latencyCount > 0 ? Math.round(latencySum / latencyCount) : 0
-    };
+    return aggregateFederationServers(
+      store.federationServers.servers,
+      localHostnames,
+    );
   });
 
-  function formatLatency(ms: number): string {
-    if (!ms || ms === 0) return "—";
-    if (ms < 1000) return _("latency.ms", { n: String(Math.round(ms)) });
-    return _("latency.s", { n: ((ms || 0) / 1000).toFixed(1) });
+  let health = $derived.by(() => {
+    if (!store.federationServers) return null;
+    return classifyFederationServers(
+      store.federationServers.servers,
+      localHostnames,
+    );
+  });
+
+  let activeHealth = $derived(
+    parseHealthParam($page.url.searchParams.get("health")),
+  );
+
+  function onHealthSelect(tier: FederationHealthTier) {
+    toggleFederationHealthFilter(activeHealth, tier, {
+      pathname: $page.url.pathname,
+      search: $page.url.search,
+      onTraffic: activeTab === "traffic",
+    });
   }
 </script>
 
@@ -108,32 +117,27 @@
             {/if}
             {policy}
           </span>
-          <span class="policy-desc">
+          <p class="policy-desc">
             {#if isAccept}
               {@html _("fed.open_desc")}
             {:else}
               {@html _("fed.closed_desc")}
             {/if}
-          </span>
+          </p>
         </div>
       </div>
     </div>
 
     <div class="fed-controls">
-      <button
-        class="toggle-btn"
-        class:active={isEnabled}
-        onclick={() => store.toggleFederationEnabled()}
-        disabled={store.busy}
-      >
-        {#if isEnabled}
-          <ToggleRight size={16} />
-          <span>{_("fed.active")}</span>
-        {:else}
-          <ToggleLeft size={16} />
-          <span>{_("fed.inactive")}</span>
-        {/if}
-      </button>
+      <div class="fed-enable-row">
+        <span class="fed-enable-label">{_("tab.federation")}</span>
+        <ToggleSwitch
+          checked={isEnabled}
+          disabled={store.busy}
+          label={_("tab.federation")}
+          onclick={() => store.toggleFederationEnabled()}
+        />
+      </div>
 
       <button
         class="policy-switch"
@@ -143,57 +147,26 @@
       >
         {#if isAccept}
           <ShieldOff size={13} />
-          {_("fed.switch_to", { policy: "REJECT" })}
         {:else}
           <ShieldCheck size={13} />
-          {_("fed.switch_to", { policy: "ACCEPT" })}
         {/if}
+        <span class="policy-switch-text policy-switch-text--long">
+          {_("fed.switch_to", { policy: isAccept ? "REJECT" : "ACCEPT" })}
+        </span>
+        <span class="policy-switch-text policy-switch-text--short" aria-hidden="true">
+          {isAccept ? "REJECT" : "ACCEPT"}
+        </span>
       </button>
     </div>
   </div>
 
-  {#if stats}
-    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
-      <div class="bg-surface-2 rounded-lg p-3 border border-border">
-        <div class="flex items-center gap-1.5 text-text-2 text-[10px] uppercase tracking-wider mb-1">
-          <Activity size={12} class="text-success" />
-          {_("fed.inbound")}
-        </div>
-        <div class="text-xl font-semibold text-success">{stats.inbound}</div>
-      </div>
-
-      <div class="bg-surface-2 rounded-lg p-3 border border-border">
-        <div class="flex items-center gap-1.5 text-text-2 text-[10px] uppercase tracking-wider mb-1">
-          <Activity size={12} class="text-success" />
-          {_("fed.outbound")}
-        </div>
-        <div class="text-xl font-semibold text-success">{stats.outbound}</div>
-      </div>
-
-      <div class="bg-surface-2 rounded-lg p-3 border border-border">
-        <div class="flex items-center gap-1.5 text-text-2 text-[10px] uppercase tracking-wider mb-1">
-          <ShieldCheck size={12} />
-          {_("fed.queued")}
-        </div>
-        <div class="text-xl font-semibold">{stats.queued}</div>
-      </div>
-
-      <div class="bg-surface-2 rounded-lg p-3 border border-border">
-        <div class="flex items-center gap-1.5 text-text-2 text-[10px] uppercase tracking-wider mb-1">
-          <Clock size={12} />
-          {_("fed.avg_latency")}
-        </div>
-        <div class="text-xl font-semibold">{formatLatency(stats.latency)}</div>
-      </div>
-
-      <div class="bg-surface-2 rounded-lg p-3 border border-border">
-        <div class="flex items-center gap-1.5 text-text-2 text-[10px] uppercase tracking-wider mb-1">
-          <AlertTriangle size={12} class="text-danger" />
-          {_("fed.expired")}
-        </div>
-        <div class="text-xl font-semibold text-danger">{stats.expired}</div>
-      </div>
-    </div>
+  {#if stats && health}
+    <FederationStatsGrid
+      {stats}
+      {health}
+      {activeHealth}
+      onHealthSelect={onHealthSelect}
+    />
   {/if}
 
   {#if !isEnabled}
@@ -209,9 +182,10 @@
       class="tab"
       class:active={activeTab === "rules"}
       href="{base}/federation"
+      data-sveltekit-noscroll
     >
       <ShieldCheck size={13} />
-      {_("tab.federation")}
+      {_("tab.federation_rules")}
       {#if store.federationRules}
         <span class="tab-count">{store.federationRules.total}</span>
       {/if}
@@ -220,9 +194,10 @@
       class="tab"
       class:active={activeTab === "traffic"}
       href="{base}/federation/traffic"
+      data-sveltekit-noscroll
     >
       <Activity size={13} />
-      {_("traffic.title")}
+      {_("tab.federation_peers")}
       {#if store.federationServers}
         <span class="tab-count">{store.federationServers.total}</span>
       {/if}
@@ -231,6 +206,7 @@
       class="tab"
       class:active={activeTab === "endpoints"}
       href="{base}/federation/endpoints"
+      data-sveltekit-noscroll
     >
       <Globe size={13} />
       {_("tab.dns")}
@@ -239,6 +215,7 @@
       class="tab"
       class:active={activeTab === "exchangers"}
       href="{base}/federation/exchangers"
+      data-sveltekit-noscroll
     >
       <ArrowDownToLine size={13} />
       {_("tab.exchangers")}

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { store } from "$lib/state.svelte";
   import { base } from "$app/paths";
+  import { afterNavigate, goto } from "$app/navigation";
   import { api, type ApiConfig } from "$lib/api";
   import { t, getLocale } from "$lib/i18n";
   import {
@@ -21,6 +22,12 @@
     Ticket,
   } from "lucide-svelte";
   import ShadowsocksQR from "$lib/components/ShadowsocksQR.svelte";
+  import FederationStatsGrid from "$lib/components/FederationStatsGrid.svelte";
+  import ToggleSwitch from "$lib/components/ToggleSwitch.svelte";
+  import Select from "$lib/components/Select.svelte";
+  import { dashboardFederationFromOverview } from "$lib/federationStats";
+  import type { FederationHealthTier } from "$lib/federationStats";
+  import { federationHealthFilterHref } from "$lib/federationHealthNav";
 
   let showQR = $state(false);
   let showUpdateModal = $state(false);
@@ -31,7 +38,46 @@
     return t(key, params);
   }
 
-  let diskPercent = $derived(store.storage?.disk?.percent_used ?? 0);
+  function isOverviewPath(pathname: string): boolean {
+    const p = base ? pathname.replace(base, "") || "/" : pathname;
+    return p === "/";
+  }
+
+  /** Re-fetch when navigating back to overview (connect already loaded on login). */
+  afterNavigate(({ from, to }) => {
+    if (!store.connected || !from || !to) return;
+    if (isOverviewPath(to.url.pathname) && !isOverviewPath(from.url.pathname)) {
+      store.loadOverview({ force: true });
+    }
+  });
+
+  const ROTATION_DAY_OPTIONS = [1, 3, 7, 14, 30, 90] as const;
+
+  let rotationApiAvailable = $derived(
+    store.overview?.message_retention != null,
+  );
+  let rotationEnabled = $derived(
+    store.overview?.message_retention?.enabled ?? false,
+  );
+  let rotationDays = $derived(
+    store.overview?.message_retention?.days ?? 30,
+  );
+  let rotationDaysSelect = $state(30);
+
+  $effect(() => {
+    rotationDaysSelect = rotationDays;
+  });
+
+  let dashboardFederation = $derived(
+    dashboardFederationFromOverview(store.overview),
+  );
+
+  let diskPercent = $derived(store.overview?.disk?.percent_used ?? 0);
+  let fedConnections = $derived(
+    store.overview?.email_servers?.connections ??
+      store.overview?.email_servers?.connection_ips ??
+      0,
+  );
   let diskColor = $derived(
     diskPercent > 90
       ? "bg-danger"
@@ -100,7 +146,7 @@
 </script>
 
 {#snippet statCard(Icon: any, label: string, value: string)}
-  <div class="bg-surface-2 rounded-lg p-3 border border-border">
+  <div class="ui-card ui-card--rounded p-3">
     <div class="flex items-center gap-1.5 text-text-2 text-xs mb-1">
       <Icon size={12} />
       {label}
@@ -112,7 +158,8 @@
 {#snippet linkCard(Icon: any, label: string, value: string, href: string)}
   <a
     {href}
-    class="bg-surface-2 rounded-lg p-3 border border-border hover:border-accent/50 transition-colors block"
+    data-sveltekit-noscroll
+    class="ui-card ui-card--rounded ui-card--interactive p-3 block"
   >
     <div class="flex items-center gap-1.5 text-text-2 text-xs mb-1">
       <Icon size={12} />
@@ -127,97 +174,81 @@
   {@render linkCard(
     Users,
     _("stat.users"),
-    String(store.status?.users?.registered ?? "—"),
+    String(store.overview?.users?.registered ?? "—"),
     `${base}/accounts`,
   )}
   {@render statCard(
     Clock,
     _("stat.uptime"),
-    store.status?.uptime?.duration ?? "—",
+    store.overview?.uptime?.duration ?? "—",
   )}
-  <div class="rounded-lg p-3 border border-border relative overflow-hidden">
-    <!-- Background fill showing disk usage -->
-    <div
-      class="absolute inset-0 opacity-15 transition-all duration-700 {diskColor}"
-      style="width: {diskPercent}%"
-    ></div>
-    <div class="relative">
-      <div class="flex items-center gap-1.5 text-text-2 text-xs mb-1">
-        <HardDrive size={12} />
-        {_("stat.host_total")}
-      </div>
-      <div class="text-xl font-semibold">
-        {store.storage?.disk ? `${store.fmtBytes(store.storage.disk.available_bytes)} / ${store.fmtBytes(store.storage.disk.total_bytes)}` : "—"}
-      </div>
-    </div>
-  </div>
   {@render linkCard(
     Ticket,
     _("tab.tokens"),
-    String(store.registrationTokens?.total ?? "—"),
+    String(store.overview?.tokens?.total ?? "—"),
     `${base}/accounts/tokens`,
   )}
 
   {@render statCard(
     Mail,
     _("stat.sent"),
-    store.status?.sent_messages != null
-      ? store.status.sent_messages.toLocaleString()
+    store.overview?.sent_messages != null
+      ? store.overview.sent_messages.toLocaleString()
       : "—",
   )}
   {@render statCard(
     SendHorizonal,
     _("stat.outbound"),
-    store.status?.outbound_messages != null
-      ? store.status.outbound_messages.toLocaleString()
+    store.overview?.outbound_messages != null
+      ? store.overview.outbound_messages.toLocaleString()
       : "—",
   )}
   {@render statCard(
     Inbox,
     _("stat.received"),
-    store.status?.received_messages != null
-      ? store.status.received_messages.toLocaleString()
+    store.overview?.received_messages != null
+      ? store.overview.received_messages.toLocaleString()
       : "—",
   )}
 
   <!-- Madmail Version Card (clickable, same size as others) -->
   <button
     onclick={() => showUpdateModal = true}
-    class="bg-surface-2 rounded-lg p-3 border border-border text-start hover:border-accent/50 transition-colors cursor-pointer"
+    class="ui-card ui-card--rounded ui-card--interactive p-3 text-start cursor-pointer"
   >
     <div class="flex items-center gap-1.5 text-text-2 text-xs mb-1">
       <Server size={12} />
       {_("stat.madmail_version")}
     </div>
     <div class="text-xl font-semibold truncate">
-      {store.status?.version ?? store.serverVersion ?? "—"}
+      {store.overview?.version ?? store.serverVersion ?? "—"}
     </div>
   </button>
 
-  {#if store.status?.imap}
+  {#if store.overview?.imap}
     {@render statCard(
       Network,
       _("stat.imap"),
       _("stat.imap_detail", {
-        connections: String(store.status.imap.connections),
-        unique_ips: String(store.status.imap.unique_ips),
+        connections: String(store.overview.imap.connections),
+        unique_ips: String(store.overview.imap.unique_ips),
       }),
     )}
   {/if}
-  {#if store.status?.turn}
+  {#if store.overview?.turn}
     {@render statCard(
       Server,
       _("stat.turn_relays"),
-      String(store.status.turn.relays),
+      String(store.overview.turn.relays),
     )}
   {/if}
-  {#if store.status?.shadowsocks}
+  {#if store.overview?.shadowsocks}
     {@render linkCard(
       Shield,
       _("stat.ss_conns"),
       _("stat.ss_detail", {
-        connections: String(store.status.shadowsocks.connections),
-        unique_ips: String(store.status.shadowsocks.unique_ips),
+        connections: String(store.overview.shadowsocks.connections),
+        unique_ips: String(store.overview.shadowsocks.unique_ips),
       }),
       `${base}/proxy`,
     )}
@@ -226,7 +257,7 @@
 
 <!-- Shadowsocks URL -->
 {#if store.shadowsocksUrl}
-  <div class="bg-surface-2 rounded-lg p-3 border border-border mb-4">
+  <div class="ui-card ui-card--rounded p-3 mb-4">
     <div class="flex items-center justify-between gap-3 mb-2">
       <div class="min-w-0">
         <div class="text-[10px] uppercase tracking-wider text-text-2 mb-0.5">
@@ -266,54 +297,99 @@
 {/if}
 
 <!-- Disk Usage -->
-{#if store.storage}
-  <div class="bg-surface-2 rounded-lg p-4 border border-border mb-4">
-    <h3 class="text-sm font-medium mb-3 flex items-center gap-1.5">
-      <HardDrive size={14} class="text-text-2" />
-      {_("disk.title")}
-    </h3>
-    <div class="h-1.5 bg-surface rounded-full overflow-hidden mb-2">
-      <div
-        class="h-full rounded-full transition-all duration-500 {diskColor}"
-        style="width: {diskPercent}%"
-      ></div>
-    </div>
-    <div class="flex justify-between text-xs text-text-2">
-      <span
-        >{store.fmtBytes(store.storage.disk.used_bytes)} {_("disk.used")}</span
-      >
-      <span
-        >{store.fmtBytes(store.storage.disk.available_bytes)}
-        {_("disk.free_of")}
-        {store.fmtBytes(store.storage.disk.total_bytes)}</span
-      >
+{#if store.overview?.disk}
+  <div class="ui-card ui-card--rounded p-4 mb-4 relative overflow-hidden">
+    <div
+      class="absolute inset-0 opacity-15 transition-all duration-700 {diskColor}"
+      style="width: {diskPercent}%"
+    ></div>
+    <div class="relative">
+      <h3 class="text-sm font-medium mb-3 flex items-center gap-1.5">
+        <HardDrive size={14} class="text-text-2" />
+        {_("disk.title")}
+      </h3>
+      <div class="h-1.5 bg-surface rounded-full overflow-hidden mb-2">
+        <div
+          class="h-full rounded-full transition-all duration-500 {diskColor}"
+          style="width: {diskPercent}%"
+        ></div>
+      </div>
+      <div class="flex justify-between text-xs text-text-2">
+        <span
+          >{store.fmtBytes(store.overview.disk.used_bytes)} {_("disk.used")}</span
+        >
+        <span
+          >{store.fmtBytes(store.overview.disk.available_bytes)}
+          {_("disk.free_of")}
+          {store.fmtBytes(store.overview.disk.total_bytes)}</span
+        >
+      </div>
     </div>
   </div>
 {/if}
 
-<!-- Email Traffic -->
-{#if store.status?.email_servers}
-  <div class="bg-surface-2 rounded-lg p-4 border border-border mb-4">
+<!-- Federation traffic -->
+{#if dashboardFederation}
+  <div class="mb-4">
     <h3 class="text-sm font-medium mb-2 flex items-center gap-1.5">
       <Network size={14} class="text-text-2" />
-      {_("traffic.title")}
+      <a href="{base}/federation/traffic" class="hover:text-accent transition-colors">
+        {_("tab.federation")}
+      </a>
+    </h3>
+    <FederationStatsGrid
+      stats={dashboardFederation.stats}
+      health={dashboardFederation.health}
+      onHealthSelect={(tier: FederationHealthTier) =>
+        goto(federationHealthFilterHref(tier))}
+    />
+    {#if store.overview?.email_servers}
+      <div class="grid grid-cols-3 gap-3">
+        <div class="ui-card ui-card--rounded p-3 text-center">
+          <div class="text-lg font-semibold tabular-nums">{fedConnections}</div>
+          <div class="text-text-2 text-[10px] uppercase tracking-wider mt-1">
+            {_("traffic.connections")}
+          </div>
+        </div>
+        <div class="ui-card ui-card--rounded p-3 text-center">
+          <div class="text-lg font-semibold tabular-nums">
+            {store.overview.email_servers.domain_servers}
+          </div>
+          <div class="text-text-2 text-[10px] uppercase tracking-wider mt-1">
+            {_("traffic.domains")}
+          </div>
+        </div>
+        <div class="ui-card ui-card--rounded p-3 text-center">
+          <div class="text-lg font-semibold tabular-nums">
+            {store.overview.email_servers.ip_servers}
+          </div>
+          <div class="text-text-2 text-[10px] uppercase tracking-wider mt-1">
+            {_("traffic.ip_servers")}
+          </div>
+        </div>
+      </div>
+    {/if}
+  </div>
+{:else if store.overview?.email_servers}
+  <div class="ui-card ui-card--rounded p-4 mb-4">
+    <h3 class="text-sm font-medium mb-2 flex items-center gap-1.5">
+      <Network size={14} class="text-text-2" />
+      {_("tab.federation")}
     </h3>
     <div class="grid grid-cols-3 gap-3 text-center">
       <div>
-        <div class="text-lg font-semibold">
-          {store.status.email_servers.connection_ips}
-        </div>
+        <div class="text-lg font-semibold">{fedConnections}</div>
         <div class="text-text-2 text-xs">{_("traffic.connections")}</div>
       </div>
       <div>
         <div class="text-lg font-semibold">
-          {store.status.email_servers.domain_servers}
+          {store.overview.email_servers.domain_servers}
         </div>
         <div class="text-text-2 text-xs">{_("traffic.domains")}</div>
       </div>
       <div>
         <div class="text-lg font-semibold">
-          {store.status.email_servers.ip_servers}
+          {store.overview.email_servers.ip_servers}
         </div>
         <div class="text-text-2 text-xs">{_("traffic.ip_servers")}</div>
       </div>
@@ -321,62 +397,153 @@
   </div>
 {/if}
 
-<!-- Message Storage -->
-<div class="bg-surface-2 rounded-lg p-4 border border-border mb-4">
-  <h3 class="text-sm font-medium mb-3 flex items-center gap-1.5">
-    <HardDrive size={14} class="text-text-2" />
-    {_("queue.purge_files")}
+<!-- Purge actions -->
+<div class="mb-4">
+  <h3 class="text-sm font-medium mb-3 flex items-center gap-1.5 text-text-2">
+    <Trash2 size={14} />
+    {_("dashboard.actions")}
   </h3>
-  <div class="flex flex-wrap gap-2 items-center mb-3">
-    <span class="text-xs text-text-2">{_("queue.purge_older")}</span>
-    <select
-      bind:value={selectedRetention}
-      class="min-w-[7.5rem] py-1.5 ps-2 pe-8 text-xs bg-surface border border-border rounded-lg text-text focus:border-accent outline-none transition rtl:ps-8 rtl:pe-2"
-    >
-      {#each RETENTION_KEYS as opt}
-        <option value={opt.value}>{_(opt.key)}</option>
-      {/each}
-    </select>
-    <button
-      onclick={purgeOlder}
-      disabled={purging}
-      class="px-3 py-1.5 text-xs border border-warning/30 rounded-lg hover:bg-warning/10 text-warning transition-colors flex items-center gap-1 disabled:opacity-50"
-    >
-      <Trash2 size={11} />
-      {purging ? "..." : _("queue.purge_older")}
-    </button>
-    <button
-      onclick={() => store.purge("purge_read_blobs")}
-      disabled={purging}
-      class="px-3 py-1.5 text-xs border border-border rounded-lg hover:bg-surface-3 text-text-2 transition-colors flex items-center gap-1 disabled:opacity-50"
-      ><Trash2 size={11} /> {_("queue.purge_read_blobs")}</button
-    >
-    <button
-      onclick={purgeAllBlobs}
-      disabled={purging}
-      class="px-3 py-1.5 text-xs border border-danger/30 rounded-lg hover:bg-danger/10 text-danger transition-colors flex items-center gap-1 disabled:opacity-50 ms-auto"
-      ><Trash2 size={11} /> {_("queue.purge_all_files")}</button
-    >
-  </div>
-</div>
 
-<!-- Queue (DB) -->
-<div class="bg-surface-2 rounded-lg p-4 border border-border">
-  <h3 class="text-sm font-medium mb-3 flex items-center gap-1.5">
-    <Shield size={14} class="text-text-2" />
-    {_("queue.title")}
-  </h3>
-  <div class="flex flex-wrap gap-2 items-center">
-    <button
-      onclick={() => store.purge("purge_read")}
-      class="px-3 py-1.5 text-xs border border-border rounded-lg hover:bg-surface-3 text-text-2 transition-colors"
-      >{_("queue.purge_read")}</button
-    >
-    <button
-      onclick={() => store.purge("purge_all")}
-      class="px-3 py-1.5 text-xs border border-danger/30 rounded-lg hover:bg-danger/10 text-danger transition-colors flex items-center gap-1"
-      ><Trash2 size={11} /> {_("queue.purge_all")}</button
-    >
+  <div class="grid sm:grid-cols-2 gap-3">
+    <!-- Message files -->
+    <div class="ui-card ui-card--rounded p-3 flex flex-col gap-2">
+      <div class="flex items-center gap-2 text-xs font-medium text-text mb-1">
+        <HardDrive size={13} class="text-text-2 shrink-0" />
+        {_("queue.purge_files")}
+      </div>
+
+      <div
+        class="rounded-lg border border-border bg-surface p-2.5 space-y-2 transition-opacity {rotationApiAvailable
+          ? ''
+          : 'opacity-45 pointer-events-none select-none'}"
+        title={rotationApiAvailable ? undefined : _("queue.rotation_unsupported")}
+      >
+        <div class="flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <div class="text-xs font-medium text-text">
+              {_("svc.message_retention")}
+            </div>
+            <p class="text-[10px] text-text-2 leading-snug mt-0.5">
+              {#if rotationApiAvailable}
+                {rotationEnabled
+                  ? _("queue.rotation_on_hint", { days: String(rotationDays) })
+                  : _("queue.rotation_off_hint")}
+              {:else}
+                {_("queue.rotation_unsupported")}
+              {/if}
+            </p>
+          </div>
+          <ToggleSwitch
+            checked={rotationEnabled}
+            disabled={store.busy || !rotationApiAvailable}
+            label={_("svc.message_retention")}
+            onclick={() => store.toggleMessageRetention()}
+          />
+        </div>
+        <div class="flex gap-2 items-center">
+          <label class="text-[11px] text-text-2 shrink-0" for="rotation-days">
+            {_("queue.rotation_keep")}
+          </label>
+          <Select
+            id="rotation-days"
+            bind:value={rotationDaysSelect}
+            disabled={!rotationApiAvailable || !rotationEnabled || store.busy}
+            onchange={() => store.setMessageRetentionDays(rotationDaysSelect)}
+            class="flex-1 bg-surface-2 py-1.5 disabled:opacity-45"
+          >
+            {#each ROTATION_DAY_OPTIONS as days}
+              <option value={days}>{_("queue.retention_days", { n: String(days) })}</option>
+            {/each}
+          </Select>
+        </div>
+      </div>
+
+      <label class="text-[11px] text-text-2" for="purge-retention">
+        {_("queue.older_than")}
+      </label>
+      <div class="flex gap-2">
+        <Select
+          id="purge-retention"
+          bind:value={selectedRetention}
+          disabled={purging}
+          class="flex-1"
+        >
+          {#each RETENTION_KEYS as opt}
+            <option value={opt.value}>{_(opt.key)}</option>
+          {/each}
+        </Select>
+        <button
+          type="button"
+          onclick={purgeOlder}
+          disabled={purging}
+          class="shrink-0 px-3 py-2 text-xs font-medium rounded-lg border border-warning/40 bg-warning/10 text-warning hover:bg-warning/20 transition-colors disabled:opacity-50"
+        >
+          {purging ? "…" : _("queue.purge_short")}
+        </button>
+      </div>
+
+      <button
+        type="button"
+        onclick={() => store.purge("purge_read_blobs")}
+        disabled={purging}
+        class="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-xs text-start rounded-lg border border-border bg-surface hover:border-accent/40 hover:bg-surface-3 transition-colors disabled:opacity-45 disabled:cursor-not-allowed"
+      >
+        <span>{_("queue.purge_read_blobs")}</span>
+        <Trash2 size={13} class="text-text-2 shrink-0" />
+      </button>
+      <button
+        type="button"
+        onclick={purgeAllBlobs}
+        disabled={purging}
+        class="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-xs text-start rounded-lg border border-danger/35 bg-danger/5 text-danger hover:bg-danger/10 hover:border-danger/50 transition-colors disabled:opacity-45 disabled:cursor-not-allowed"
+      >
+        <span>{_("queue.purge_all_files")}</span>
+        <Trash2 size={13} class="shrink-0" />
+      </button>
+    </div>
+
+    <!-- Actions -->
+    <div class="ui-card ui-card--rounded p-3 flex flex-col gap-2">
+      <div class="flex items-center gap-2 text-xs font-medium text-text mb-1">
+        <Server size={13} class="text-text-2 shrink-0" />
+        {_("actions.title")}
+      </div>
+
+      <button
+        type="button"
+        onclick={() => store.reload()}
+        disabled={store.reloading || purging}
+        class="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-xs text-start rounded-lg border border-border bg-surface hover:border-accent/40 hover:bg-surface-3 transition-colors disabled:opacity-45 disabled:cursor-not-allowed"
+      >
+        <span>
+          {store.reloading ? _("action.restarting") : _("actions.soft_reload")}
+        </span>
+        <RefreshCw
+          size={13}
+          class="text-text-2 shrink-0 {store.reloading ? 'animate-spin' : ''}"
+        />
+      </button>
+
+      <button
+        type="button"
+        onclick={() => store.purge("purge_all")}
+        disabled={purging}
+        class="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-xs text-start rounded-lg border border-danger/35 bg-danger/5 text-danger hover:bg-danger/10 hover:border-danger/50 transition-colors disabled:opacity-45 disabled:cursor-not-allowed"
+      >
+        <span>{_("queue.purge_all")}</span>
+        <Trash2 size={13} class="shrink-0" />
+      </button>
+
+      <button
+        type="button"
+        onclick={() => store.purge("purge_read")}
+        disabled={purging}
+        class="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-xs text-start rounded-lg border border-border bg-surface hover:border-accent/40 hover:bg-surface-3 transition-colors disabled:opacity-45 disabled:cursor-not-allowed"
+      >
+        <span>{_("queue.purge_read")}</span>
+        <Trash2 size={13} class="text-text-2 shrink-0" />
+      </button>
+    </div>
   </div>
 </div>
 
@@ -389,7 +556,7 @@
     onclick={() => showUpdateModal = false}
   >
     <div
-      class="bg-surface-2 border border-border rounded-xl w-full max-w-sm p-5 shadow-2xl"
+      class="ui-card ui-card--panel w-full max-w-sm p-5"
       onclick={(e) => e.stopPropagation()}
     >
       <div class="flex items-center justify-between mb-4">
@@ -410,7 +577,7 @@
           >{_("version.current")}</div
         >
         <div class="text-lg font-semibold font-mono">
-          {store.status?.version ?? store.serverVersion ?? "—"}
+          {store.overview?.version ?? store.serverVersion ?? "—"}
         </div>
       </div>
 

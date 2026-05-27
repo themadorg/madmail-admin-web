@@ -1,16 +1,9 @@
 <script lang="ts">
   import { store } from "$lib/state.svelte";
   import { t, getLocale } from "$lib/i18n";
-  import {
-    ToggleLeft,
-    ToggleRight,
-    Pencil,
-    RotateCcw,
-    Dice5,
-    QrCode,
-    AlertTriangle,
-  } from "lucide-svelte";
+  import { Pencil, RotateCcw, Dice5, QrCode, AlertTriangle } from "lucide-svelte";
   import ShadowsocksQR from "$lib/components/ShadowsocksQR.svelte";
+  import ToggleSwitch from "$lib/components/ToggleSwitch.svelte";
 
   let showQR = $state(false);
 
@@ -31,11 +24,9 @@
 
   let isWorking = $derived(store.refreshing || store.busy || store.reloading);
 
-  function toggleLabel(val: string | undefined): string {
-    return (val ?? "enabled") === "enabled"
-      ? _("proxy.enabled")
-      : _("proxy.disabled");
-  }
+  $effect(() => {
+    if (store.connected) store.loadSettings();
+  });
 
   let httpProxyUrl = $derived.by(() => {
     if (!store.settings) return "";
@@ -74,27 +65,18 @@
     onLabel: string,
   )}
     <div
-      class="flex items-center justify-between bg-surface-2 rounded-lg p-3 border border-border"
+      class="ui-card ui-card--rounded ui-card-row"
     >
       <div>
         <div class="text-sm font-medium">{label}</div>
         <div class="text-xs text-text-2 font-mono">{resource}</div>
       </div>
-      <button
-        onclick={() => store.toggleService(resource, current)}
+      <ToggleSwitch
+        checked={current === onLabel}
         disabled={isWorking}
-        class="flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full transition-colors disabled:opacity-50
-          {current === onLabel
-          ? 'bg-success/15 text-success border border-success/30'
-          : 'bg-surface-3 text-text-2 border border-border hover:border-text-2/50'}"
-      >
-        {#if current === onLabel}
-          <ToggleRight size={14} />
-        {:else}
-          <ToggleLeft size={14} />
-        {/if}
-        {toggleLabel(current)}
-      </button>
+        label={label}
+        onclick={() => store.toggleService(resource, current)}
+      />
     </div>
   {/snippet}
 
@@ -105,7 +87,7 @@
     inputType: string,
   )}
     <div
-      class="flex items-center justify-between bg-surface-2 rounded-lg p-3 border border-border gap-3"
+      class="ui-card-row gap-3"
     >
       <div class="min-w-0 flex-1">
         <div class="text-sm font-medium">{label}</div>
@@ -213,31 +195,22 @@
       <h3 class="text-sm font-medium text-text-2">
         {_("proxy.shadowsocks")}
       </h3>
-      <button
+      <ToggleSwitch
+        checked={store.settings.ss_enabled === "enabled"}
+        disabled={isWorking}
+        label={_("proxy.shadowsocks")}
         onclick={() =>
           store.toggleService(
             "/admin/services/shadowsocks",
             store.settings!.ss_enabled,
           )}
-        disabled={isWorking}
-        class="flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full transition-colors disabled:opacity-50
-          {store.settings.ss_enabled === 'enabled'
-          ? 'bg-success/15 text-success border border-success/30'
-          : 'bg-surface-3 text-text-2 border border-border hover:border-text-2/50'}"
-      >
-        {#if store.settings.ss_enabled === "enabled"}
-          <ToggleRight size={14} />
-        {:else}
-          <ToggleLeft size={14} />
-        {/if}
-        {toggleLabel(store.settings.ss_enabled)}
-      </button>
+      />
     </div>
 
     <div
-      class="bg-surface-2 rounded-xl border border-border overflow-hidden shadow-sm"
+      class="ui-card ui-card--panel"
     >
-      <div class="divide-y divide-border">
+      <div class="ui-card-rows">
         {@render editableRow("ss_password", _("svc.ss_password"), "", "text")}
         {@render editableRow(
           "ss_port",
@@ -309,31 +282,22 @@
       <h3 class="text-sm font-medium text-text-2">
         {_("proxy.ws")}
       </h3>
-      <button
+      <ToggleSwitch
+        checked={(store.settings.ss_ws_enabled ?? "enabled") === "enabled"}
+        disabled={isWorking}
+        label={_("proxy.ws")}
         onclick={() =>
           store.toggleService(
             "/admin/services/ss_ws",
             store.settings!.ss_ws_enabled ?? "enabled",
           )}
-        disabled={isWorking}
-        class="flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full transition-colors disabled:opacity-50
-          {(store.settings.ss_ws_enabled ?? 'enabled') === 'enabled'
-          ? 'bg-success/15 text-success border border-success/30'
-          : 'bg-surface-3 text-text-2 border border-border hover:border-text-2/50'}"
-      >
-        {#if (store.settings.ss_ws_enabled ?? "enabled") === "enabled"}
-          <ToggleRight size={14} />
-        {:else}
-          <ToggleLeft size={14} />
-        {/if}
-        {toggleLabel(store.settings.ss_ws_enabled)}
-      </button>
+      />
     </div>
 
     <div
-      class="bg-surface-2 rounded-xl border border-border overflow-hidden shadow-sm"
+      class="ui-card ui-card--panel"
     >
-      <div class="divide-y divide-border">
+      <div class="ui-card-rows">
         {@render editableRow(
           "ss_ws_port",
           _("proxy.ws_port"),
@@ -352,31 +316,22 @@
       <h3 class="text-sm font-medium text-text-2">
         {_("proxy.grpc")}
       </h3>
-      <button
+      <ToggleSwitch
+        checked={(store.settings.ss_grpc_enabled ?? "enabled") === "enabled"}
+        disabled={isWorking}
+        label={_("proxy.grpc")}
         onclick={() =>
           store.toggleService(
             "/admin/services/ss_grpc",
             store.settings!.ss_grpc_enabled ?? "enabled",
           )}
-        disabled={isWorking}
-        class="flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full transition-colors disabled:opacity-50
-          {(store.settings.ss_grpc_enabled ?? 'enabled') === 'enabled'
-          ? 'bg-success/15 text-success border border-success/30'
-          : 'bg-surface-3 text-text-2 border border-border hover:border-text-2/50'}"
-      >
-        {#if (store.settings.ss_grpc_enabled ?? "enabled") === "enabled"}
-          <ToggleRight size={14} />
-        {:else}
-          <ToggleLeft size={14} />
-        {/if}
-        {toggleLabel(store.settings.ss_grpc_enabled)}
-      </button>
+      />
     </div>
 
     <div
-      class="bg-surface-2 rounded-xl border border-border overflow-hidden shadow-sm"
+      class="ui-card ui-card--panel"
     >
-      <div class="divide-y divide-border">
+      <div class="ui-card-rows">
         {@render editableRow(
           "ss_grpc_port",
           _("proxy.grpc_port"),
@@ -395,31 +350,22 @@
       <h3 class="text-sm font-medium text-text-2">
         {_("proxy.http_proxy")}
       </h3>
-      <button
+      <ToggleSwitch
+        checked={(store.settings.http_proxy_enabled ?? "disabled") === "enabled"}
+        disabled={isWorking}
+        label={_("proxy.http_proxy")}
         onclick={() =>
           store.toggleService(
             "/admin/services/http_proxy",
             store.settings!.http_proxy_enabled ?? "disabled",
           )}
-        disabled={isWorking}
-        class="flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full transition-colors disabled:opacity-50
-          {(store.settings.http_proxy_enabled ?? 'disabled') === 'enabled'
-          ? 'bg-success/15 text-success border border-success/30'
-          : 'bg-surface-3 text-text-2 border border-border hover:border-text-2/50'}"
-      >
-        {#if (store.settings.http_proxy_enabled ?? "disabled") === "enabled"}
-          <ToggleRight size={14} />
-        {:else}
-          <ToggleLeft size={14} />
-        {/if}
-        {toggleLabel(store.settings.http_proxy_enabled ?? "disabled")}
-      </button>
+      />
     </div>
 
     <div
-      class="bg-surface-2 rounded-xl border border-border overflow-hidden shadow-sm"
+      class="ui-card ui-card--panel"
     >
-      <div class="divide-y divide-border">
+      <div class="ui-card-rows">
         {@render editableRow(
           "http_proxy_port",
           _("proxy.http_proxy_port"),

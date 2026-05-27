@@ -11,4 +11,13 @@ declare global {
 	}
 }
 
+interface ImportMetaEnv {
+	readonly VITE_DEV_API_PROXY?: string;
+	readonly VITE_DEV_API_PATH?: string;
+}
+
+interface ImportMeta {
+	readonly env: ImportMetaEnv;
+}
+
 export { };

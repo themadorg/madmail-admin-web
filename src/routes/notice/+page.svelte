@@ -13,6 +13,10 @@
     locale = getLocale();
   });
 
+  $effect(() => {
+    if (store.connected) store.loadOverview();
+  });
+
   let mode = $state<"all" | "single">("all");
   let recipient = $state("");
   let subject = $state("");
@@ -29,8 +33,10 @@
     return { baseUrl: store.baseUrl, token: store.token };
   }
 
-  // Get total users from store
-  let totalUsers = $derived(store.status?.users?.registered ?? 0);
+  // Get total users from overview (or legacy status mirror)
+  let totalUsers = $derived(
+    store.overview?.users?.registered ?? store.status?.users?.registered ?? 0,
+  );
 
   async function doSend() {
     showConfirm = false;
@@ -87,7 +93,7 @@
 </script>
 
 <!-- Header -->
-<div class="bg-surface-2 rounded-lg border border-border mb-4 p-4">
+<div class="ui-card ui-card--rounded mb-4 p-4">
   <div class="flex items-center gap-2 mb-1">
     <Mail size={16} class="text-accent" />
     <h2 class="text-base font-semibold">{_("notice.title")}</h2>
@@ -96,7 +102,7 @@
 </div>
 
 <!-- Recipient Mode -->
-<div class="bg-surface-2 rounded-lg border border-border mb-3 p-3">
+<div class="ui-card ui-card--rounded mb-3 p-3">
   <div class="flex gap-2 mb-3">
     <button
       onclick={() => (mode = "all")}

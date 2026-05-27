@@ -187,7 +187,7 @@
 {#if store.registrationTokens}
   <!-- Header card -->
   <div
-    class="bg-surface-2 rounded-lg border border-border mb-4 p-3 flex flex-wrap justify-between items-center gap-2"
+    class="ui-card ui-card--rounded mb-4 p-3 flex flex-wrap justify-between items-center gap-2"
   >
     <div class="flex items-center gap-3">
       <span class="text-sm flex items-center gap-1.5">
@@ -209,7 +209,7 @@
   <!-- Create form -->
   {#if showCreate}
     <div
-      class="bg-surface-2 rounded-lg border border-accent/30 mb-4 p-4 space-y-3 animate-modal"
+      class="ui-card ui-card--rounded border-accent/30 mb-4 p-4 space-y-3 animate-modal"
     >
       <h3 class="text-sm font-semibold flex items-center gap-1.5">
         <Plus size={14} class="text-accent" />
@@ -318,7 +318,7 @@
     <div class="space-y-1.5">
       {#each filtered as entry (entry.token)}
         <div
-          class="bg-surface-2 rounded-lg px-3 py-3 border border-border group"
+          class="ui-card ui-card--rounded px-3 py-3 group"
         >
           <div class="flex items-start justify-between gap-2">
             <!-- Token info -->

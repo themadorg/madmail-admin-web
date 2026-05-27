@@ -3,8 +3,11 @@
 
 import {
     api,
+    fetchOverview,
+    isViteDevShell,
     type ApiConfig,
     type StatusResponse,
+    type OverviewResponse,
     type StorageResponse,
     type AllSettings,
     type AccountList,
@@ -22,6 +25,38 @@ import {
 import { t } from '$lib/i18n';
 import { applySettingsToAdminBaseUrl } from '$lib/adminUrl';
 import { saveServer } from '$lib/servers';
+import {
+    getPageRefreshLoaders,
+    normalizeRoutePath,
+} from '$lib/pageRefresh';
+
+/** Map admin toggle API paths to settings snapshot fields */
+const TOGGLE_RESOURCE_SETTINGS: Record<string, keyof AllSettings> = {
+    '/admin/registration': 'registration',
+    '/admin/registration/jit': 'jit_registration',
+    '/admin/services/turn': 'turn_enabled',
+    '/admin/services/iroh': 'iroh_enabled',
+    '/admin/services/admin_web': 'admin_web_enabled',
+    '/admin/services/auto_purge_seen': 'auto_purge_seen_enabled',
+    '/admin/services/message_retention': 'message_retention_enabled',
+    '/admin/services/webimap': 'webimap_enabled',
+    '/admin/services/websmtp': 'websmtp_enabled',
+    '/admin/services/shadowsocks': 'ss_enabled',
+    '/admin/services/ss_ws': 'ss_ws_enabled',
+    '/admin/services/ss_grpc': 'ss_grpc_enabled',
+    '/admin/services/http_proxy': 'http_proxy_enabled',
+};
+
+/** Toggles that need a service reload before they take effect (Apply & Restart in header). */
+const RESTART_DEFERRAL_RESOURCES = new Set([
+    '/admin/services/shadowsocks',
+    '/admin/services/ss_ws',
+    '/admin/services/ss_grpc',
+    '/admin/services/http_proxy',
+    '/admin/services/turn',
+    '/admin/services/iroh',
+    '/admin/services/admin_web',
+]);
 
 /** Map admin toggle API paths to i18n keys for toast labels */
 const TOGGLE_RESOURCE_I18N: Record<string, string> = {
@@ -31,6 +66,7 @@ const TOGGLE_RESOURCE_I18N: Record<string, string> = {
     '/admin/services/iroh': 'svc.iroh',
     '/admin/services/admin_web': 'svc.admin_web',
     '/admin/services/auto_purge_seen': 'svc.auto_purge_seen',
+    '/admin/services/message_retention': 'svc.message_retention',
     '/admin/services/webimap': 'svc.webimap',
     '/admin/services/websmtp': 'svc.websmtp',
     '/admin/services/shadowsocks': 'svc.shadowsocks',
@@ -42,6 +78,12 @@ const TOGGLE_RESOURCE_I18N: Record<string, string> = {
 function toggleResourceLabel(resource: string): string {
     const key = TOGGLE_RESOURCE_I18N[resource];
     return key ? t(key) : (resource.split('/').pop() ?? resource);
+}
+
+function applyToggleToSettings(settings: AllSettings, resource: string, status: string) {
+    const key = TOGGLE_RESOURCE_SETTINGS[resource];
+    if (!key) return;
+    (settings as Record<string, string>)[key] = status;
 }
 
 function toggleStatusLabel(status: string | undefined): string {
@@ -94,6 +136,8 @@ class AdminState {
     checkingUpdates = $state(false);
 
     // Data
+    overview = $state<OverviewResponse | null>(null);
+    overviewLoading = $state(false);
     status = $state<StatusResponse | null>(null);
     storage = $state<StorageResponse | null>(null);
     settings = $state<AllSettings | null>(null);
@@ -122,6 +166,7 @@ class AdminState {
     // Derived
     get shadowsocksUrl(): string {
         if (!this.settings || this.settings.ss_enabled !== 'enabled') return '';
+        if (this.settings.shadowsocks_url) return this.settings.shadowsocks_url;
 
         const getVal = (key: string, fallback: string) => {
             if (this.editingField === key) return this.editValue;
@@ -223,6 +268,11 @@ class AdminState {
         if (typeof window === 'undefined' || !this.settings) {
             return;
         }
+        // Production chatmail embeds the SPA under admin_web_path (e.g. /aaa2).
+        // Vite dev always serves at / — syncing would redirect away from the dev server.
+        if (isViteDevShell()) {
+            return;
+        }
         const s = this.settings.admin_web_path;
         if (!s.is_set || !s.value?.trim()) {
             return;
@@ -245,41 +295,202 @@ class AdminState {
         if (!this.baseUrl || !this.token || this.connecting) return;
         this.connecting = true;
         this.connectError = '';
-        const res = await api.status(this.cfg());
+        const res = await fetchOverview(this.cfg());
         this.connecting = false;
         if (res.error) { this.connectError = res.error; return; }
         localStorage.setItem('madmail_url', this.baseUrl);
         localStorage.setItem('madmail_token', this.token);
-        // Save to IndexedDB for multi-server support
         saveServer(this.baseUrl, this.token).catch(() => { });
+        this.applyOverviewResponse(res);
         this.connected = true;
-        if (res.data) this.status = res.data;
-        if ((res as any).version) this.serverVersion = (res as any).version;
-        this.refresh();
+    }
+
+    /** Apply `GET /admin/overview` (or legacy composed) payload into store fields. */
+    applyOverviewResponse(res: { data?: OverviewResponse; version?: string }) {
+        if (res.data) {
+            this.overview = res.data;
+            this.status = {
+                version: res.data.version,
+                users: res.data.users,
+                uptime: res.data.uptime,
+                sent_messages: res.data.sent_messages,
+                outbound_messages: res.data.outbound_messages,
+                received_messages: res.data.received_messages,
+                imap: res.data.imap,
+                turn: res.data.turn,
+                shadowsocks: res.data.shadowsocks,
+                email_servers: res.data.email_servers,
+                federation_traffic: res.data.federation_traffic,
+                message_retention: res.data.message_retention,
+            };
+            this.storage = {
+                disk: res.data.disk,
+                state_dir: this.storage?.state_dir ?? { path: '', size_bytes: 0 },
+            };
+            if (res.data.settings) {
+                this.settings = res.data.settings;
+                this.syncConnectionBaseUrlWithSettings();
+                this.syncAdminWebPathFromSettings();
+            }
+        }
+        if (res.version) this.serverVersion = res.version;
+    }
+
+    async loadOverview(opts?: { force?: boolean }) {
+        if (!this.connected || this.overviewLoading) return;
+        if (!opts?.force && this.overview) return;
+        this.overviewLoading = true;
+        try {
+            const res = await fetchOverview(this.cfg());
+            if (res.error) {
+                this.notify(res.error, 'err');
+                return;
+            }
+            this.applyOverviewResponse(res);
+        } finally {
+            this.overviewLoading = false;
+        }
+    }
+
+    async loadStorage() {
+        if (!this.connected) return;
+        const res = await api.storage(this.cfg());
+        if (res.error) { this.notify(res.error, 'err'); return; }
+        if (res.data) this.storage = res.data;
+        if (res.version) this.serverVersion = res.version;
+    }
+
+    async loadSettings() {
+        if (!this.connected) return;
+        const res = await api.settings(this.cfg());
+        if (res.error) { this.notify(res.error, 'err'); return; }
+        if (res.data) {
+            this.settings = res.data;
+            this.syncConnectionBaseUrlWithSettings();
+            this.syncAdminWebPathFromSettings();
+        }
+        if (res.version) this.serverVersion = res.version;
+    }
+
+    async loadAccounts() {
+        if (!this.connected) return;
+        const res = await api.accounts(this.cfg());
+        if (res.error) { this.notify(res.error, 'err'); return; }
+        if (res.data) this.accounts = res.data;
+        if (res.version) this.serverVersion = res.version;
+    }
+
+    async loadQuota() {
+        if (!this.connected) return;
+        const res = await api.quota(this.cfg());
+        if (res.error) { this.notify(res.error, 'err'); return; }
+        if (res.data) this.quota = res.data;
+        if (res.version) this.serverVersion = res.version;
+    }
+
+    async loadBlocklist() {
+        if (!this.connected) return;
+        const res = await api.blocklist(this.cfg());
+        if (res.error) { this.notify(res.error, 'err'); return; }
+        if (res.data) this.blocklist = res.data;
+        if (res.version) this.serverVersion = res.version;
+    }
+
+    async loadEndpointOverrides() {
+        if (!this.connected) return;
+        const res = await api.dns(this.cfg());
+        if (res.error) { this.notify(res.error, 'err'); return; }
+        if (res.data) this.endpointOverrides = res.data;
+        if (res.version) this.serverVersion = res.version;
+    }
+
+    async loadExchangers() {
+        if (!this.connected) return;
+        const res = await api.exchangers(this.cfg());
+        if (res.error) { this.notify(res.error, 'err'); return; }
+        if (res.data) this.exchangers = res.data;
+        if (res.version) this.serverVersion = res.version;
+    }
+
+    async loadRegistrationTokens() {
+        if (!this.connected) return;
+        const res = await api.registrationTokens(this.cfg());
+        if (res.error) { this.notify(res.error, 'err'); return; }
+        if (res.data) this.registrationTokens = res.data;
+        if (res.version) this.serverVersion = res.version;
+    }
+
+    async loadFederationSettings() {
+        if (!this.connected) return;
+        const res = await api.federationSettings(this.cfg());
+        if (res.error) { this.notify(res.error, 'err'); return; }
+        if (res.data) this.federationSettings = res.data;
+    }
+
+    async loadFederationRules() {
+        if (!this.connected) return;
+        const res = await api.federationRules(this.cfg());
+        if (res.error) { this.notify(res.error, 'err'); return; }
+        if (res.data) this.federationRules = res.data;
+    }
+
+    async loadFederationServers() {
+        if (!this.connected) return;
+        const res = await api.federationServers(this.cfg());
+        if (res.error) { this.notify(res.error, 'err'); return; }
+        if (res.data) this.federationServers = res.data;
+    }
+
+    /** Load summary data shown in the accounts section header. */
+    async loadAccountsSection() {
+        await Promise.all([
+            this.loadAccounts(),
+            this.loadBlocklist(),
+            this.loadQuota(),
+            this.loadRegistrationTokens(),
+        ]);
+    }
+
+    /** Load shared federation layout data. */
+    async loadFederationSection() {
+        await Promise.all([
+            this.loadFederationSettings(),
+            this.loadFederationRules(),
+            this.loadFederationServers(),
+            this.loadSettings(),
+        ]);
     }
 
     async refresh() {
-        if (this.refreshing) return;
+        if (this.refreshing || !this.connected) return;
         this.refreshing = true;
         try {
-            // Fetch everything in parallel but update state as soon as each resolves.
-            // This makes the dashboard feel much faster as results pop in.
             await Promise.all([
-                api.storage(this.cfg()).then(res => { if (res.data) this.storage = res.data; if (res.version) this.serverVersion = res.version; }),
-                api.settings(this.cfg()).then(res => { if (res.data) this.settings = res.data; if (res.version) this.serverVersion = res.version; }),
-                api.accounts(this.cfg()).then(res => { if (res.data) this.accounts = res.data; if (res.version) this.serverVersion = res.version; }),
-                api.quota(this.cfg()).then(res => { if (res.data) this.quota = res.data; if (res.version) this.serverVersion = res.version; }),
-                api.status(this.cfg()).then(res => { if (res.data) this.status = res.data; if (res.version) this.serverVersion = res.version; }),
-                api.blocklist(this.cfg()).then(res => { if (res.data) this.blocklist = res.data; if (res.version) this.serverVersion = res.version; }),
-                api.dns(this.cfg()).then(res => { if (res.data) this.endpointOverrides = res.data; if (res.version) this.serverVersion = res.version; }),
-                api.exchangers(this.cfg()).then(res => { if (res.data) this.exchangers = res.data; if (res.version) this.serverVersion = res.version; }),
-                api.registrationTokens(this.cfg()).then(res => { if (res.data) this.registrationTokens = res.data; if (res.version) this.serverVersion = res.version; }),
-                api.federationSettings(this.cfg()).then(res => { if (res.data) this.federationSettings = res.data; }),
-                api.federationRules(this.cfg()).then(res => { if (res.data) this.federationRules = res.data; }),
-                api.federationServers(this.cfg()).then(res => { if (res.data) this.federationServers = res.data; }),
+                this.loadOverview({ force: true }),
+                this.loadSettings(),
+                this.loadAccounts(),
+                this.loadQuota(),
+                this.loadBlocklist(),
+                this.loadEndpointOverrides(),
+                this.loadExchangers(),
+                this.loadRegistrationTokens(),
+                this.loadFederationSettings(),
+                this.loadFederationRules(),
+                this.loadFederationServers(),
             ]);
-            this.syncConnectionBaseUrlWithSettings();
-            this.syncAdminWebPathFromSettings();
+        } finally {
+            this.refreshing = false;
+        }
+    }
+
+    /** Header refresh — reload only what the current route needs. */
+    async refreshForPath(pathname: string) {
+        if (this.refreshing || !this.connected) return;
+        const path = normalizeRoutePath(pathname);
+        const loaders = getPageRefreshLoaders(this, path);
+        this.refreshing = true;
+        try {
+            await Promise.all(loaders.map((load) => load()));
         } finally {
             this.refreshing = false;
         }
@@ -292,6 +503,7 @@ class AdminState {
         this.baseUrl = '';
         this.token = '';
         this.status = this.storage = this.settings = this.accounts = this.quota = this.blocklist = this.endpointOverrides = this.exchangers = this.registrationTokens = null;
+        this.overview = null;
         this.federationSettings = this.federationRules = this.federationServers = null;
         this.newAccount = null;
     }
@@ -306,16 +518,19 @@ class AdminState {
                 : resource === '/admin/registration' ? 'open' : 'enable';
             const res = await api.setToggle(this.cfg(), resource, action);
             if (res.error) { this.notify(res.error, 'err'); return; }
+            const newStatus = res.data?.status;
+            if (newStatus && this.settings) {
+                applyToggleToSettings(this.settings, resource, newStatus);
+            }
             this.notify(
                 t('notify.toggle_arrow', {
                     service: toggleResourceLabel(resource),
-                    status: toggleStatusLabel(res.data?.status),
+                    status: toggleStatusLabel(newStatus),
                 }),
             );
-            // Proxy transport toggles require a restart to take effect
-            const restartResources = ['/admin/services/shadowsocks', '/admin/services/ss_ws', '/admin/services/ss_grpc', '/admin/services/http_proxy'];
-            if (restartResources.includes(resource)) this.pendingRestart = true;
-            await this.refresh();
+            if (RESTART_DEFERRAL_RESOURCES.has(resource) || res.data?.restart_required) {
+                this.pendingRestart = true;
+            }
         } finally { this.busy = false; }
     }
 
@@ -360,6 +575,16 @@ class AdminState {
                 await api.reload(this.cfg());
                 this.pendingRestart = false;
                 this.notify(t('action.restarting'));
+                if (isViteDevShell()) {
+                    if (this.settings) {
+                        this.settings.admin_web_path = {
+                            ...this.settings.admin_web_path,
+                            value: v,
+                            is_set: true,
+                        };
+                    }
+                    return;
+                }
                 const u = new URL(path + '/', window.location.origin);
                 u.search = window.location.search;
                 u.hash = window.location.hash;
@@ -434,6 +659,16 @@ class AdminState {
                 await api.reload(this.cfg());
                 this.pendingRestart = false;
                 this.notify(t('action.restarting'));
+                if (isViteDevShell()) {
+                    if (this.settings && res.data) {
+                        this.settings.admin_web_path = {
+                            key: res.data.key,
+                            value: res.data.value,
+                            is_set: res.data.is_set,
+                        };
+                    }
+                    return;
+                }
                 const u = new URL('/admin/', window.location.origin);
                 u.search = window.location.search;
                 u.hash = window.location.hash;
@@ -493,7 +728,7 @@ class AdminState {
                 await api.resetSetting(this.cfg(), localOnlySettingKey);
             }
             this.pendingRestart = true;
-            await this.refresh();
+            await this.loadSettings();
         } finally { this.busy = false; }
     }
 
@@ -760,11 +995,56 @@ class AdminState {
             const action = current === 'enabled' ? 'disable' : 'enable';
             const res = await api.setToggle(this.cfg(), '/admin/services/auto_purge_seen', action);
             if (res.error) { this.notify(res.error, 'err'); return; }
+            if (res.data?.status && this.settings) {
+                applyToggleToSettings(this.settings, '/admin/services/auto_purge_seen', res.data.status);
+            }
             this.notify(
                 action === 'enable' ? t('notify.auto_purge_enabled') : t('notify.auto_purge_disabled'),
             );
-            await this.refresh();
         } finally { this.busy = false; }
+    }
+
+    async toggleMessageRetention() {
+        if (this.busy || !this.overview?.message_retention) return;
+        this.busy = true;
+        try {
+            const current = this.overview.message_retention.enabled;
+            const action = current ? 'disable' : 'enable';
+            const res = await api.setToggle(
+                this.cfg(),
+                '/admin/services/message_retention',
+                action,
+            );
+            if (res.error) {
+                this.notify(res.error, 'err');
+                return;
+            }
+            this.notify(
+                action === 'enable'
+                    ? t('notify.message_retention_enabled')
+                    : t('notify.message_retention_disabled'),
+            );
+            await this.loadOverview({ force: true });
+        } finally {
+            this.busy = false;
+        }
+    }
+
+    async setMessageRetentionDays(days: number) {
+        if (this.busy || !this.overview?.message_retention) return;
+        this.busy = true;
+        try {
+            const value = `${days}d`;
+            const res = await api.setSetting(this.cfg(), 'message_retention', value);
+            if (res.error) {
+                this.notify(res.error, 'err');
+                return;
+            }
+            this.notify(t('notify.message_retention_days', { days: String(days) }));
+            await this.loadOverview({ force: true });
+        } finally {
+            this.busy = false;
+        }
     }
 
     async toggleTokenRequired() {
@@ -775,10 +1055,12 @@ class AdminState {
             const action = current === 'enabled' ? 'disable' : 'enable';
             const res = await api.setToggle(this.cfg(), '/admin/settings/registration_token_required', action);
             if (res.error) { this.notify(res.error, 'err'); return; }
+            if (res.data?.status && this.settings) {
+                this.settings.registration_token_required = res.data.status;
+            }
             this.notify(
                 action === 'enable' ? t('notify.reg_tokens_required_on') : t('notify.reg_tokens_required_off'),
             );
-            await this.refresh();
         } finally { this.busy = false; }
     }
 

@@ -12,6 +12,10 @@
     locale = getLocale();
   });
 
+  $effect(() => {
+    if (store.connected) store.loadExchangers();
+  });
+
   let showAdd = $state(false);
   let newName = $state("");
   let newUrl = $state("");
@@ -71,6 +75,7 @@
   }
 </script>
 
+<div class="tab-pane federation-exchangers">
 {#if store.exchangers}
   <div class="exc-header">
     <span class="exc-count">
@@ -215,6 +220,7 @@
 {:else}
   <p class="loading">{_("exc.loading")}</p>
 {/if}
+</div>
 
 <!-- Delete confirmation modal -->
 {#if confirmingDelete}

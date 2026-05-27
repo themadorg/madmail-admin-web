@@ -18,6 +18,10 @@
 
   type AccessInfo = { accessField: string; localOnlySetting: string };
 
+  $effect(() => {
+    if (store.connected) store.loadSettings();
+  });
+
   /**
    * Map each port row to its access field and local-only setting key.
    * Ports without access control (like Shadowsocks itself, SASL) are excluded.
@@ -154,7 +158,7 @@
     {#snippet editableRow(key: string, label: string, fallback: string)}
       {@const access = getAccess(key)}
       <div
-        class="flex items-center justify-between bg-surface-2 rounded-lg p-3 border border-border gap-3"
+        class="ui-card ui-card--rounded ui-card-row gap-3"
       >
         <div class="min-w-0 flex-1">
           <div class="text-sm font-medium">{label}</div>

@@ -19,6 +19,10 @@
   $effect(() => {
     locale = getLocale();
   });
+
+  $effect(() => {
+    if (store.connected) store.loadAccountsSection();
+  });
   
   // Quota editing state
   let editingDefaultQuota = $state(false);
@@ -59,7 +63,7 @@
 <div class="federation-layout">
   <!-- Accounts Stats Grid -->
   <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
-    <div class="bg-surface-2 rounded-lg p-3 border border-border">
+    <div class="ui-card ui-card--rounded p-3">
       <div class="flex items-center gap-1.5 text-text-2 text-[10px] uppercase tracking-wider mb-1">
         <Users size={12} class="text-accent" />
         {_("acct.total")}
@@ -69,7 +73,7 @@
       </div>
     </div>
 
-    <div class="bg-surface-2 rounded-lg p-3 border border-border">
+    <div class="ui-card ui-card--rounded p-3">
       <div class="flex items-center gap-1.5 text-text-2 text-[10px] uppercase tracking-wider mb-1">
         <ShieldBan size={12} class="text-danger" />
         {_("acct.blocked")}
@@ -79,7 +83,7 @@
       </div>
     </div>
 
-    <div class="bg-surface-2 rounded-lg p-3 border border-border">
+    <div class="ui-card ui-card--rounded p-3">
       <div class="flex items-center gap-1.5 text-text-2 text-[10px] uppercase tracking-wider mb-1">
         <Ticket size={12} class="text-warning" />
         {_("tab.tokens")}
@@ -89,7 +93,7 @@
       </div>
     </div>
 
-    <div class="bg-surface-2 rounded-lg p-3 border border-border">
+    <div class="ui-card ui-card--rounded p-3">
       <div class="flex items-center gap-1.5 text-text-2 text-[10px] uppercase tracking-wider mb-1">
         <HardDrive size={12} class="text-success" />
         {_("acct.used")}
@@ -106,7 +110,7 @@
       {/if}
     </div>
 
-    <div class="bg-surface-2 rounded-lg p-3 border border-border">
+    <div class="ui-card ui-card--rounded p-3">
       <div class="flex items-center gap-1.5 text-text-2 text-[10px] uppercase tracking-wider mb-1">
         <ShieldCheck size={12} class="text-accent" />
         {_("acct.default_quota")}
@@ -198,6 +202,7 @@
       class="tab"
       class:active={activeTab === "list"}
       href="{base}/accounts"
+      data-sveltekit-noscroll
     >
       <Users size={13} />
       {_("tab.accounts")}
@@ -209,6 +214,7 @@
       class="tab"
       class:active={activeTab === "blocked"}
       href="{base}/accounts/blocked"
+      data-sveltekit-noscroll
     >
       <ShieldBan size={13} />
       {_("acct.blocked")}
@@ -220,6 +226,7 @@
       class="tab"
       class:active={activeTab === "tokens"}
       href="{base}/accounts/tokens"
+      data-sveltekit-noscroll
     >
       <Ticket size={13} />
       {_("tab.tokens")}

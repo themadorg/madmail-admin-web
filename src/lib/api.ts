@@ -4,6 +4,28 @@
 // When running inside Electron (detected by the page being served from 127.0.0.1),
 // requests are routed through a local /__proxy endpoint in the Electron main process.
 // This avoids CORS restrictions and self-signed certificate errors.
+//
+// In Vite dev with VITE_DEV_API_PROXY=1, requests go to the same-origin path (e.g. /api/admin)
+// and Vite proxies to DEV_API_PROXY_TARGET from .env (see vite.config.ts).
+
+function devProxyEnabled(): boolean {
+    return import.meta.env.DEV && import.meta.env.VITE_DEV_API_PROXY === '1';
+}
+
+/** Vite dev serves the SPA at `/`; do not follow production `admin_web_path` redirects. */
+export function isViteDevShell(): boolean {
+    return import.meta.env.DEV;
+}
+
+/** Same-origin admin API URL in dev (Vite proxy); otherwise the configured baseUrl. */
+function resolveAdminApiUrl(config: ApiConfig): string {
+    if (devProxyEnabled() && typeof window !== 'undefined') {
+        const path = (import.meta.env.VITE_DEV_API_PATH || '/api/admin').replace(/\/+$/, '');
+        const normalized = path.startsWith('/') ? path : `/${path}`;
+        return `${window.location.origin}${normalized}`;
+    }
+    return config.baseUrl.replace(/\/+$/, '');
+}
 
 export interface ApiConfig {
     baseUrl: string;
@@ -20,6 +42,38 @@ export interface ApiResponse<T = unknown> {
 
 // --- Response types ---
 
+export interface EmailServersSummary {
+    /** Successful federated peer servers (excluding this host). */
+    connections: number;
+    /** Peers identified by domain name. */
+    domain_servers: number;
+    /** Peers identified by IP literal. */
+    ip_servers: number;
+    /** @deprecated Same as `connections`; older servers used IMAP unique IPs here. */
+    connection_ips?: number;
+}
+
+/** Message file rotation from `GET /admin/status` (and `/admin/overview`). */
+export interface MessageRetentionSummary {
+    enabled: boolean;
+    days: number;
+    retention: string;
+}
+
+/** Federation delivery aggregates from `GET /admin/status` (and `/admin/overview`). */
+export interface FederationTrafficSummary {
+    inbound: number;
+    outbound: number;
+    queued: number;
+    expired: number;
+    mean_latency_ms: number;
+    health: {
+        perfect: number;
+        federated: number;
+        bad: number;
+    };
+}
+
 export interface StatusResponse {
     version: string;
     imap?: { connections: number; unique_ips: number };
@@ -27,10 +81,37 @@ export interface StatusResponse {
     shadowsocks?: { connections: number; unique_ips: number };
     users: { registered: number };
     uptime: { boot_time: string; duration: string };
-    email_servers?: { connection_ips: number; domain_servers: number; ip_servers: number };
+    email_servers?: EmailServersSummary;
+    federation_traffic?: FederationTrafficSummary;
+    message_retention?: MessageRetentionSummary;
     sent_messages: number;
     outbound_messages: number;
     received_messages: number;
+}
+
+/** Dashboard overview (`GET /admin/overview`). Prefer this over composing Status + Storage + tokens. */
+export interface OverviewResponse {
+    version: string;
+    users: { registered: number };
+    uptime: { boot_time: string; duration: string };
+    disk: {
+        total_bytes: number;
+        used_bytes: number;
+        available_bytes: number;
+        percent_used: number;
+    };
+    tokens: { total: number };
+    sent_messages: number;
+    outbound_messages: number;
+    received_messages: number;
+    imap?: { connections: number; unique_ips: number };
+    turn?: { relays: number };
+    shadowsocks?: { connections: number; unique_ips: number };
+    email_servers?: EmailServersSummary;
+    federation_traffic?: FederationTrafficSummary;
+    message_retention?: MessageRetentionSummary;
+    /** Present on servers with overview+settings bundle; omitted on legacy composed responses. */
+    settings?: AllSettings;
 }
 
 export interface StorageResponse {
@@ -41,6 +122,7 @@ export interface StorageResponse {
 
 export interface ToggleStatus {
     status: string;
+    restart_required?: boolean;
 }
 
 export interface SettingValue {
@@ -57,6 +139,8 @@ export interface AllSettings {
     iroh_enabled: string;
     ss_enabled: string;
     auto_purge_seen_enabled: string;
+    message_retention_enabled: string;
+    message_retention: SettingValue;
     ss_ws_enabled: string;
     ss_grpc_enabled: string;
     http_proxy_enabled: string;
@@ -107,6 +191,8 @@ export interface AllSettings {
     dclogin_imap_security: SettingValue;
     dclogin_smtp_security: SettingValue;
     language: SettingValue;
+    /** Server-built SS URL when available (`GET /admin/settings`). */
+    shadowsocks_url?: string;
 }
 
 export interface AccountList {
@@ -236,7 +322,7 @@ export async function apiCall<T = unknown>(
     body?: unknown
 ): Promise<{ data?: T; error?: string; status: number; version?: string }> {
     try {
-        const targetUrl = config.baseUrl.replace(/\/+$/, '');
+        const targetUrl = resolveAdminApiUrl(config);
         const payload = {
             method,
             resource,
@@ -292,7 +378,9 @@ export async function apiCall<T = unknown>(
 
 // Convenience wrappers
 export const api = {
+    /** @deprecated Prefer `overview()` for the dashboard; kept for auth checks and legacy servers. */
     status: (c: ApiConfig) => apiCall<StatusResponse>(c, '/admin/status'),
+    overview: (c: ApiConfig) => apiCall<OverviewResponse>(c, '/admin/overview'),
     storage: (c: ApiConfig) => apiCall<StorageResponse>(c, '/admin/storage'),
     accounts: (c: ApiConfig) => apiCall<AccountList>(c, '/admin/accounts'),
     createAccount: (c: ApiConfig) =>
@@ -398,4 +486,77 @@ export const api = {
     federationServers: (c: ApiConfig) =>
         apiCall<FederationServersResponse>(c, '/admin/federation/servers'),
 };
+
+export interface OverviewFetchResult {
+    data?: OverviewResponse;
+    error?: string;
+    status: number;
+    version?: string;
+}
+
+/**
+ * Load dashboard overview. Uses `GET /admin/overview` when available (one request);
+ * otherwise composes legacy endpoints in parallel (backward compatible).
+ */
+export async function fetchOverview(config: ApiConfig): Promise<OverviewFetchResult> {
+    const res = await api.overview(config);
+    if (!res.error && res.data) {
+        return { data: res.data, status: res.status, version: res.version };
+    }
+    const missing =
+        res.status === 404 ||
+        (res.error?.includes('unknown resource') ?? false);
+    if (!missing) {
+        return { error: res.error, status: res.status, version: res.version };
+    }
+
+    const [statusRes, storageRes, tokensRes, settingsRes] = await Promise.all([
+        api.status(config),
+        api.storage(config),
+        api.registrationTokens(config),
+        api.settings(config),
+    ]);
+    if (statusRes.error) {
+        return { error: statusRes.error, status: statusRes.status, version: statusRes.version };
+    }
+    if (storageRes.error) {
+        return { error: storageRes.error, status: storageRes.status, version: storageRes.version };
+    }
+    if (tokensRes.error) {
+        return { error: tokensRes.error, status: tokensRes.status, version: tokensRes.version };
+    }
+    const status = statusRes.data!;
+    const disk = storageRes.data?.disk ?? {
+        total_bytes: 0,
+        used_bytes: 0,
+        available_bytes: 0,
+        percent_used: 0,
+    };
+    const overview: OverviewResponse = {
+        version: status.version,
+        users: status.users,
+        uptime: status.uptime,
+        disk,
+        tokens: { total: tokensRes.data?.total ?? 0 },
+        sent_messages: status.sent_messages,
+        outbound_messages: status.outbound_messages,
+        received_messages: status.received_messages,
+        imap: status.imap,
+        turn: status.turn,
+        shadowsocks: status.shadowsocks,
+        email_servers: status.email_servers,
+        federation_traffic: status.federation_traffic,
+        message_retention: status.message_retention,
+        settings: settingsRes.data,
+    };
+    return {
+        data: overview,
+        status: 200,
+        version:
+            statusRes.version ??
+            storageRes.version ??
+            tokensRes.version ??
+            settingsRes.version,
+    };
+}
 

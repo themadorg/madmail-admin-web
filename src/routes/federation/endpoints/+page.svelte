@@ -12,6 +12,10 @@
     locale = getLocale();
   });
 
+  $effect(() => {
+    if (store.connected) store.loadEndpointOverrides();
+  });
+
   let search = $state("");
   let showAdd = $state(false);
   let newLookup = $state("");
@@ -55,6 +59,7 @@
   }
 </script>
 
+<div class="tab-pane federation-endpoints">
 {#if store.endpointOverrides}
   <div class="dns-header">
     <span class="dns-count">
@@ -172,6 +177,7 @@
 {:else}
   <p class="loading">{_("misc.loading")}</p>
 {/if}
+</div>
 
 <!-- Delete confirmation modal -->
 {#if confirmingDelete}
