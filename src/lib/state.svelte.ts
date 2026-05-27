@@ -142,15 +142,20 @@ class AdminState {
     status = $state<StatusResponse | null>(null);
     storage = $state<StorageResponse | null>(null);
     settings = $state<AllSettings | null>(null);
+    settingsLoading = $state(false);
     accounts = $state<AccountList | null>(null);
+    accountsSectionLoading = $state(false);
     quota = $state<QuotaStats | null>(null);
     blocklist = $state<BlocklistResponse | null>(null);
     endpointOverrides = $state<DnsListResponse | null>(null);
+    endpointOverridesLoading = $state(false);
     exchangers = $state<ExchangerListResponse | null>(null);
+    exchangersLoading = $state(false);
     registrationTokens = $state<RegistrationTokenListResponse | null>(null);
     federationSettings = $state<FederationSettingsResponse | null>(null);
     federationRules = $state<FederationRulesResponse | null>(null);
     federationServers = $state<FederationServersResponse | null>(null);
+    federationSectionLoading = $state(false);
 
     // UI
     toast = $state('');
@@ -363,14 +368,19 @@ class AdminState {
 
     async loadSettings() {
         if (!this.connected) return;
-        const res = await api.settings(this.cfg());
-        if (res.error) { this.notify(res.error, 'err'); return; }
-        if (res.data) {
-            this.settings = res.data;
-            this.syncConnectionBaseUrlWithSettings();
-            this.syncAdminWebPathFromSettings();
+        this.settingsLoading = true;
+        try {
+            const res = await api.settings(this.cfg());
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            if (res.data) {
+                this.settings = res.data;
+                this.syncConnectionBaseUrlWithSettings();
+                this.syncAdminWebPathFromSettings();
+            }
+            if (res.version) this.serverVersion = res.version;
+        } finally {
+            this.settingsLoading = false;
         }
-        if (res.version) this.serverVersion = res.version;
     }
 
     async loadAccounts() {
@@ -399,18 +409,28 @@ class AdminState {
 
     async loadEndpointOverrides() {
         if (!this.connected) return;
-        const res = await api.dns(this.cfg());
-        if (res.error) { this.notify(res.error, 'err'); return; }
-        if (res.data) this.endpointOverrides = res.data;
-        if (res.version) this.serverVersion = res.version;
+        this.endpointOverridesLoading = true;
+        try {
+            const res = await api.dns(this.cfg());
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            if (res.data) this.endpointOverrides = res.data;
+            if (res.version) this.serverVersion = res.version;
+        } finally {
+            this.endpointOverridesLoading = false;
+        }
     }
 
     async loadExchangers() {
         if (!this.connected) return;
-        const res = await api.exchangers(this.cfg());
-        if (res.error) { this.notify(res.error, 'err'); return; }
-        if (res.data) this.exchangers = res.data;
-        if (res.version) this.serverVersion = res.version;
+        this.exchangersLoading = true;
+        try {
+            const res = await api.exchangers(this.cfg());
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            if (res.data) this.exchangers = res.data;
+            if (res.version) this.serverVersion = res.version;
+        } finally {
+            this.exchangersLoading = false;
+        }
     }
 
     async loadRegistrationTokens() {
@@ -444,22 +464,34 @@ class AdminState {
 
     /** Load summary data shown in the accounts section header. */
     async loadAccountsSection() {
-        await Promise.all([
-            this.loadAccounts(),
-            this.loadBlocklist(),
-            this.loadQuota(),
-            this.loadRegistrationTokens(),
-        ]);
+        if (!this.connected) return;
+        this.accountsSectionLoading = true;
+        try {
+            await Promise.all([
+                this.loadAccounts(),
+                this.loadBlocklist(),
+                this.loadQuota(),
+                this.loadRegistrationTokens(),
+            ]);
+        } finally {
+            this.accountsSectionLoading = false;
+        }
     }
 
     /** Load shared federation layout data. */
     async loadFederationSection() {
-        await Promise.all([
-            this.loadFederationSettings(),
-            this.loadFederationRules(),
-            this.loadFederationServers(),
-            this.loadSettings(),
-        ]);
+        if (!this.connected) return;
+        this.federationSectionLoading = true;
+        try {
+            await Promise.all([
+                this.loadFederationSettings(),
+                this.loadFederationRules(),
+                this.loadFederationServers(),
+                this.loadSettings(),
+            ]);
+        } finally {
+            this.federationSectionLoading = false;
+        }
     }
 
     async refresh() {

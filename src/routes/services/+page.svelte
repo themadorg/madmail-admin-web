@@ -4,6 +4,7 @@
   import { Pencil, RotateCcw, Dice5 } from "lucide-svelte";
   import ToggleSwitch from "$lib/components/ToggleSwitch.svelte";
   import Select from "$lib/components/Select.svelte";
+  import PageLoader from "$lib/components/PageLoader.svelte";
 
   function randomPath(): string {
     const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -29,10 +30,6 @@
   }
 
   let isWorking = $derived(store.refreshing || store.busy || store.reloading);
-
-  $effect(() => {
-    if (store.connected) store.loadSettings();
-  });
 
 </script>
 
@@ -274,7 +271,7 @@
     )}
   </div>
 {:else}
-  <p class="text-text-2 text-sm">{_("misc.loading")}</p>
+  <PageLoader />
 {/if}
 
 {#snippet selectRow(key: string, label: string, fallback: string, options: {value: string, label: string}[])}

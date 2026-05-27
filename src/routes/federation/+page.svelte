@@ -11,6 +11,7 @@
     ChevronLeft,
     ChevronRight,
   } from "lucide-svelte";
+  import PageLoader from "$lib/components/PageLoader.svelte";
 
   let locale = $state(getLocale());
   function _(key: string, params?: Record<string, string>): string {
@@ -19,10 +20,6 @@
   }
   $effect(() => {
     locale = getLocale();
-  });
-
-  $effect(() => {
-    if (store.connected) store.loadFederationRules();
   });
 
   let showAdd = $state(false);
@@ -144,7 +141,7 @@
   </div>
 
   {#if !store.federationRules}
-    <p class="loading">{_("misc.loading")}</p>
+    <PageLoader />
   {:else if filteredRules.length === 0 && store.federationRules.total === 0 && !showAdd}
     <div class="empty-state">
       <GitBranch size={32} />

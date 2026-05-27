@@ -19,10 +19,6 @@
   $effect(() => {
     locale = getLocale();
   });
-
-  $effect(() => {
-    if (store.connected) store.loadAccountsSection();
-  });
   
   // Quota editing state
   let editingDefaultQuota = $state(false);
@@ -62,7 +58,10 @@
 
 <div class="federation-layout">
   <!-- Accounts Stats Grid -->
-  <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
+  <div
+    class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4"
+    class:section-loading={store.accountsSectionLoading}
+  >
     <div class="ui-card ui-card--rounded p-3">
       <div class="flex items-center gap-1.5 text-text-2 text-[10px] uppercase tracking-wider mb-1">
         <Users size={12} class="text-accent" />

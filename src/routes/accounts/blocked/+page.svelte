@@ -2,6 +2,7 @@
   import { store } from "$lib/state.svelte";
   import { t, getLocale } from "$lib/i18n";
   import { ShieldBan, ShieldCheck, SearchX } from "lucide-svelte";
+  import PageLoader from "$lib/components/PageLoader.svelte";
 
   let locale = $state(getLocale());
   function _(key: string, params?: Record<string, string>): string {
@@ -137,7 +138,7 @@
     </div>
   {/if}
 {:else}
-  <p class="text-text-2 text-sm">{_("misc.loading")}</p>
+  <PageLoader />
 {/if}
 
 <!-- Unblock confirmation modal -->

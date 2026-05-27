@@ -1,4 +1,4 @@
-/** Horizontal drag-to-scroll for overflow containers (touch + mouse grab). */
+/** Horizontal drag-to-scroll for overflow containers (mouse grab on desktop). */
 export type DragScrollOptions = {
 	/** Pixels before pointer movement counts as a drag (default 8). */
 	threshold?: number;
@@ -28,7 +28,9 @@ export function dragScroll(node: HTMLElement, options: DragScrollOptions = {}) {
 	};
 
 	const onPointerDown = (e: PointerEvent) => {
-		if (e.pointerType === 'mouse' && e.button !== 0) return;
+		// Touch uses native overflow scroll (snappier on phones).
+		if (e.pointerType !== 'mouse') return;
+		if (e.button !== 0) return;
 		if (!canScroll()) return;
 
 		activePointer = e.pointerId;

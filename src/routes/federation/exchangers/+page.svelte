@@ -2,6 +2,7 @@
   import { store } from "$lib/state.svelte";
   import { t, getLocale } from "$lib/i18n";
   import { ArrowDownToLine, Trash2, Plus, ToggleLeft, ToggleRight, Clock, Zap } from "lucide-svelte";
+  import PageLoader from "$lib/components/PageLoader.svelte";
 
   let locale = $state(getLocale());
   function _(key: string, params?: Record<string, string>): string {
@@ -10,10 +11,6 @@
   }
   $effect(() => {
     locale = getLocale();
-  });
-
-  $effect(() => {
-    if (store.connected) store.loadExchangers();
   });
 
   let showAdd = $state(false);
@@ -76,20 +73,24 @@
 </script>
 
 <div class="tab-pane federation-exchangers">
-{#if store.exchangers}
   <div class="exc-header">
     <span class="exc-count">
       <ArrowDownToLine size={14} />
-      {store.exchangers.total === 1
-        ? _("exc.count_one")
-        : _("exc.count_many", { n: String(store.exchangers.total) })}
+      {#if store.exchangers}
+        {store.exchangers.total === 1
+          ? _("exc.count_one")
+          : _("exc.count_many", { n: String(store.exchangers.total) })}
+      {:else}
+        {_("exc.loading")}
+      {/if}
     </span>
-    <button class="btn-add" onclick={() => (showAdd = !showAdd)}>
+    <button class="btn-add" onclick={() => (showAdd = !showAdd)} disabled={!store.exchangers}>
       <Plus size={12} />
       {_("exc.add")}
     </button>
   </div>
 
+{#if store.exchangers}
   <!-- Add form -->
   {#if showAdd}
     <div class="add-form">
@@ -218,7 +219,7 @@
     </div>
   {/if}
 {:else}
-  <p class="loading">{_("exc.loading")}</p>
+  <PageLoader label={_("exc.loading")} />
 {/if}
 </div>
 

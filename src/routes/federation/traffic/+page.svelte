@@ -20,6 +20,7 @@
   } from "$lib/federationStats";
   import { parseHealthParam } from "$lib/federationHealthNav";
   import Select from "$lib/components/Select.svelte";
+  import PageLoader from "$lib/components/PageLoader.svelte";
 
   type SortKey =
     | "domain"
@@ -43,13 +44,6 @@
   }
   $effect(() => {
     locale = getLocale();
-  });
-
-  $effect(() => {
-    if (store.connected) {
-      store.loadFederationRules();
-      store.loadFederationSettings();
-    }
   });
 
   let search = $state("");
@@ -317,7 +311,7 @@
   </div>
 
   {#if !store.federationServers}
-    <p class="loading">{_("fed.loading_traffic")}</p>
+    <PageLoader label={_("fed.loading_traffic")} />
   {:else if filteredServers.length === 0}
     <div class="empty-state">
       {#if search || filterBy !== "all" || healthFilter}

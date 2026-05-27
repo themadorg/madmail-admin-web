@@ -58,3 +58,13 @@ export function getPageRefreshLoaders(
 	// Unknown route — settings is the most common shared dependency
 	return [() => store.loadSettings()];
 }
+
+/** Start loading data for a route without blocking navigation. */
+export function prefetchRouteData(
+	store: PageRefreshTarget,
+	pathname: string,
+): void {
+	for (const load of getPageRefreshLoaders(store, normalizeRoutePath(pathname))) {
+		void load();
+	}
+}

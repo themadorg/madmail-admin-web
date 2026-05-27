@@ -13,6 +13,7 @@
     ArrowDownToLine,
   } from "lucide-svelte";
   import FederationStatsGrid from "$lib/components/FederationStatsGrid.svelte";
+  import PageLoader from "$lib/components/PageLoader.svelte";
   import ToggleSwitch from "$lib/components/ToggleSwitch.svelte";
   import {
     aggregateFederationServers,
@@ -34,10 +35,6 @@
   }
   $effect(() => {
     locale = getLocale();
-  });
-
-  $effect(() => {
-    if (store.connected) store.loadFederationSection();
   });
 
   // Derived state from store
@@ -167,6 +164,8 @@
       {activeHealth}
       onHealthSelect={onHealthSelect}
     />
+  {:else if store.federationSectionLoading}
+    <PageLoader />
   {/if}
 
   {#if !isEnabled}

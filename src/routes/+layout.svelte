@@ -3,6 +3,7 @@
   import { page } from "$app/stores";
   import { base } from "$app/paths";
   import { afterNavigate, goto } from "$app/navigation";
+  import { prefetchRouteData } from "$lib/pageRefresh";
   import { tick } from "svelte";
   import { store } from "$lib/state.svelte";
   import { t, getLocale, setLocale, LOCALES, type Locale } from "$lib/i18n";
@@ -13,6 +14,7 @@
     type SavedServer,
   } from "$lib/servers";
   import { consumeLoginFromLocation } from "$lib/adminLoginQr";
+  import { releaseCameraAccess } from "$lib/cameraAccess";
   import LoginQrScanner from "$lib/components/LoginQrScanner.svelte";
   import ThemeSwitcher from "$lib/components/ThemeSwitcher.svelte";
   import { dragScroll } from "$lib/actions/dragScroll";
@@ -110,6 +112,8 @@
   });
 
   function onLoginQrScan(creds: { url: string; token: string }) {
+    showLoginQr = false;
+    void releaseCameraAccess();
     store.baseUrl = creds.url;
     store.token = creds.token;
     void connectWithMorph();
@@ -137,6 +141,13 @@
     if (!autoConnectDone && store.baseUrl && store.token) {
       autoConnectDone = true;
       store.connect();
+    }
+  });
+
+  $effect(() => {
+    if (store.connected) {
+      showLoginQr = false;
+      void releaseCameraAccess();
     }
   });
 
@@ -261,9 +272,15 @@
     });
   });
 
+  /** Prefetch data for the current route when connected or path changes. */
+  $effect(() => {
+    if (!store.connected) return;
+    prefetchRouteData(store, $page.url.pathname);
+  });
+
   /** In-app navigation: smooth scroll + slide indicator. */
-  afterNavigate(({ from, to }) => {
-    if (!to || !store.connected || !from) return;
+  afterNavigate(({ from }) => {
+    if (!from) return;
     const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     void alignNavToRoute(smooth);
   });
@@ -352,6 +369,8 @@
     const from = loginLogoEl?.getBoundingClientRect();
     await store.connect();
     if (!store.connected) return;
+    showLoginQr = false;
+    void releaseCameraAccess();
     if (!from) return;
     loginHandoff = true;
     await startLogoMorph(from);
@@ -644,11 +663,11 @@
 <!-- Login Gate (stays visible during logo handoff so it is one continuous motion) -->
 {#if !store.connected || loginHandoff}
   <div
-    class="login-gate bg-surface text-text"
+    class="login-gate fixed inset-0 z-40 flex items-center justify-center min-h-dvh overflow-y-auto overscroll-contain bg-surface text-text"
     class:login-gate--handoff={loginHandoff}
     style="font-family: 'Inter', system-ui, sans-serif;"
   >
-    <div class="login-gate__stack">
+    <div class="login-gate__stack flex flex-col items-center w-full max-w-sm my-auto">
       <div class="login-gate__card ui-card ui-card--panel w-full p-6">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-3 min-w-0">
@@ -783,19 +802,41 @@
           </div>
         {/if}
       </div>
-      <a
-        href="https://github.com/themadorg/madmail-admin-web"
-        target="_blank"
-        rel="noopener"
-        class="login-gate__version text-text-2/40 hover:text-text-2/70 text-[10px] text-center flex items-center justify-center gap-1 transition-colors"
+      <div
+        class="login-gate__version text-text-2/40 text-[10px] text-center flex items-center justify-center gap-x-1.5 gap-y-0.5 flex-wrap"
       >
-        <Github size={10} />
-        v{appVersion}
-      </a>
+        <a
+          href="https://github.com/themadorg/madmail-admin-web"
+          target="_blank"
+          rel="noopener"
+          class="inline-flex items-center gap-1 hover:text-text-2/70 transition-colors"
+        >
+          <Github size={10} />
+          v{appVersion}
+        </a>
+        <span class="login-gate__version-sep text-text-2/25" aria-hidden="true">·</span>
+        <span class="inline-flex items-center gap-1">
+          {_("login.by")}
+          <a
+            href="https://github.com/themadorg"
+            target="_blank"
+            rel="noopener"
+            class="login-gate__org-link hover:text-text-2/70 transition-colors"
+          >
+            the<span class="login-mad-glitch"
+              ><span class="login-mad-glitch__layer login-mad-glitch__layer--r" aria-hidden="true">mad</span
+              ><span class="login-mad-glitch__layer login-mad-glitch__layer--g" aria-hidden="true">mad</span
+              ><span class="login-mad-glitch__main">mad</span></span
+            >org
+          </a>
+        </span>
+      </div>
     </div>
   </div>
 
-  <LoginQrScanner bind:open={showLoginQr} onScan={onLoginQrScan} />
+  {#if showLoginQr}
+    <LoginQrScanner bind:open={showLoginQr} onScan={onLoginQrScan} />
+  {/if}
 {/if}
 
 {#if store.connected}
@@ -927,7 +968,9 @@
 
       <!-- Page Content -->
       <main class="app-main flex flex-col flex-1">
-        {@render children()}
+        {#key $page.url.pathname}
+          {@render children()}
+        {/key}
       </main>
     </div>
   </div>

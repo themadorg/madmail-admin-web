@@ -14,6 +14,7 @@
     AlertTriangle,
     Link,
   } from "lucide-svelte";
+  import PageLoader from "$lib/components/PageLoader.svelte";
 
   let locale = $state(getLocale());
   function _(key: string, params?: Record<string, string>): string {
@@ -398,7 +399,7 @@
     </div>
   {/if}
 {:else}
-  <p class="text-text-2 text-sm">{_("misc.loading")}</p>
+  <PageLoader />
 {/if}
 
 <!-- Delete confirmation modal -->

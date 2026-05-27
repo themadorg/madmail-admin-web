@@ -2,6 +2,7 @@
   import { store } from "$lib/state.svelte";
   import { t, getLocale } from "$lib/i18n";
   import { Globe, Trash2, Plus, ArrowRight, SearchX } from "lucide-svelte";
+  import PageLoader from "$lib/components/PageLoader.svelte";
 
   let locale = $state(getLocale());
   function _(key: string, params?: Record<string, string>): string {
@@ -10,10 +11,6 @@
   }
   $effect(() => {
     locale = getLocale();
-  });
-
-  $effect(() => {
-    if (store.connected) store.loadEndpointOverrides();
   });
 
   let search = $state("");
@@ -60,18 +57,26 @@
 </script>
 
 <div class="tab-pane federation-endpoints">
-{#if store.endpointOverrides}
   <div class="dns-header">
     <span class="dns-count">
       <Globe size={14} />
-      {_("dns.total", { count: String(store.endpointOverrides.total) })}
+      {#if store.endpointOverrides}
+        {_("dns.total", { count: String(store.endpointOverrides.total) })}
+      {:else}
+        {_("misc.loading")}
+      {/if}
     </span>
-    <button class="btn-add" onclick={() => (showAdd = !showAdd)}>
+    <button
+      class="btn-add"
+      onclick={() => (showAdd = !showAdd)}
+      disabled={!store.endpointOverrides}
+    >
       <Plus size={12} />
       {_("dns.add")}
     </button>
   </div>
 
+{#if store.endpointOverrides}
   <!-- Add form -->
   {#if showAdd}
     <div class="add-form">
@@ -175,7 +180,7 @@
     </div>
   {/if}
 {:else}
-  <p class="loading">{_("misc.loading")}</p>
+  <PageLoader />
 {/if}
 </div>
 

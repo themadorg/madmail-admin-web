@@ -18,6 +18,7 @@
     Search,
   } from "lucide-svelte";
   import Select from "$lib/components/Select.svelte";
+  import PageLoader from "$lib/components/PageLoader.svelte";
 
   let locale = $state(getLocale());
   function _(key: string, params?: Record<string, string>): string {
@@ -26,10 +27,6 @@
   }
   $effect(() => {
     locale = getLocale();
-  });
-
-  $effect(() => {
-    if (store.connected) store.loadSettings();
   });
 
   /** Focus element on mount for inline editing */
@@ -197,29 +194,8 @@
   }
 </script>
 
-{#if store.accounts}
-  <!-- Create Account Button — only when registration is closed -->
-  {#if isRegistrationClosed}
-    <div class="mb-4 p-3 rounded-lg border border-amber-500/20 bg-amber-500/5">
-      <div class="flex items-center justify-between gap-3 flex-wrap">
-        <div class="flex items-center gap-2 text-xs text-amber-400">
-          <AlertTriangle size={14} />
-          <span>{_("acct.create_hint")}</span>
-        </div>
-        <button
-          onclick={() => store.createAccount()}
-          disabled={store.busy}
-          class="px-3 py-1.5 text-xs rounded-lg bg-accent text-white hover:bg-accent/80 transition-colors font-medium flex items-center gap-1.5 disabled:opacity-50"
-        >
-          <UserPlus size={12} />
-          {_("acct.create")}
-        </button>
-      </div>
-    </div>
-  {/if}
-
-  <!-- Search + Sort + Pagination bar -->
-  <div class="relative mb-3">
+<!-- Search + Sort + Pagination bar -->
+<div class="relative mb-3">
     <Search
       size={13}
       class="absolute start-2.5 top-1/2 -translate-y-1/2 text-text-2/50 pointer-events-none"
@@ -331,6 +307,26 @@
     </div>
   </div>
 
+{#if store.accounts}
+  {#if isRegistrationClosed}
+    <div class="mb-4 p-3 rounded-lg border border-amber-500/20 bg-amber-500/5">
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <div class="flex items-center gap-2 text-xs text-amber-400">
+          <AlertTriangle size={14} />
+          <span>{_("acct.create_hint")}</span>
+        </div>
+        <button
+          onclick={() => store.createAccount()}
+          disabled={store.busy}
+          class="px-3 py-1.5 text-xs rounded-lg bg-accent text-white hover:bg-accent/80 transition-colors font-medium flex items-center gap-1.5 disabled:opacity-50"
+        >
+          <UserPlus size={12} />
+          {_("acct.create")}
+        </button>
+      </div>
+    </div>
+  {/if}
+
   <div class="space-y-1">
     {#each pagedAccounts as acct (acct.username)}
       <div
@@ -423,7 +419,7 @@
     {/each}
   </div>
 {:else}
-  <p class="text-text-2 text-sm">{_("misc.loading")}</p>
+  <PageLoader />
 {/if}
 
 <!-- New Account Created Modal (one-time dclogin display) -->

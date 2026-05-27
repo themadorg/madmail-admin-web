@@ -292,6 +292,43 @@ html:has(.login-gate) {
     flex-shrink: 0;
 }
 
+.login-gate__org-link {
+    font-weight: 500;
+}
+
+.login-mad-glitch {
+    position: relative;
+    display: inline-block;
+    font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
+}
+
+.login-mad-glitch__layer,
+.login-mad-glitch__main {
+    display: inline-block;
+}
+
+.login-mad-glitch__layer {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.login-mad-glitch__layer--r {
+    color: #f87171;
+    animation: logo-secret-title-rgb-r 3.1s infinite steps(1);
+}
+
+.login-mad-glitch__layer--g {
+    color: #34d399;
+    animation: logo-secret-title-rgb-g 3.1s infinite steps(1);
+}
+
+.login-mad-glitch__main {
+    position: relative;
+    animation: logo-secret-title-jitter 3.1s infinite steps(1);
+}
+
 /* Login → header logo morph (single logo, not a page transition) */
 .login-gate--handoff {
     position: fixed;
@@ -369,6 +406,11 @@ html:has(.login-gate) {
     .logo-secret__title-layer,
     .logo-secret__title-main,
     .logo-secret {
+        animation: none;
+    }
+
+    .login-mad-glitch__layer,
+    .login-mad-glitch__main {
         animation: none;
     }
 }
@@ -826,4 +868,26 @@ html:has(.login-gate) {
         padding-left: env(safe-area-inset-left);
         padding-right: env(safe-area-inset-right);
     }
+}
+
+.page-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    min-height: 8rem;
+    padding: 2rem 1rem;
+    color: var(--th-text-2);
+    font-size: 0.875rem;
+}
+
+.page-loading__text {
+    text-align: center;
+}
+
+.section-loading {
+    opacity: 0.65;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
 }
