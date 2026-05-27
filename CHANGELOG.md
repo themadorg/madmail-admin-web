@@ -1,3 +1,10 @@
+# [1.21.0](https://github.com/themadorg/madmail-admin-web/compare/v1.20.1...v1.21.0) (2026-05-27)
+
+
+### Features
+
+* add .env.example for Vite dev proxy configuration, update Makefile for local development commands, and enhance API handling in the application ([98703f5](https://github.com/themadorg/madmail-admin-web/commit/98703f5f408af378c1b3a7398bd18e8074c01cdc))
+
 ## [1.20.1](https://github.com/themadorg/madmail-admin-web/compare/v1.20.0...v1.20.1) (2026-04-23)
 
 
