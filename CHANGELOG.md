@@ -1,3 +1,10 @@
+# [1.27.0](https://github.com/themadorg/madmail-admin-web/compare/v1.26.1...v1.27.0) (2026-05-27)
+
+
+### Features
+
+* enhance server capabilities and PWA update handling ([c1974dd](https://github.com/themadorg/madmail-admin-web/commit/c1974ddfc948dd7bf26a4752ce9727e48976ca22))
+
 ## [1.26.1](https://github.com/themadorg/madmail-admin-web/compare/v1.26.0...v1.26.1) (2026-05-27)
 
 
