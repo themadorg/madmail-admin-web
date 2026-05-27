@@ -5,7 +5,10 @@
 
 import { base } from '$app/paths';
 
-let currentVersion: string | null = null;
+/** Admin-web version baked in at build time (matches stamped version.json when embedded). */
+const runningVersion =
+    typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
+
 let onUpdateAvailable: ((newVersion: string) => void) | null = null;
 let checkInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -31,13 +34,11 @@ async function checkForUpdate() {
     const remote = await fetchVersion();
     if (!remote) return;
 
-    if (currentVersion && remote !== currentVersion) {
-        // New version detected — notify the app
-        console.log(`[sw-update] New version detected: ${currentVersion} → ${remote}`);
+    // Compare server version.json against the code actually running (cached bundle).
+    if (remote !== runningVersion) {
+        console.log(`[sw-update] Update available: ${runningVersion} → ${remote}`);
         onUpdateAvailable?.(remote);
     }
-
-    currentVersion = remote;
 }
 
 export function startVersionChecker(cb: (newVersion: string) => void) {
@@ -67,18 +68,20 @@ export function startVersionChecker(cb: (newVersion: string) => void) {
  *   3. Hard-reloads the page
  */
 export function applyUpdate() {
+    let reloaded = false;
+    const reload = () => {
+        if (reloaded) return;
+        reloaded = true;
+        window.location.reload();
+    };
+
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage('CLEAR_CACHE');
-        // Listen for confirmation then reload
         navigator.serviceWorker.addEventListener('message', (e) => {
-            if (e.data === 'CACHE_CLEARED') {
-                window.location.reload();
-            }
+            if (e.data === 'CACHE_CLEARED') reload();
         });
-        // Fallback: reload after 2s even if no confirmation
-        setTimeout(() => window.location.reload(), 2000);
+        setTimeout(reload, 2000);
     } else {
-        // No SW controller, just hard reload
-        window.location.reload();
+        reload();
     }
 }

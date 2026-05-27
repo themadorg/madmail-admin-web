@@ -16,14 +16,15 @@ let CACHE_NAME = 'madmail-v0'; // fallback; overwritten on install
 // ── Install: fetch version, create versioned cache, pre-cache shell ──
 self.addEventListener('install', (e) => {
     e.waitUntil(
-        fetchVersionTag().then((tag) => {
-            CACHE_NAME = `madmail-${tag}`;
-            return caches.open(CACHE_NAME).then((cache) =>
-                cache.addAll(['./', './index.html', './manifest.json'])
-            );
-        })
+        fetchVersionTag()
+            .then((tag) => {
+                CACHE_NAME = `madmail-${tag}`;
+                return caches.open(CACHE_NAME).then((cache) =>
+                    cache.addAll(['./', './index.html', './manifest.json'])
+                );
+            })
+            .then(() => self.skipWaiting())
     );
-    self.skipWaiting();
 });
 
 // ── Activate: purge ALL caches that aren't the current version ──
