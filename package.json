@@ -1,6 +1,6 @@
 {
 	"name": "madmail-admin-web",
-	"version": "1.24.0",
+	"version": "1.24.1",
 	"description": "Madmail server administration dashboard",
 	"author": "Madmail <admin@madmail.chat>",
 	"type": "module",
