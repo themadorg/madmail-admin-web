@@ -1,3 +1,10 @@
+# [1.25.0](https://github.com/themadorg/madmail-admin-web/compare/v1.24.1...v1.25.0) (2026-05-27)
+
+
+### Features
+
+* enhance QR code scanning and camera access management ([4ead7f4](https://github.com/themadorg/madmail-admin-web/commit/4ead7f46e998585f9c0f04637f87cec36d0402f3))
+
 ## [1.24.1](https://github.com/themadorg/madmail-admin-web/compare/v1.24.0...v1.24.1) (2026-05-27)
 
 
