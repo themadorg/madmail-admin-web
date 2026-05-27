@@ -1,3 +1,10 @@
+# [1.24.0](https://github.com/themadorg/madmail-admin-web/compare/v1.23.0...v1.24.0) (2026-05-27)
+
+
+### Features
+
+* **qr:** enhance QR code scanning and update login interface ([3191718](https://github.com/themadorg/madmail-admin-web/commit/31917182f07044e7fbdcb3df1e0e6598a244b14f))
+
 # [1.23.0](https://github.com/themadorg/madmail-admin-web/compare/v1.22.0...v1.23.0) (2026-05-27)
 
 
