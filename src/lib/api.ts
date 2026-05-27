@@ -17,6 +17,20 @@ export function isViteDevShell(): boolean {
     return import.meta.env.DEV;
 }
 
+/**
+ * True when the SPA is served from the same origin as the connected admin API
+ * (embedded under madmail's admin_web_path). False for hosted panels such as
+ * admin.madmail.chat that call a remote server via cross-origin API.
+ */
+export function isEmbeddedAdminShell(baseUrl: string): boolean {
+    if (typeof window === 'undefined' || !baseUrl) return false;
+    try {
+        return new URL(baseUrl).origin === window.location.origin;
+    } catch {
+        return false;
+    }
+}
+
 /** Same-origin admin API URL in dev (Vite proxy); otherwise the configured baseUrl. */
 function resolveAdminApiUrl(config: ApiConfig): string {
     if (devProxyEnabled() && typeof window !== 'undefined') {

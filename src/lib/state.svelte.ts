@@ -4,6 +4,7 @@
 import {
     api,
     fetchOverview,
+    isEmbeddedAdminShell,
     isViteDevShell,
     type ApiConfig,
     type StatusResponse,
@@ -268,9 +269,9 @@ class AdminState {
         if (typeof window === 'undefined' || !this.settings) {
             return;
         }
-        // Production chatmail embeds the SPA under admin_web_path (e.g. /aaa2).
-        // Vite dev always serves at / — syncing would redirect away from the dev server.
-        if (isViteDevShell()) {
+        // Only when madmail serves this SPA on the same host as the admin API.
+        // Hosted panels (e.g. admin.madmail.chat → remote 1.1.1.1) must not redirect.
+        if (isViteDevShell() || !isEmbeddedAdminShell(this.baseUrl)) {
             return;
         }
         const s = this.settings.admin_web_path;
@@ -575,7 +576,7 @@ class AdminState {
                 await api.reload(this.cfg());
                 this.pendingRestart = false;
                 this.notify(t('action.restarting'));
-                if (isViteDevShell()) {
+                if (isViteDevShell() || !isEmbeddedAdminShell(this.baseUrl)) {
                     if (this.settings) {
                         this.settings.admin_web_path = {
                             ...this.settings.admin_web_path,
@@ -659,7 +660,7 @@ class AdminState {
                 await api.reload(this.cfg());
                 this.pendingRestart = false;
                 this.notify(t('action.restarting'));
-                if (isViteDevShell()) {
+                if (isViteDevShell() || !isEmbeddedAdminShell(this.baseUrl)) {
                     if (this.settings && res.data) {
                         this.settings.admin_web_path = {
                             key: res.data.key,
