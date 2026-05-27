@@ -1,3 +1,10 @@
+## [1.24.1](https://github.com/themadorg/madmail-admin-web/compare/v1.24.0...v1.24.1) (2026-05-27)
+
+
+### Bug Fixes
+
+* lockfile fix ([bf6fc55](https://github.com/themadorg/madmail-admin-web/commit/bf6fc555dedb0d8186ae0d4bfe0ee3f535bb7504))
+
 # [1.24.0](https://github.com/themadorg/madmail-admin-web/compare/v1.23.0...v1.24.0) (2026-05-27)
 
 
