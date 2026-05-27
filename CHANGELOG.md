@@ -1,3 +1,10 @@
+# [1.26.0](https://github.com/themadorg/madmail-admin-web/compare/v1.25.1...v1.26.0) (2026-05-27)
+
+
+### Features
+
+* enhance PWA update experience and improve app icons ([f1ed5d9](https://github.com/themadorg/madmail-admin-web/commit/f1ed5d9920492b6acdee6069a03d686b2c1c8640))
+
 ## [1.25.1](https://github.com/themadorg/madmail-admin-web/compare/v1.25.0...v1.25.1) (2026-05-27)
 
 
