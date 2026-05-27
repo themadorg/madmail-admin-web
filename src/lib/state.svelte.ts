@@ -23,6 +23,7 @@ import {
     type FederationRulesResponse,
     type FederationServersResponse,
 } from '$lib/api';
+import { serverCapabilities } from '$lib/stores/serverCapabilities.svelte';
 import { t } from '$lib/i18n';
 import { applySettingsToAdminBaseUrl } from '$lib/adminUrl';
 import { saveServer } from '$lib/servers';
@@ -539,6 +540,7 @@ class AdminState {
         this.overview = null;
         this.federationSettings = this.federationRules = this.federationServers = null;
         this.newAccount = null;
+        serverCapabilities.reset();
     }
 
     async toggleService(resource: string, current: string) {

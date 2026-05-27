@@ -8,6 +8,8 @@
 // In Vite dev with VITE_DEV_API_PROXY=1, requests go to the same-origin path (e.g. /api/admin)
 // and Vite proxies to DEV_API_PROXY_TARGET from .env (see vite.config.ts).
 
+import { serverCapabilities } from '$lib/stores/serverCapabilities.svelte';
+
 function devProxyEnabled(): boolean {
     return import.meta.env.DEV && import.meta.env.VITE_DEV_API_PROXY === '1';
 }
@@ -393,7 +395,11 @@ export async function apiCall<T = unknown>(
 // Convenience wrappers
 export const api = {
     /** @deprecated Prefer `overview()` for the dashboard; kept for auth checks and legacy servers. */
-    status: (c: ApiConfig) => apiCall<StatusResponse>(c, '/admin/status'),
+    status: async (c: ApiConfig) => {
+        const res = await apiCall<StatusResponse>(c, '/admin/status');
+        serverCapabilities.applyStatusResult(res);
+        return res;
+    },
     overview: (c: ApiConfig) => apiCall<OverviewResponse>(c, '/admin/overview'),
     storage: (c: ApiConfig) => apiCall<StorageResponse>(c, '/admin/storage'),
     accounts: (c: ApiConfig) => apiCall<AccountList>(c, '/admin/accounts'),
@@ -515,6 +521,7 @@ export interface OverviewFetchResult {
 export async function fetchOverview(config: ApiConfig): Promise<OverviewFetchResult> {
     const res = await api.overview(config);
     if (!res.error && res.data) {
+        serverCapabilities.setMadmailV2(true);
         return { data: res.data, status: res.status, version: res.version };
     }
     const missing =

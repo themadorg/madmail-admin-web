@@ -7,7 +7,12 @@
   import { tick } from "svelte";
   import { store } from "$lib/state.svelte";
   import { t, getLocale, setLocale, LOCALES, type Locale } from "$lib/i18n";
-  import { startVersionChecker, applyUpdate } from "$lib/sw-update";
+  import {
+    startVersionChecker,
+    applyUpdate,
+    dismissPwaUpdate,
+    isPwaUpdateDismissed,
+  } from "$lib/sw-update";
   import {
     getSavedServers,
     removeServer,
@@ -35,6 +40,7 @@
     type LogoSecretAccent,
   } from "$lib/logoSecretAccent";
   import { theme } from "$lib/stores/theme.svelte";
+  import { serverCapabilities } from "$lib/stores/serverCapabilities.svelte";
   import {
     Mail,
     Plug,
@@ -165,8 +171,15 @@
   if (typeof window !== "undefined") {
     startVersionChecker((newVer) => {
       pwaUpdateVersion = newVer;
-      showPwaUpdateModal = true;
+      if (!isPwaUpdateDismissed(newVer)) {
+        showPwaUpdateModal = true;
+      }
     });
+  }
+
+  function dismissPwaUpdateModal() {
+    if (pwaUpdateVersion) dismissPwaUpdate(pwaUpdateVersion);
+    showPwaUpdateModal = false;
   }
 
   function isActive(href: string, path: string): boolean {
@@ -406,6 +419,12 @@
     applyLogoSecretAccent(theme.mode);
   }
 
+  function syncLogoSecretTitleFromCapabilities() {
+    logoSecretTitleBase = serverCapabilities.logoSecretTitle;
+    logoSecretRainWord = serverCapabilities.logoSecretRainWord;
+    logoSecretLabel = serverCapabilities.logoSecretTitle;
+  }
+
   function toggleLogoSecret(e: Event) {
     e.preventDefault();
     e.stopPropagation();
@@ -456,9 +475,7 @@
 
   $effect(() => {
     if (!logoSecretActive || typeof window === "undefined") {
-      logoSecretLabel = LOGO_SECRET_TITLE;
-      logoSecretTitleBase = LOGO_SECRET_TITLE;
-      logoSecretRainWord = `${LOGO_SECRET_LABEL}.`;
+      syncLogoSecretTitleFromCapabilities();
       matrixGoldenFlashSeq = 0;
       return;
     }
@@ -487,16 +504,8 @@
     return createLogoSecretStatusPoller(
       () => ({ baseUrl: store.baseUrl, token: store.token }),
       {
-        onStatusAvailable: () => {
-          logoSecretTitleBase = LOGO_SECRET_TITLE;
-          logoSecretRainWord = `${LOGO_SECRET_LABEL}.`;
-          logoSecretLabel = LOGO_SECRET_TITLE;
-        },
-        onStatusUnavailable: () => {
-          logoSecretTitleBase = LOGO_SECRET_LABEL;
-          logoSecretRainWord = LOGO_SECRET_LABEL;
-          logoSecretLabel = LOGO_SECRET_LABEL;
-        },
+        onStatusAvailable: syncLogoSecretTitleFromCapabilities,
+        onStatusUnavailable: syncLogoSecretTitleFromCapabilities,
         onNewSentMessages: (count) => queueGoldenRainFlashes(count),
       },
     );
@@ -556,7 +565,7 @@
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
     class="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
-    onclick={() => (showPwaUpdateModal = false)}
+    onclick={dismissPwaUpdateModal}
   >
     <div
       class="ui-card ui-card--panel w-full max-w-sm p-5"
@@ -583,7 +592,7 @@
         </div>
         <button
           type="button"
-          onclick={() => (showPwaUpdateModal = false)}
+          onclick={dismissPwaUpdateModal}
           class="p-1 text-text-2 hover:text-text rounded transition-colors shrink-0"
           aria-label={_("action.cancel")}
         >
@@ -594,7 +603,7 @@
       <div class="flex gap-2">
         <button
           type="button"
-          onclick={() => (showPwaUpdateModal = false)}
+          onclick={dismissPwaUpdateModal}
           class="flex-1 px-3 py-2 text-xs border border-border rounded-lg hover:bg-surface-3 transition-colors text-text-2"
         >
           {_("update.later")}

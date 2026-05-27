@@ -14,6 +14,22 @@ let checkInterval: ReturnType<typeof setInterval> | null = null;
 
 const VERSION_URL = `${base}/version.json`;
 const CHECK_MS = 5 * 60 * 1000; // 5 minutes
+const PWA_UPDATE_DISMISS_KEY = 'madmail_pwa_update_dismissed';
+
+export function isPwaUpdateDismissed(remoteVersion: string): boolean {
+    if (typeof localStorage === 'undefined' || !remoteVersion) return false;
+    return localStorage.getItem(PWA_UPDATE_DISMISS_KEY) === remoteVersion;
+}
+
+export function dismissPwaUpdate(remoteVersion: string): void {
+    if (typeof localStorage === 'undefined' || !remoteVersion) return;
+    localStorage.setItem(PWA_UPDATE_DISMISS_KEY, remoteVersion);
+}
+
+export function clearPwaUpdateDismiss(): void {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.removeItem(PWA_UPDATE_DISMISS_KEY);
+}
 
 async function fetchVersion(): Promise<string | null> {
     try {
@@ -35,10 +51,13 @@ async function checkForUpdate() {
     if (!remote) return;
 
     // Compare server version.json against the code actually running (cached bundle).
-    if (remote !== runningVersion) {
-        console.log(`[sw-update] Update available: ${runningVersion} → ${remote}`);
-        onUpdateAvailable?.(remote);
+    if (remote === runningVersion) {
+        clearPwaUpdateDismiss();
+        return;
     }
+
+    console.log(`[sw-update] Update available: ${runningVersion} → ${remote}`);
+    onUpdateAvailable?.(remote);
 }
 
 export function startVersionChecker(cb: (newVersion: string) => void) {
@@ -68,6 +87,7 @@ export function startVersionChecker(cb: (newVersion: string) => void) {
  *   3. Hard-reloads the page
  */
 export function applyUpdate() {
+    clearPwaUpdateDismiss();
     let reloaded = false;
     const reload = () => {
         if (reloaded) return;
