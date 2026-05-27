@@ -145,12 +145,12 @@ input[type="email"] {
 .app-header__logo {
     grid-column: 1;
     grid-row: 1 / -1;
-    align-self: stretch;
-    justify-self: start;
-    aspect-ratio: 1;
-    height: 100%;
-    width: auto;
-    max-width: 100%;
+    align-self: center;
+    flex-shrink: 0;
+    width: 3.25rem;
+    height: 3.25rem;
+    min-width: 3.25rem;
+    min-height: 3.25rem;
     display: flex;
     align-items: center;
     justify-content: center;

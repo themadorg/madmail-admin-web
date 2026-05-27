@@ -56,6 +56,7 @@
     Ticket,
     GitBranch,
     QrCode,
+    X,
   } from "lucide-svelte";
 
   let { children } = $props();
@@ -159,10 +160,12 @@
   });
 
   // Version update checker
-  let updateAvailable = $state("");
+  let pwaUpdateVersion = $state("");
+  let showPwaUpdateModal = $state(false);
   if (typeof window !== "undefined") {
     startVersionChecker((newVer) => {
-      updateAvailable = newVer;
+      pwaUpdateVersion = newVer;
+      showPwaUpdateModal = true;
     });
   }
 
@@ -509,6 +512,9 @@
 <svelte:head>
   <title>{_("app.title")}</title>
   <meta name="description" content={_("app.description")} />
+  <meta name="apple-mobile-web-app-title" content="Madmail" />
+  <link rel="apple-touch-icon" sizes="180x180" href="{base}/icon-180.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="{base}/icon-192.png" />
 </svelte:head>
 
 {#snippet langPicker()}
@@ -544,23 +550,64 @@
   </div>
 {/snippet}
 
-<!-- Update Banner -->
-{#if updateAvailable}
+<!-- PWA update modal -->
+{#if pwaUpdateVersion && showPwaUpdateModal}
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
-    class="fixed top-0 inset-x-0 z-[60] bg-accent/95 text-white px-4 py-2.5 flex items-center justify-center gap-3 text-sm font-medium shadow-lg backdrop-blur-sm"
+    class="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+    onclick={() => (showPwaUpdateModal = false)}
   >
-    <Download size={16} />
-    <span>{_("update.available", { version: updateAvailable })}</span>
-    <button
-      onclick={() => applyUpdate()}
-      class="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-md text-xs font-semibold transition-colors"
-      >{_("update.button")}</button
+    <div
+      class="ui-card ui-card--panel w-full max-w-sm p-5"
+      role="dialog"
+      aria-labelledby="pwa-update-title"
+      onclick={(e) => e.stopPropagation()}
     >
-    <button
-      onclick={() => (updateAvailable = "")}
-      class="px-2 py-1 text-white/60 hover:text-white text-xs transition-colors"
-      >✕</button
-    >
+      <div class="flex items-start justify-between gap-3 mb-4">
+        <div class="flex items-start gap-3 min-w-0">
+          <div class="p-2 rounded-lg bg-accent/10 text-accent shrink-0">
+            <Download size={18} />
+          </div>
+          <div class="min-w-0">
+            <h2 id="pwa-update-title" class="text-sm font-semibold text-text mb-1">
+              {_("update.title")}
+            </h2>
+            <p class="text-xs text-text-2">
+              {_("update.body", {
+                current: appVersion,
+                version: pwaUpdateVersion,
+              })}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onclick={() => (showPwaUpdateModal = false)}
+          class="p-1 text-text-2 hover:text-text rounded transition-colors shrink-0"
+          aria-label={_("action.cancel")}
+        >
+          <X size={14} />
+        </button>
+      </div>
+
+      <div class="flex gap-2">
+        <button
+          type="button"
+          onclick={() => (showPwaUpdateModal = false)}
+          class="flex-1 px-3 py-2 text-xs border border-border rounded-lg hover:bg-surface-3 transition-colors text-text-2"
+        >
+          {_("update.later")}
+        </button>
+        <button
+          type="button"
+          onclick={() => applyUpdate()}
+          class="flex-1 px-3 py-2 text-xs bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors font-medium"
+        >
+          {_("update.button")}
+        </button>
+      </div>
+    </div>
   </div>
 {/if}
 
@@ -863,6 +910,8 @@
           <img
             src="{base}/madmail-logo.png"
             alt="Madmail"
+            width="52"
+            height="52"
             class="app-header__logo-img"
           />
         </a>
@@ -870,7 +919,22 @@
         <div class="app-header__content">
           <div class="app-header__heading flex items-center gap-1.5 flex-wrap">
             <h1 class="text-xl font-semibold leading-tight">Madmail</h1>
-            <span class="text-[10px] text-text-2/50 font-mono">v{appVersion}</span>
+            {#if pwaUpdateVersion}
+              <button
+                type="button"
+                onclick={() => (showPwaUpdateModal = true)}
+                class="text-[10px] font-mono font-semibold text-accent hover:text-accent/80 transition-colors flex items-center gap-1 rounded px-1 -mx-1"
+                title={_("update.available", { version: pwaUpdateVersion })}
+              >
+                v{appVersion}
+                <span
+                  class="inline-block w-1.5 h-1.5 rounded-full bg-accent shrink-0 animate-pulse"
+                  aria-hidden="true"
+                ></span>
+              </button>
+            {:else}
+              <span class="text-[10px] text-text-2/50 font-mono">v{appVersion}</span>
+            {/if}
           </div>
           <p class="app-header__url text-text-2 text-[11px] truncate leading-snug">
             {store.baseUrl}

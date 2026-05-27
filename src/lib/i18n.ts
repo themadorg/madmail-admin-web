@@ -348,6 +348,9 @@ const translations: Record<Locale, Record<string, string>> = {
         'app.title': 'Madmail Admin',
         'app.description': 'Madmail server administration dashboard',
         'update.available': 'v{version} available',
+        'update.title': 'Update available',
+        'update.body': 'You are on v{current}. v{version} is ready to install.',
+        'update.later': 'Later',
         'update.button': 'Update',
         'login.cert_title': 'Certificate not trusted?',
         'login.cert_hint':
@@ -834,6 +837,9 @@ const translations: Record<Locale, Record<string, string>> = {
         'app.title': 'مدیریت مدمیل',
         'app.description': 'داشبورد مدیریت سرور مدمیل',
         'update.available': 'نسخه {version} موجود است',
+        'update.title': 'به‌روزرسانی موجود است',
+        'update.body': 'نسخه فعلی v{current} است. v{version} آماده نصب است.',
+        'update.later': 'بعداً',
         'update.button': 'به‌روزرسانی',
         'login.cert_title': 'گواهی نامعتبر است؟',
         'login.cert_hint':
@@ -1306,6 +1312,9 @@ const translations: Record<Locale, Record<string, string>> = {
         'app.title': 'Admin Madmail',
         'app.description': 'Panel de administración del servidor Madmail',
         'update.available': 'v{version} disponible',
+        'update.title': 'Actualización disponible',
+        'update.body': 'Estás en v{current}. v{version} está listo para instalar.',
+        'update.later': 'Después',
         'update.button': 'Actualizar',
         'login.cert_title': '¿Certificado no confiable?',
         'login.cert_hint':
@@ -1780,6 +1789,9 @@ const translations: Record<Locale, Record<string, string>> = {
         'app.title': 'Админ Madmail',
         'app.description': 'Панель управления сервером Madmail',
         'update.available': 'Доступна v{version}',
+        'update.title': 'Доступно обновление',
+        'update.body': 'У вас v{current}. v{version} готова к установке.',
+        'update.later': 'Позже',
         'update.button': 'Обновить',
         'login.cert_title': 'Недоверенный сертификат?',
         'login.cert_hint':
