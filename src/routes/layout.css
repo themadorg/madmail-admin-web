@@ -254,38 +254,42 @@ input[type="email"] {
     transition: none;
 }
 
-/* Login screen — fixed viewport on iOS PWA (no body scroll bounce) */
+/* Login screen — centered card; scroll only when content overflows (iOS PWA safe) */
 .login-gate {
     position: fixed;
     inset: 0;
     z-index: 40;
-    height: 100dvh;
-    max-height: 100dvh;
-    overflow: hidden;
     display: flex;
-    flex-direction: column;
-    padding:
-        env(safe-area-inset-top, 0)
-        env(safe-area-inset-right, 0)
-        env(safe-area-inset-bottom, 0)
-        env(safe-area-inset-left, 0);
-}
-
-.login-gate__scroll {
-    flex: 1;
-    min-height: 0;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    min-height: 100dvh;
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
+    padding:
+        max(1rem, env(safe-area-inset-top, 0))
+        max(1rem, env(safe-area-inset-right, 0))
+        max(1rem, env(safe-area-inset-bottom, 0))
+        max(1rem, env(safe-area-inset-left, 0));
+}
+
+html:has(.login-gate) {
+    overflow: hidden;
+}
+
+.login-gate__stack {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 1rem;
+    width: 100%;
+    max-width: 24rem;
+    margin: auto;
 }
 
 .login-gate__version {
-    padding-bottom: 0.25rem;
+    margin-top: 1rem;
+    flex-shrink: 0;
 }
 
 /* Login → header logo morph (single logo, not a page transition) */
@@ -814,7 +818,7 @@ input[type="email"] {
     }
 }
 
-/* Safe area for PWA (notch devices) — app shell only; login gate handles its own insets */
+/* Safe area for PWA (notch devices) — logged-in shell only */
 @supports(padding: env(safe-area-inset-top)) {
     .app-shell {
         padding-top: env(safe-area-inset-top);

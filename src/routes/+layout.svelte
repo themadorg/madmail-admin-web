@@ -648,147 +648,146 @@
     class:login-gate--handoff={loginHandoff}
     style="font-family: 'Inter', system-ui, sans-serif;"
   >
-    <div class="login-gate__scroll">
-      <div class="login-gate__card ui-card ui-card--panel w-full max-w-sm p-6">
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-3">
-          <img
-            bind:this={loginLogoEl}
-            src="{base}/madmail-logo.png"
-            alt="Madmail"
-            width="48"
-            height="48"
-            class="login-logo h-12 w-12 rounded-xl object-contain shrink-0"
-            class:login-logo--handoff={logoMorphActive}
-          />
-          <div>
-            <h1 class="text-lg font-semibold">{_("login.title")}</h1>
-            <p class="text-text-2 text-xs">{_("login.subtitle")}</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-1.5 shrink-0">
-          <ThemeSwitcher {locale} />
-          {@render langPicker()}
-        </div>
-      </div>
-
-      <label for="url" class="block text-xs text-text-2 mb-1"
-        >{_("login.url_label")}</label
-      >
-      <input
-        id="url"
-        type="url"
-        bind:value={store.baseUrl}
-        placeholder={_("login.url_placeholder")}
-        class="w-full mb-3 px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text placeholder-text-2/40 focus:border-accent focus:ring-1 focus:ring-accent/30 outline-none transition"
-      />
-
-      <label for="tok" class="block text-xs text-text-2 mb-1"
-        >{_("login.token_label")}</label
-      >
-      <input
-        id="tok"
-        type="password"
-        bind:value={store.token}
-        placeholder={_("login.token_placeholder")}
-        onkeydown={(e: KeyboardEvent) => {
-          if (e.key === "Enter") connectWithMorph();
-        }}
-        class="w-full mb-4 px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text placeholder-text-2/40 focus:border-accent focus:ring-1 focus:ring-accent/30 outline-none transition"
-      />
-
-      {#if store.connectError}
-        <div class="text-danger text-xs mb-3">
-          <p class="flex items-center gap-1">
-            <AlertTriangle size={12} />
-            {store.connectError}
-          </p>
-          {#if store.connectError.includes("Failed to fetch") || store.connectError.includes("NetworkError") || store.connectError.includes("net::")}
-            <div
-              class="mt-2 p-2 bg-warning/10 border border-warning/20 rounded-md text-warning text-xs"
-            >
-              <p class="font-medium mb-1">{_("login.cert_title")}</p>
-              <p class="text-text-2 mb-2">
-                {_("login.cert_hint")}
-              </p>
-              <a
-                href={store.baseUrl}
-                target="_blank"
-                rel="noopener"
-                class="inline-flex items-center gap-1 text-accent hover:underline font-medium"
-                >{_("login.cert_open", { url: store.baseUrl })}</a
-              >
+    <div class="login-gate__stack">
+      <div class="login-gate__card ui-card ui-card--panel w-full p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3 min-w-0">
+            <img
+              bind:this={loginLogoEl}
+              src="{base}/madmail-logo.png"
+              alt="Madmail"
+              width="48"
+              height="48"
+              class="login-logo h-12 w-12 rounded-xl object-contain shrink-0"
+              class:login-logo--handoff={logoMorphActive}
+            />
+            <div class="min-w-0">
+              <h1 class="text-lg font-semibold">{_("login.title")}</h1>
+              <p class="text-text-2 text-xs">{_("login.subtitle")}</p>
             </div>
-          {/if}
-        </div>
-      {/if}
-
-      <div class="flex gap-2">
-        <button
-          onclick={() => connectWithMorph()}
-          disabled={!canConnect}
-          class="flex-1 py-2.5 bg-accent hover:bg-accent-dim text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        >
-          {#if store.connecting}
-            <RefreshCw size={14} class="animate-spin" /> {_("login.connecting")}
-          {:else}
-            <Plug size={14} /> {_("login.connect")}
-          {/if}
-        </button>
-        <button
-          type="button"
-          onclick={() => (showLoginQr = true)}
-          disabled={store.connecting}
-          class="px-3 py-2.5 bg-surface border border-border rounded-lg hover:border-accent/50 hover:bg-surface-3 transition-colors disabled:opacity-40 shrink-0"
-          title={_("login.scan_qr")}
-          aria-label={_("login.scan_qr")}
-        >
-          <QrCode size={18} class="text-accent" />
-        </button>
-      </div>
-
-      <!-- Saved Servers -->
-      {#if savedServers.length > 0}
-        <div class="mt-5 pt-4 border-t border-border">
-          <h3
-            class="text-xs text-text-2 font-medium mb-2.5 flex items-center gap-1.5"
-          >
-            <Server size={12} />
-            {_("login.saved_servers")}
-          </h3>
-          <div class="space-y-1.5">
-            {#each savedServers as s (s.id)}
-              <!-- svelte-ignore a11y_click_events_have_key_events -->
-              <!-- svelte-ignore a11y_no_static_element_interactions -->
-              <div
-                onclick={() => selectServer(s)}
-                class="w-full group flex items-center gap-2.5 px-3 py-2 bg-surface border border-border rounded-lg hover:border-accent/50 hover:bg-accent/5 transition-all text-start cursor-pointer"
-              >
-                <div class="p-1.5 bg-accent/10 rounded-md shrink-0">
-                  <Server size={13} class="text-accent" />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <div class="text-sm font-medium truncate">{s.label}</div>
-                  <div class="text-[11px] text-text-2 truncate">{s.url}</div>
-                </div>
-                <button
-                  onclick={(e: MouseEvent) => deleteSavedServer(e, s.id)}
-                  class="p-1 text-text-2 opacity-0 group-hover:opacity-100 hover:text-danger transition-all rounded"
-                  title={_("login.remove_saved")}
-                >
-                  <Trash2 size={12} />
-                </button>
-              </div>
-            {/each}
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <ThemeSwitcher {locale} />
+            {@render langPicker()}
           </div>
         </div>
-      {/if}
+
+        <label for="url" class="block text-xs text-text-2 mb-1"
+          >{_("login.url_label")}</label
+        >
+        <input
+          id="url"
+          type="url"
+          bind:value={store.baseUrl}
+          placeholder={_("login.url_placeholder")}
+          class="w-full mb-3 px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text placeholder-text-2/40 focus:border-accent focus:ring-1 focus:ring-accent/30 outline-none transition"
+        />
+
+        <label for="tok" class="block text-xs text-text-2 mb-1"
+          >{_("login.token_label")}</label
+        >
+        <input
+          id="tok"
+          type="password"
+          bind:value={store.token}
+          placeholder={_("login.token_placeholder")}
+          onkeydown={(e: KeyboardEvent) => {
+            if (e.key === "Enter") connectWithMorph();
+          }}
+          class="w-full mb-4 px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text placeholder-text-2/40 focus:border-accent focus:ring-1 focus:ring-accent/30 outline-none transition"
+        />
+
+        {#if store.connectError}
+          <div class="text-danger text-xs mb-3">
+            <p class="flex items-center gap-1">
+              <AlertTriangle size={12} />
+              {store.connectError}
+            </p>
+            {#if store.connectError.includes("Failed to fetch") || store.connectError.includes("NetworkError") || store.connectError.includes("net::")}
+              <div
+                class="mt-2 p-2 bg-warning/10 border border-warning/20 rounded-md text-warning text-xs"
+              >
+                <p class="font-medium mb-1">{_("login.cert_title")}</p>
+                <p class="text-text-2 mb-2">
+                  {_("login.cert_hint")}
+                </p>
+                <a
+                  href={store.baseUrl}
+                  target="_blank"
+                  rel="noopener"
+                  class="inline-flex items-center gap-1 text-accent hover:underline font-medium"
+                  >{_("login.cert_open", { url: store.baseUrl })}</a
+                >
+              </div>
+            {/if}
+          </div>
+        {/if}
+
+        <div class="flex gap-2">
+          <button
+            onclick={() => connectWithMorph()}
+            disabled={!canConnect}
+            class="flex-1 py-2.5 bg-accent hover:bg-accent-dim text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {#if store.connecting}
+              <RefreshCw size={14} class="animate-spin" /> {_("login.connecting")}
+            {:else}
+              <Plug size={14} /> {_("login.connect")}
+            {/if}
+          </button>
+          <button
+            type="button"
+            onclick={() => (showLoginQr = true)}
+            disabled={store.connecting}
+            class="px-3 py-2.5 bg-surface border border-border rounded-lg hover:border-accent/50 hover:bg-surface-3 transition-colors disabled:opacity-40 shrink-0"
+            title={_("login.scan_qr")}
+            aria-label={_("login.scan_qr")}
+          >
+            <QrCode size={18} class="text-accent" />
+          </button>
+        </div>
+
+        {#if savedServers.length > 0}
+          <div class="mt-5 pt-4 border-t border-border">
+            <h3
+              class="text-xs text-text-2 font-medium mb-2.5 flex items-center gap-1.5"
+            >
+              <Server size={12} />
+              {_("login.saved_servers")}
+            </h3>
+            <div class="space-y-1.5">
+              {#each savedServers as s (s.id)}
+                <!-- svelte-ignore a11y_click_events_have_key_events -->
+                <!-- svelte-ignore a11y_no_static_element_interactions -->
+                <div
+                  onclick={() => selectServer(s)}
+                  class="w-full group flex items-center gap-2.5 px-3 py-2 bg-surface border border-border rounded-lg hover:border-accent/50 hover:bg-accent/5 transition-all text-start cursor-pointer"
+                >
+                  <div class="p-1.5 bg-accent/10 rounded-md shrink-0">
+                    <Server size={13} class="text-accent" />
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm font-medium truncate">{s.label}</div>
+                    <div class="text-[11px] text-text-2 truncate">{s.url}</div>
+                  </div>
+                  <button
+                    onclick={(e: MouseEvent) => deleteSavedServer(e, s.id)}
+                    class="p-1 text-text-2 opacity-0 group-hover:opacity-100 hover:text-danger transition-all rounded"
+                    title={_("login.remove_saved")}
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/if}
       </div>
       <a
         href="https://github.com/themadorg/madmail-admin-web"
         target="_blank"
         rel="noopener"
-        class="login-gate__version text-text-2/40 hover:text-text-2/70 text-[10px] mt-4 text-center flex items-center justify-center gap-1 transition-colors shrink-0"
+        class="login-gate__version text-text-2/40 hover:text-text-2/70 text-[10px] text-center flex items-center justify-center gap-1 transition-colors"
       >
         <Github size={10} />
         v{appVersion}

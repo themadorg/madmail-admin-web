@@ -31,6 +31,9 @@ const translations: Record<Locale, Record<string, string>> = {
         'login.qr_invalid': 'Unrecognized QR code — use the code from madmail admin-token.',
         'login.qr_close': 'Close scanner',
         'login.qr_starting': 'Starting camera…',
+        'login.qr_start_camera': 'Start camera',
+        'login.qr_from_photo': 'Scan from photo',
+        'login.qr_camera_failed': 'Could not open camera — try “Scan from photo”.',
 
         // Tabs
         'tab.overview': 'Overview',
@@ -543,6 +546,9 @@ const translations: Record<Locale, Record<string, string>> = {
         'login.qr_invalid': 'QR شناخته نشد — از کد madmail admin-token استفاده کنید.',
         'login.qr_close': 'بستن اسکنر',
         'login.qr_starting': 'راه‌اندازی دوربین…',
+        'login.qr_start_camera': 'شروع دوربین',
+        'login.qr_from_photo': 'اسکن از عکس',
+        'login.qr_camera_failed': 'دوربین باز نشد — «اسکن از عکس» را امتحان کنید.',
 
         'tab.overview': 'نمای کلی',
         'tab.services': 'سرویس‌ها',
@@ -1012,6 +1018,9 @@ const translations: Record<Locale, Record<string, string>> = {
         'login.qr_invalid': 'QR no reconocido — use el código de madmail admin-token.',
         'login.qr_close': 'Cerrar escáner',
         'login.qr_starting': 'Iniciando cámara…',
+        'login.qr_start_camera': 'Iniciar cámara',
+        'login.qr_from_photo': 'Escanear desde foto',
+        'login.qr_camera_failed': 'No se pudo abrir la cámara — pruebe «Escanear desde foto».',
 
         'tab.overview': 'General',
         'tab.services': 'Servicios',
@@ -1483,6 +1492,9 @@ const translations: Record<Locale, Record<string, string>> = {
         'login.qr_invalid': 'QR не распознан — используйте код из madmail admin-token.',
         'login.qr_close': 'Закрыть сканер',
         'login.qr_starting': 'Запуск камеры…',
+        'login.qr_start_camera': 'Запустить камеру',
+        'login.qr_from_photo': 'Сканировать с фото',
+        'login.qr_camera_failed': 'Не удалось открыть камеру — попробуйте «Сканировать с фото».',
 
         'tab.overview': 'Обзор',
         'tab.services': 'Сервисы',
