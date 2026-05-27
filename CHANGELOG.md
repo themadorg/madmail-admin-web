@@ -1,3 +1,10 @@
+# [1.22.0](https://github.com/themadorg/madmail-admin-web/compare/v1.21.0...v1.22.0) (2026-05-27)
+
+
+### Features
+
+* **api:** add isEmbeddedAdminShell function to determine SPA origin ([3e032a8](https://github.com/themadorg/madmail-admin-web/commit/3e032a87a93be33ca1fbbbdf68f1babee3a7098b))
+
 # [1.21.0](https://github.com/themadorg/madmail-admin-web/compare/v1.20.1...v1.21.0) (2026-05-27)
 
 
