@@ -1,3 +1,10 @@
+## [1.27.1](https://github.com/themadorg/madmail-admin-web/compare/v1.27.0...v1.27.1) (2026-05-27)
+
+
+### Bug Fixes
+
+* prevent request loop in data prefetching ([a399e3c](https://github.com/themadorg/madmail-admin-web/commit/a399e3c785c437b94b1f833711e784bf90f8d534))
+
 # [1.27.0](https://github.com/themadorg/madmail-admin-web/compare/v1.26.1...v1.27.0) (2026-05-27)
 
 
