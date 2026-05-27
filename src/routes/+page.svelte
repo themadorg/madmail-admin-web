@@ -162,7 +162,7 @@
     class="ui-card ui-card--rounded ui-card--interactive p-3 block"
   >
     <div class="flex items-center gap-1.5 text-text-2 text-xs mb-1">
-      <Icon size={12} />
+      <Icon size={12} class="text-accent shrink-0" />
       {label}
     </div>
     <div class="text-xl font-semibold">{value}</div>
