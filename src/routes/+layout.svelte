@@ -4,7 +4,7 @@
   import { base } from "$app/paths";
   import { afterNavigate, goto } from "$app/navigation";
   import { prefetchRouteData } from "$lib/pageRefresh";
-  import { tick } from "svelte";
+  import { tick, untrack } from "svelte";
   import { store } from "$lib/state.svelte";
   import { t, getLocale, setLocale, LOCALES, type Locale } from "$lib/i18n";
   import {
@@ -288,10 +288,13 @@
     });
   });
 
-  /** Prefetch data for the current route when connected or path changes. */
+  /** Prefetch data for the current route when connected or path changes.
+   * untrack() prevents reactive reads inside async loaders (e.g. overviewLoading)
+   * from re-triggering this effect and causing a request loop. */
   $effect(() => {
     if (!store.connected) return;
-    prefetchRouteData(store, $page.url.pathname);
+    const path = $page.url.pathname;
+    untrack(() => prefetchRouteData(store, path));
   });
 
   /** In-app navigation: smooth scroll + slide indicator. */
