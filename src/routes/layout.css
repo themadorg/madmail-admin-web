@@ -97,7 +97,6 @@ input[type="email"] {
 .nav-scroll {
     position: relative;
     cursor: grab;
-    touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
 }
