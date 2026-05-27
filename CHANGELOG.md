@@ -1,3 +1,10 @@
+## [1.25.1](https://github.com/themadorg/madmail-admin-web/compare/v1.25.0...v1.25.1) (2026-05-27)
+
+
+### Bug Fixes
+
+* remove touch-action property from .nav-scroll class in layout.css ([d9ac88c](https://github.com/themadorg/madmail-admin-web/commit/d9ac88c31100e2fbd3bf3d52eca5d5913dc24e47))
+
 # [1.25.0](https://github.com/themadorg/madmail-admin-web/compare/v1.24.1...v1.25.0) (2026-05-27)
 
 
