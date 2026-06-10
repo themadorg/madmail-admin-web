@@ -1,3 +1,10 @@
+# [1.28.0](https://github.com/themadorg/madmail-admin-web/compare/v1.27.1...v1.28.0) (2026-06-10)
+
+
+### Features
+
+* add push notification management and admin path normalization ([afa09e0](https://github.com/themadorg/madmail-admin-web/commit/afa09e0b2d0abc66fc6c4f5c3c5ad0c73fd07b07))
+
 ## [1.27.1](https://github.com/themadorg/madmail-admin-web/compare/v1.27.0...v1.27.1) (2026-05-27)
 
 
