@@ -573,7 +573,9 @@
     <div
       class="ui-card ui-card--panel w-full max-w-sm p-5"
       role="dialog"
+      aria-modal="true"
       aria-labelledby="pwa-update-title"
+      tabindex="-1"
       onclick={(e) => e.stopPropagation()}
     >
       <div class="flex items-start justify-between gap-3 mb-4">

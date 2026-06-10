@@ -20,6 +20,7 @@
     ExternalLink,
     X,
     Ticket,
+    Bell,
   } from "lucide-svelte";
   import ShadowsocksQR from "$lib/components/ShadowsocksQR.svelte";
   import FederationStatsGrid from "$lib/components/FederationStatsGrid.svelte";
@@ -67,6 +68,12 @@
   $effect(() => {
     rotationDaysSelect = rotationDays;
   });
+
+  let pushApiAvailable = $derived(store.overview?.push != null);
+  let pushEnabled = $derived(store.pushRuntimeEnabled());
+  let pushSuccessful = $derived(
+    store.overview?.push?.successful_notifications ?? 0,
+  );
 
   let dashboardFederation = $derived(
     dashboardFederationFromOverview(store.overview),
@@ -543,6 +550,49 @@
         <span>{_("queue.purge_read")}</span>
         <Trash2 size={13} class="text-text-2 shrink-0" />
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Push notifications -->
+<div class="mb-4">
+  <div
+    class="ui-card ui-card--rounded p-3 transition-opacity {pushApiAvailable
+      ? ''
+      : 'opacity-45 pointer-events-none select-none'}"
+    title={pushApiAvailable ? undefined : _("push.unsupported")}
+  >
+    <div class="flex items-center justify-between gap-3">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2 text-xs font-medium text-text mb-1">
+          <Bell size={13} class="text-text-2 shrink-0" />
+          {_("svc.push")}
+        </div>
+        <p class="text-[10px] text-text-2 leading-snug">
+          {#if pushApiAvailable}
+            {pushEnabled ? _("push.on_hint") : _("push.off_hint")}
+          {:else}
+            {_("push.unsupported")}
+          {/if}
+        </p>
+        {#if pushApiAvailable}
+          <p class="text-[10px] text-text-2/80 font-mono mt-1">
+            {_("push.notify_target")}
+          </p>
+        {/if}
+      </div>
+      <ToggleSwitch
+        checked={pushEnabled}
+        disabled={store.busy || !pushApiAvailable}
+        label={_("svc.push")}
+        onclick={() => store.togglePush()}
+      />
+    </div>
+    <div class="mt-3 pt-3 border-t border-border flex items-center justify-between gap-3">
+      <span class="text-[11px] text-text-2">{_("stat.push_successful")}</span>
+      <span class="text-lg font-semibold tabular-nums">
+        {pushApiAvailable ? pushSuccessful.toLocaleString() : "—"}
+      </span>
     </div>
   </div>
 </div>

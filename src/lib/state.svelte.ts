@@ -25,7 +25,11 @@ import {
 } from '$lib/api';
 import { serverCapabilities } from '$lib/stores/serverCapabilities.svelte';
 import { t } from '$lib/i18n';
-import { applySettingsToAdminBaseUrl } from '$lib/adminUrl';
+import {
+    applySettingsToAdminBaseUrl,
+    isUnderAdminWebPath,
+    normalizeAdminWebPath,
+} from '$lib/adminUrl';
 import { saveServer } from '$lib/servers';
 import {
     getPageRefreshLoaders,
@@ -38,6 +42,7 @@ const TOGGLE_RESOURCE_SETTINGS: Record<string, keyof AllSettings> = {
     '/admin/registration/jit': 'jit_registration',
     '/admin/services/turn': 'turn_enabled',
     '/admin/services/iroh': 'iroh_enabled',
+    '/admin/services/push': 'push_enabled',
     '/admin/services/admin_web': 'admin_web_enabled',
     '/admin/services/auto_purge_seen': 'auto_purge_seen_enabled',
     '/admin/services/message_retention': 'message_retention_enabled',
@@ -57,6 +62,7 @@ const RESTART_DEFERRAL_RESOURCES = new Set([
     '/admin/services/http_proxy',
     '/admin/services/turn',
     '/admin/services/iroh',
+    '/admin/services/push',
     '/admin/services/admin_web',
 ]);
 
@@ -85,7 +91,7 @@ function toggleResourceLabel(resource: string): string {
 function applyToggleToSettings(settings: AllSettings, resource: string, status: string) {
     const key = TOGGLE_RESOURCE_SETTINGS[resource];
     if (!key) return;
-    (settings as Record<string, string>)[key] = status;
+    settings[key] = status as AllSettings[typeof key];
 }
 
 function toggleStatusLabel(status: string | undefined): string {
@@ -284,15 +290,11 @@ class AdminState {
         if (!s.is_set || !s.value?.trim()) {
             return;
         }
-        const raw = s.value.trim();
-        const want =
-            (raw.startsWith('/') ? raw : `/${raw}`).replace(/\/+$/, '') || '/';
-        const cur =
-            window.location.pathname.replace(/\/+$/, '') || '/';
-        if (want === cur) {
+        const want = normalizeAdminWebPath(s.value);
+        if (isUnderAdminWebPath(window.location.pathname, want)) {
             return;
         }
-        const u = new URL(want + '/', window.location.origin);
+        const u = new URL(`${want}/`, window.location.origin);
         u.search = window.location.search;
         u.hash = window.location.hash;
         window.location.replace(u.toString());
@@ -544,6 +546,9 @@ class AdminState {
     }
 
     async toggleService(resource: string, current: string) {
+        if (resource === '/admin/services/push') {
+            return this.togglePush();
+        }
         if (this.busy) return;
         this.busy = true;
         try {
@@ -580,8 +585,8 @@ class AdminState {
             this.editingField = '';
             // If admin_path changed, reload immediately with the new URL
             if (key === 'admin_path' && value) {
-                // Send reload on the OLD url (still active until restart)
-                await api.reload(this.cfg());
+                // Remount HTTP routes on the old URL (still active until listeners restart)
+                await api.reload(this.cfg(), { scope: 'http', wait: true });
                 // Now update our baseUrl to the new path
                 const url = new URL(this.baseUrl);
                 url.pathname = value;
@@ -603,11 +608,10 @@ class AdminState {
                 }, 1000);
                 return;
             }
-            // Admin web UI path: reload config then full navigation (same origin, new path prefix)
+            // Admin web UI path: server already remounted HTTP routes in setSetting; navigate only
             if (key === 'admin_web_path' && value) {
                 const v = value.trim();
                 const path = (v.startsWith('/') ? v : `/${v}`).replace(/\/+$/, '') || '/';
-                await api.reload(this.cfg());
                 this.pendingRestart = false;
                 this.notify(t('action.restarting'));
                 if (isViteDevShell() || !isEmbeddedAdminShell(this.baseUrl)) {
@@ -670,7 +674,7 @@ class AdminState {
             this.notify(t('notify.reset', { key }));
             // If admin_path reset, reload immediately with the default URL
             if (key === 'admin_path') {
-                await api.reload(this.cfg());
+                await api.reload(this.cfg(), { scope: 'http', wait: true });
                 const url = new URL(this.baseUrl);
                 url.pathname = '/api/admin';
                 this.baseUrl = url.toString().replace(/\/+$/, '');
@@ -691,7 +695,6 @@ class AdminState {
                 return;
             }
             if (key === 'admin_web_path') {
-                await api.reload(this.cfg());
                 this.pendingRestart = false;
                 this.notify(t('action.restarting'));
                 if (isViteDevShell() || !isEmbeddedAdminShell(this.baseUrl)) {
@@ -704,7 +707,10 @@ class AdminState {
                     }
                     return;
                 }
-                const u = new URL('/admin/', window.location.origin);
+                const nextPath = res.data?.value?.trim()
+                    ? normalizeAdminWebPath(res.data.value)
+                    : '/admin';
+                const u = new URL(`${nextPath}/`, window.location.origin);
                 u.search = window.location.search;
                 u.hash = window.location.hash;
                 window.location.replace(u.toString());
@@ -1037,6 +1043,51 @@ class AdminState {
                 action === 'enable' ? t('notify.auto_purge_enabled') : t('notify.auto_purge_disabled'),
             );
         } finally { this.busy = false; }
+    }
+
+    pushRuntimeEnabled(): boolean {
+        if (this.overview?.push != null) return this.overview.push.enabled;
+        const mode = this.settings?.push_mode;
+        if (mode) return mode !== 'off';
+        return this.settings?.push_enabled === 'enabled';
+    }
+
+    async togglePush() {
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const current = this.pushRuntimeEnabled();
+            const action = current ? 'disable' : 'auto';
+            const res = await api.setToggle(this.cfg(), '/admin/services/push', action);
+            if (res.error) {
+                this.notify(res.error, 'err');
+                return;
+            }
+            if (res.data?.restart_required) {
+                this.pendingRestart = true;
+            }
+            if (this.settings) {
+                if (res.data?.status) {
+                    applyToggleToSettings(
+                        this.settings,
+                        '/admin/services/push',
+                        res.data.status,
+                    );
+                }
+                if (res.data?.mode) {
+                    this.settings.push_mode = res.data.mode;
+                }
+            }
+            this.notify(
+                t('notify.toggle_arrow', {
+                    service: toggleResourceLabel('/admin/services/push'),
+                    status: toggleStatusLabel(res.data?.status),
+                }),
+            );
+            await this.loadOverview({ force: true });
+        } finally {
+            this.busy = false;
+        }
     }
 
     async toggleMessageRetention() {

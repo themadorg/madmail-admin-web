@@ -577,12 +577,6 @@
     justify-content: flex-end;
   }
 
-  /* ── Loading ── */
-  .loading {
-    font-size: 0.875rem;
-    color: var(--th-text-2);
-  }
-
   /* ── Animations ── */
   @keyframes slide-in {
     from {

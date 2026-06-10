@@ -76,6 +76,16 @@ export interface MessageRetentionSummary {
     retention: string;
 }
 
+/** Delta Chat push (`GET /admin/status`, `/admin/overview`, `/admin/services/push`). */
+export interface PushSummary {
+    enabled: boolean;
+    /** `auto` (default), `on`, or `off` */
+    mode?: string;
+    successful_notifications: number;
+    consecutive_failures?: number;
+    auto_disable_after?: number;
+}
+
 /** Federation delivery aggregates from `GET /admin/status` (and `/admin/overview`). */
 export interface FederationTrafficSummary {
     inbound: number;
@@ -100,6 +110,7 @@ export interface StatusResponse {
     email_servers?: EmailServersSummary;
     federation_traffic?: FederationTrafficSummary;
     message_retention?: MessageRetentionSummary;
+    push?: PushSummary;
     sent_messages: number;
     outbound_messages: number;
     received_messages: number;
@@ -126,6 +137,7 @@ export interface OverviewResponse {
     email_servers?: EmailServersSummary;
     federation_traffic?: FederationTrafficSummary;
     message_retention?: MessageRetentionSummary;
+    push?: PushSummary;
     /** Present on servers with overview+settings bundle; omitted on legacy composed responses. */
     settings?: AllSettings;
 }
@@ -139,6 +151,7 @@ export interface StorageResponse {
 export interface ToggleStatus {
     status: string;
     restart_required?: boolean;
+    successful_notifications?: number;
 }
 
 export interface SettingValue {
@@ -153,6 +166,8 @@ export interface AllSettings {
     jit_registration: string;
     turn_enabled: string;
     iroh_enabled: string;
+    push_enabled: string;
+    push_mode: string;
     ss_enabled: string;
     auto_purge_seen_enabled: string;
     message_retention_enabled: string;
@@ -472,8 +487,12 @@ export const api = {
         apiCall(c, '/admin/exchangers', 'DELETE', { name }),
 
 
-    // Reload
-    reload: (c: ApiConfig) => apiCall<ReloadResponse>(c, '/admin/reload', 'POST'),
+    // Reload (scope `http` remounts admin API + admin-web only; default `full` restarts all listeners)
+    reload: (
+        c: ApiConfig,
+        opts?: { scope?: 'full' | 'http'; wait?: boolean },
+    ) =>
+        apiCall<ReloadResponse>(c, '/admin/reload', 'POST', opts ?? {}),
 
     // Restart service (needed after port access changes)
     restart: (c: ApiConfig) => apiCall(c, '/admin/restart', 'POST'),

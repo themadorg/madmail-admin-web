@@ -569,9 +569,6 @@
   .modal-detail { font-size: 0.75rem; font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace; color: var(--th-text-2); word-break: break-all; margin: 0; }
   .modal-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
 
-  /* ── Loading ── */
-  .loading { font-size: 0.875rem; color: var(--th-text-2); }
-
   /* ── Animations ── */
   @keyframes slide-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes modal-in { from { opacity: 0; transform: scale(0.95) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }

@@ -1,5 +1,22 @@
 import type { AllSettings } from '$lib/api';
 
+/** Normalize an admin-web mount path (`/admin`, `/secret`, …). */
+export function normalizeAdminWebPath(raw: string): string {
+    const trimmed = raw.trim();
+    const withSlash = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+    return withSlash.replace(/\/+$/, '') || '/';
+}
+
+/** True when `pathname` is the SPA root or a client route under `adminWebPath`. */
+export function isUnderAdminWebPath(pathname: string, adminWebPath: string): boolean {
+    const prefix = normalizeAdminWebPath(adminWebPath);
+    const cur = pathname.replace(/\/+$/, '') || '/';
+    if (cur === prefix) {
+        return true;
+    }
+    return cur.startsWith(`${prefix}/`);
+}
+
 /**
  * Recompute the admin API base URL (same inputs as the madmail admin-token
  * / buildAdminURL logic): apply DB overrides for SMTP hostname, HTTPS/HTTP

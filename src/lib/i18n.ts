@@ -84,6 +84,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'stat.sent': 'Messages Sent',
         'stat.outbound': 'Messages Out',
         'stat.received': 'Messages In',
+        'stat.push_successful': 'Successful push notifications',
         'stat.host_free': 'Host Storage (Free)',
         'stat.host_total': 'Host Capacity',
         'stat.imap': 'IMAP',
@@ -131,6 +132,14 @@ const translations: Record<Locale, Record<string, string>> = {
         'queue.retention_days': '{n} days',
         'svc.turn': 'TURN',
         'svc.iroh': 'Iroh Relay',
+        'svc.push': 'Push notifications (XDELTAPUSH)',
+        'push.on_hint':
+            'On — POSTs encrypted device tokens to notifications.delta.chat when new mail arrives (auto-disables after 5 proxy failures)',
+        'push.off_hint':
+            'Off by default — no requests to notifications.delta.chat; XDELTAPUSH and device token registration disabled',
+        'push.unsupported':
+            'Requires a newer madmail server (push stats are not in /admin/status).',
+        'push.notify_target': 'Sends to notifications.delta.chat',
         'svc.shadowsocks': 'Shadowsocks',
         'svc.configuration': 'Configuration',
         'svc.smtp_hostname': 'SMTP Hostname',
@@ -599,6 +608,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'stat.sent': 'پیام ارسالی',
         'stat.outbound': 'پیام خروجی',
         'stat.received': 'پیام ورودی',
+        'stat.push_successful': 'اعلان‌های فوری موفق',
         'stat.host_free': 'فضای آزاد هاست',
         'stat.host_total': 'کل فضای هاست',
         'stat.imap': 'IMAP',
@@ -642,6 +652,14 @@ const translations: Record<Locale, Record<string, string>> = {
         'queue.retention_days': '{n} روز',
         'svc.turn': 'TURN',
         'svc.iroh': 'رله Iroh',
+        'svc.push': 'اعلان‌های فوری (XDELTAPUSH)',
+        'push.on_hint':
+            'روشن — توکن‌های رمزنگاری‌شده با ورود ایمیل جدید به notifications.delta.chat ارسال می‌شود',
+        'push.off_hint':
+            'خاموش (پیش‌فرض) — بدون درخواست به notifications.delta.chat',
+        'push.notify_target': 'ارسال به notifications.delta.chat',
+        'push.unsupported':
+            'نیاز به سرور madmail جدیدتر (آمار push در /admin/status نیست).',
         'svc.shadowsocks': 'شدوساکس',
         'svc.configuration': 'تنظیمات',
         'svc.smtp_hostname': 'نام هاست SMTP',
@@ -1074,6 +1092,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'stat.sent': 'Mensajes Enviados',
         'stat.outbound': 'Mensajes Salientes',
         'stat.received': 'Mensajes Recibidos',
+        'stat.push_successful': 'Notificaciones push exitosas',
         'stat.host_free': 'Espacio Libre (Host)',
         'stat.host_total': 'Capacidad Total',
         'stat.imap': 'IMAP',
@@ -1117,6 +1136,14 @@ const translations: Record<Locale, Record<string, string>> = {
         'queue.retention_days': '{n} días',
         'svc.turn': 'TURN',
         'svc.iroh': 'Relé Iroh',
+        'svc.push': 'Notificaciones push (XDELTAPUSH)',
+        'push.on_hint':
+            'Activo — envía tokens cifrados a notifications.delta.chat con correo nuevo',
+        'push.off_hint':
+            'Inactivo por defecto — sin solicitudes a notifications.delta.chat',
+        'push.notify_target': 'Envía a notifications.delta.chat',
+        'push.unsupported':
+            'Requiere un servidor madmail más nuevo (las estadísticas push no están en /admin/status).',
         'svc.shadowsocks': 'Shadowsocks',
         'svc.configuration': 'Configuración',
         'svc.smtp_hostname': 'Nombre de host SMTP',
@@ -1551,6 +1578,7 @@ const translations: Record<Locale, Record<string, string>> = {
         'stat.sent': 'Отправлено',
         'stat.outbound': 'Исходящие',
         'stat.received': 'Входящие',
+        'stat.push_successful': 'Успешные push-уведомления',
         'stat.host_free': 'Свободно на хосте',
         'stat.host_total': 'Общий объем',
         'stat.imap': 'IMAP',
@@ -1594,6 +1622,14 @@ const translations: Record<Locale, Record<string, string>> = {
         'queue.retention_days': '{n} дн.',
         'svc.turn': 'TURN',
         'svc.iroh': 'Реле Iroh',
+        'svc.push': 'Push-уведомления (XDELTAPUSH)',
+        'push.on_hint':
+            'Вкл. — отправляет токены на notifications.delta.chat при новой почте',
+        'push.off_hint':
+            'Выкл. по умолчанию — без запросов к notifications.delta.chat',
+        'push.notify_target': 'Отправка на notifications.delta.chat',
+        'push.unsupported':
+            'Требуется более новый сервер madmail (статистика push отсутствует в /admin/status).',
         'svc.shadowsocks': 'Shadowsocks',
         'svc.configuration': 'Конфигурация',
         'svc.smtp_hostname': 'Имя хоста SMTP',

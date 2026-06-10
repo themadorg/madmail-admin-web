@@ -189,6 +189,26 @@
       store.settings.iroh_enabled,
       "enabled",
     )}
+    <div class="ui-card ui-card--rounded ui-card-row items-start gap-3">
+      <div class="min-w-0 flex-1">
+        <div class="text-sm font-medium">{_("svc.push")}</div>
+        <div class="text-xs text-text-2 font-mono">/admin/services/push</div>
+        <p class="text-[10px] text-text-2 leading-snug mt-1">
+          {store.pushRuntimeEnabled()
+            ? _("push.on_hint")
+            : _("push.off_hint")}
+        </p>
+        <p class="text-[10px] text-text-2/80 font-mono mt-0.5">
+          {_("push.notify_target")}
+        </p>
+      </div>
+      <ToggleSwitch
+        checked={store.pushRuntimeEnabled()}
+        disabled={isWorking}
+        label={_("svc.push")}
+        onclick={() => store.togglePush()}
+      />
+    </div>
     {@render toggleRow(
       _("svc.admin_web"),
       "/admin/services/admin_web",
