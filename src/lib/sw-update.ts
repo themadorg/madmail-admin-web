@@ -4,6 +4,7 @@
 // The caller can then trigger applyUpdate() to clear the SW cache and reload.
 
 import { base } from '$app/paths';
+import { compareVersions } from '$lib/version';
 
 /** Admin-web version baked in at build time (matches stamped version.json when embedded). */
 const runningVersion =
@@ -51,8 +52,13 @@ async function checkForUpdate() {
     if (!remote) return;
 
     // Compare server version.json against the code actually running (cached bundle).
-    if (remote === runningVersion) {
+    if (remote === runningVersion || compareVersions(remote, runningVersion) === 0) {
         clearPwaUpdateDismiss();
+        return;
+    }
+
+    // Ignore stale or downgraded version.json (e.g. 1.2.0 while running 1.28.0).
+    if (runningVersion !== 'dev' && compareVersions(remote, runningVersion) < 0) {
         return;
     }
 

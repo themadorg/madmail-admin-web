@@ -25,6 +25,7 @@ import {
 } from '$lib/api';
 import { serverCapabilities } from '$lib/stores/serverCapabilities.svelte';
 import { t } from '$lib/i18n';
+import { compareVersions } from '$lib/version';
 import {
     applySettingsToAdminBaseUrl,
     isUnderAdminWebPath,
@@ -233,24 +234,11 @@ class AdminState {
      * Compares two semantic versions.
      * Returns 1 if v1 > v2, -1 if v1 < v2, 0 if equal.
      */
-    compareVersions(v1: string, v2: string): number {
-        const parse = (v: string) => (v || '').replace(/^v/, '').split('+')[0].split('.').map(Number);
-        const p1 = parse(v1);
-        const p2 = parse(v2);
-        for (let i = 0; i < Math.max(p1.length, p2.length); i++) {
-            const n1 = p1[i] || 0;
-            const n2 = p2[i] || 0;
-            if (n1 > n2) return 1;
-            if (n2 > n1) return -1;
-        }
-        return 0;
-    }
-
     get hasUpdate(): boolean {
         if (!this.latestServerVersion) return false;
         const current = this.status?.version ?? this.serverVersion;
         if (!current) return false;
-        return this.compareVersions(current, this.latestServerVersion) < 0;
+        return compareVersions(current, this.latestServerVersion) < 0;
     }
 
     // --- API actions ---
