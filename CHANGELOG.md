@@ -1,3 +1,10 @@
+# [1.29.0](https://github.com/themadorg/madmail-admin-web/compare/v1.28.0...v1.29.0) (2026-06-15)
+
+
+### Features
+
+* add federation body size management ([23679a8](https://github.com/themadorg/madmail-admin-web/commit/23679a81fee745a71c2a188ca8ac850ceaad45d8))
+
 # [1.28.0](https://github.com/themadorg/madmail-admin-web/compare/v1.27.1...v1.28.0) (2026-06-10)
 
 
