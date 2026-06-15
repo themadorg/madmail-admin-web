@@ -22,6 +22,7 @@ import {
     type FederationSettingsResponse,
     type FederationRulesResponse,
     type FederationServersResponse,
+    type FederationSizeResponse,
 } from '$lib/api';
 import { serverCapabilities } from '$lib/stores/serverCapabilities.svelte';
 import { t } from '$lib/i18n';
@@ -92,7 +93,7 @@ function toggleResourceLabel(resource: string): string {
 function applyToggleToSettings(settings: AllSettings, resource: string, status: string) {
     const key = TOGGLE_RESOURCE_SETTINGS[resource];
     if (!key) return;
-    settings[key] = status as AllSettings[typeof key];
+    (settings as unknown as Record<string, string | SettingValue>)[key] = status;
 }
 
 function toggleStatusLabel(status: string | undefined): string {
@@ -161,9 +162,12 @@ class AdminState {
     exchangersLoading = $state(false);
     registrationTokens = $state<RegistrationTokenListResponse | null>(null);
     federationSettings = $state<FederationSettingsResponse | null>(null);
+    federationSize = $state<FederationSizeResponse | null>(null);
     federationRules = $state<FederationRulesResponse | null>(null);
     federationServers = $state<FederationServersResponse | null>(null);
     federationSectionLoading = $state(false);
+    editingFederationSize = $state(false);
+    federationSizeEditValue = $state('');
 
     // UI
     toast = $state('');
@@ -439,6 +443,18 @@ class AdminState {
         if (res.data) this.federationSettings = res.data;
     }
 
+    async loadFederationSize() {
+        if (!this.connected) return;
+        const res = await api.federationSize(this.cfg());
+        if (res.error) {
+            if (res.status === 404 || res.error.includes('unknown resource')) {
+                this.federationSize = null;
+            }
+            return;
+        }
+        if (res.data) this.federationSize = res.data;
+    }
+
     async loadFederationRules() {
         if (!this.connected) return;
         const res = await api.federationRules(this.cfg());
@@ -476,6 +492,7 @@ class AdminState {
         try {
             await Promise.all([
                 this.loadFederationSettings(),
+                this.loadFederationSize(),
                 this.loadFederationRules(),
                 this.loadFederationServers(),
                 this.loadSettings(),
@@ -499,6 +516,7 @@ class AdminState {
                 this.loadExchangers(),
                 this.loadRegistrationTokens(),
                 this.loadFederationSettings(),
+                this.loadFederationSize(),
                 this.loadFederationRules(),
                 this.loadFederationServers(),
             ]);
@@ -528,7 +546,7 @@ class AdminState {
         this.token = '';
         this.status = this.storage = this.settings = this.accounts = this.quota = this.blocklist = this.endpointOverrides = this.exchangers = this.registrationTokens = null;
         this.overview = null;
-        this.federationSettings = this.federationRules = this.federationServers = null;
+        this.federationSettings = this.federationSize = this.federationRules = this.federationServers = null;
         this.newAccount = null;
         serverCapabilities.reset();
     }
@@ -1206,6 +1224,81 @@ class AdminState {
             this.notify(t('notify.fed_rule_removed', { domain }));
             await this.refresh();
         } finally { this.busy = false; }
+    }
+
+    /** Whether the connected server exposes federation body size settings. */
+    get federationSizeSupported(): boolean {
+        return (
+            this.federationSize != null ||
+            this.federationSettings?.federation_size_effective != null
+        );
+    }
+
+    federationSizeDisplay(): { effective: string; configured: string | null; hasOverride: boolean } {
+        const fromSize = this.federationSize;
+        const fromSettings = this.federationSettings;
+        const effective =
+            fromSize?.effective ??
+            fromSettings?.federation_size_effective ??
+            '70M';
+        const configured =
+            fromSize?.max_federation_size ??
+            fromSettings?.max_federation_size ??
+            null;
+        const hasOverride = Boolean(configured?.trim());
+        return { effective, configured: configured?.trim() || null, hasOverride };
+    }
+
+    startEditFederationSize() {
+        const { effective, configured } = this.federationSizeDisplay();
+        this.federationSizeEditValue = configured ?? effective;
+        this.editingFederationSize = true;
+    }
+
+    cancelEditFederationSize() {
+        this.editingFederationSize = false;
+        this.federationSizeEditValue = '';
+    }
+
+    async saveFederationSize() {
+        const size = this.federationSizeEditValue.trim();
+        if (!size || this.busy) return;
+        this.busy = true;
+        try {
+            const res = await api.setFederationSize(this.cfg(), size);
+            if (res.error) {
+                this.notify(res.error, 'err');
+                return;
+            }
+            if (res.data) this.federationSize = res.data;
+            this.editingFederationSize = false;
+            this.notify(t('notify.federation_size_set', { size: res.data?.effective ?? size }));
+            await this.loadFederationSettings();
+        } finally {
+            this.busy = false;
+        }
+    }
+
+    async resetFederationSize() {
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const res = await api.resetFederationSize(this.cfg());
+            if (res.error) {
+                this.notify(res.error, 'err');
+                return;
+            }
+            if (res.data) this.federationSize = res.data;
+            this.editingFederationSize = false;
+            this.notify(
+                t('notify.federation_size_reset', {
+                    size: res.data?.effective ?? '',
+                }),
+            );
+            await this.loadFederationSettings();
+        } finally {
+            this.busy = false;
+        }
     }
 }
 

@@ -54,6 +54,15 @@
     if (p.includes("/tokens")) return "tokens";
     return "list";
   });
+
+  /** Share of default-quota pool consumed (API does not return percent_used). */
+  let poolPercent = $derived.by(() => {
+    const q = store.quota;
+    if (!q || q.accounts_count <= 0 || q.default_quota_bytes <= 0) return null;
+    const cap = q.default_quota_bytes * q.accounts_count;
+    if (cap <= 0) return null;
+    return (q.total_storage_bytes / cap) * 100;
+  });
 </script>
 
 <div class="federation-layout">
@@ -100,10 +109,10 @@
       <div class="text-xl font-semibold text-success">
         {store.quota ? store.fmtBytes(store.quota.total_storage_bytes) : "—"}
       </div>
-      {#if store.quota?.percent_used}
+      {#if poolPercent != null}
         <div class="text-[10px] text-text-2 mt-1">
           {_("acct.pool_pct", {
-            pct: store.quota.percent_used.toFixed(1),
+            pct: poolPercent.toFixed(1),
           })}
         </div>
       {/if}

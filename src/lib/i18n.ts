@@ -346,6 +346,11 @@ const translations: Record<Locale, Record<string, string>> = {
         'fed.health_bad': 'Bad federation',
         'fed.health_bad_short': 'Bad',
         'fed.health_bad_hint': 'Less than 30% delivery success',
+        'fed.body_size_limit': 'Federation body size',
+        'fed.body_size_hint': 'Max HTTP body size for /mxdeliv (default 70M)',
+        'fed.body_size_override': 'Database override',
+        'fed.edit_body_size': 'Edit federation body size',
+        'fed.reset_body_size': 'Reset to config default',
 
         // Misc
         'misc.default': '(default)',
@@ -533,6 +538,8 @@ const translations: Record<Locale, Record<string, string>> = {
         'notify.federation_policy': 'Federation policy set to {policy}',
         'notify.federation_on': 'Federation enabled',
         'notify.federation_off': 'Federation disabled',
+        'notify.federation_size_set': 'Federation body size set to {size}',
+        'notify.federation_size_reset': 'Federation body size reset to {size}',
         'notify.fed_rule_added': 'Rule added: {domain}',
         'notify.fed_rule_removed': 'Rule removed: {domain}',
 
@@ -846,6 +853,11 @@ const translations: Record<Locale, Record<string, string>> = {
         'fed.health_bad': 'فدراسیون ضعیف',
         'fed.health_bad_short': 'ضعیف',
         'fed.health_bad_hint': 'کمتر از ۳۰٪ تحویل موفق',
+        'fed.body_size_limit': 'اندازه بدنه فدراسیون',
+        'fed.body_size_hint': 'حداکثر اندازه بدنه HTTP برای /mxdeliv (پیش‌فرض 70M)',
+        'fed.body_size_override': 'بازنویسی پایگاه داده',
+        'fed.edit_body_size': 'ویرایش اندازه بدنه فدراسیون',
+        'fed.reset_body_size': 'بازگشت به پیش‌فرض پیکربندی',
 
         'misc.default': '(پیش‌فرض)',
         'misc.loading': 'بارگذاری…',
@@ -1017,6 +1029,8 @@ const translations: Record<Locale, Record<string, string>> = {
         'notify.federation_policy': 'سیاست فدراسیون: {policy}',
         'notify.federation_on': 'فدراسیون فعال شد',
         'notify.federation_off': 'فدراسیون غیرفعال شد',
+        'notify.federation_size_set': 'اندازه بدنه فدراسیون روی {size} تنظیم شد',
+        'notify.federation_size_reset': 'اندازه بدنه فدراسیون به {size} بازنشانی شد',
         'notify.fed_rule_added': 'قانون اضافه شد: {domain}',
         'notify.fed_rule_removed': 'قانون حذف شد: {domain}',
 
@@ -1330,6 +1344,11 @@ const translations: Record<Locale, Record<string, string>> = {
         'fed.health_bad': 'Federación deficiente',
         'fed.health_bad_short': 'Deficiente',
         'fed.health_bad_hint': 'Menos del 30% de entregas exitosas',
+        'fed.body_size_limit': 'Tamaño del cuerpo de federación',
+        'fed.body_size_hint': 'Tamaño máximo del cuerpo HTTP para /mxdeliv (predeterminado 70M)',
+        'fed.body_size_override': 'Anulación en base de datos',
+        'fed.edit_body_size': 'Editar tamaño del cuerpo de federación',
+        'fed.reset_body_size': 'Restablecer al valor de configuración',
 
         'misc.default': '(predeterminado)',
         'misc.loading': 'Cargando…',
@@ -1503,6 +1522,8 @@ const translations: Record<Locale, Record<string, string>> = {
         'notify.federation_policy': 'Política de federación: {policy}',
         'notify.federation_on': 'Federación activada',
         'notify.federation_off': 'Federación desactivada',
+        'notify.federation_size_set': 'Tamaño del cuerpo de federación establecido en {size}',
+        'notify.federation_size_reset': 'Tamaño del cuerpo de federación restablecido a {size}',
         'notify.fed_rule_added': 'Regla añadida: {domain}',
         'notify.fed_rule_removed': 'Regla eliminada: {domain}',
 
@@ -1816,6 +1837,11 @@ const translations: Record<Locale, Record<string, string>> = {
         'fed.health_bad': 'Плохая федерация',
         'fed.health_bad_short': 'Плохо',
         'fed.health_bad_hint': 'Менее 30% успешных доставок',
+        'fed.body_size_limit': 'Размер тела федерации',
+        'fed.body_size_hint': 'Макс. размер HTTP-тела для /mxdeliv (по умолчанию 70M)',
+        'fed.body_size_override': 'Переопределение в БД',
+        'fed.edit_body_size': 'Изменить размер тела федерации',
+        'fed.reset_body_size': 'Сбросить к значению из конфигурации',
 
         'misc.default': '(по умолчанию)',
         'misc.loading': 'Загрузка…',
@@ -1989,6 +2015,8 @@ const translations: Record<Locale, Record<string, string>> = {
         'notify.federation_policy': 'Политика федерации: {policy}',
         'notify.federation_on': 'Федерация включена',
         'notify.federation_off': 'Федерация выключена',
+        'notify.federation_size_set': 'Размер тела федерации установлен: {size}',
+        'notify.federation_size_reset': 'Размер тела федерации сброшен: {size}',
         'notify.fed_rule_added': 'Правило добавлено: {domain}',
         'notify.fed_rule_removed': 'Правило удалено: {domain}',
 

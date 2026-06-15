@@ -405,7 +405,7 @@
   let matrixGoldenFlashSeq = $state(0);
   let logoSecretRainWord = $state(`${LOGO_SECRET_LABEL}.`);
   let logoSecretHelpVisible = $state(false);
-  let logoSecretHelpTimer: ReturnType<typeof window.setTimeout> | undefined;
+  let logoSecretHelpTimer: number | undefined;
   let logoSecretPollingActive = $state(false);
 
   function queueGoldenRainFlashes(count: number) {

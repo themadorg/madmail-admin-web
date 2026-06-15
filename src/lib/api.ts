@@ -152,6 +152,8 @@ export interface ToggleStatus {
     status: string;
     restart_required?: boolean;
     successful_notifications?: number;
+    /** Push toggle: `auto`, `on`, or `off`. */
+    mode?: string;
 }
 
 export interface SettingValue {
@@ -222,6 +224,13 @@ export interface AllSettings {
     dclogin_imap_security: SettingValue;
     dclogin_smtp_security: SettingValue;
     language: SettingValue;
+    appendlimit?: SettingValue;
+    max_message_size?: SettingValue;
+    message_size_effective?: string;
+    message_size_effective_bytes?: number;
+    max_federation_size?: SettingValue;
+    federation_size_effective?: string;
+    federation_size_effective_bytes?: number;
     /** Server-built SS URL when available (`GET /admin/settings`). */
     shadowsocks_url?: string;
 }
@@ -291,6 +300,22 @@ export interface RegistrationTokenListResponse {
 export interface FederationSettingsResponse {
     enabled: boolean;
     policy: string;
+    /** DB override (`null` when unset). */
+    max_federation_size?: string | null;
+    /** Effective `/mxdeliv` HTTP body cap (formatted). */
+    federation_size_effective?: string;
+    federation_size_effective_bytes?: number;
+}
+
+export interface FederationSizeResponse {
+    effective_bytes: number;
+    effective: string;
+    /** DB override when set. */
+    max_federation_size?: string | null;
+    config_bytes: number;
+    config: string;
+    size?: string;
+    reset?: boolean;
 }
 
 export interface FederationRuleEntry {
@@ -524,6 +549,12 @@ export const api = {
         apiCall(c, '/admin/federation/rules', 'DELETE', { domain }),
     federationServers: (c: ApiConfig) =>
         apiCall<FederationServersResponse>(c, '/admin/federation/servers'),
+    federationSize: (c: ApiConfig) =>
+        apiCall<FederationSizeResponse>(c, '/admin/federation-size'),
+    setFederationSize: (c: ApiConfig, size: string) =>
+        apiCall<FederationSizeResponse>(c, '/admin/federation-size', 'PUT', { size }),
+    resetFederationSize: (c: ApiConfig) =>
+        apiCall<FederationSizeResponse>(c, '/admin/federation-size', 'DELETE'),
 };
 
 export interface OverviewFetchResult {

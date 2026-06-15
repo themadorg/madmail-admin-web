@@ -50,24 +50,24 @@
         mode === "single" ? recipient : undefined,
       );
       if (res.error) {
-        store.showToast(res.error, "err");
-      } else if (res.body) {
-        result = res.body;
-        if (res.body.sent > 0) {
-          store.showToast(
-            _("notice.sent", { count: String(res.body.sent) }),
+        store.notify(res.error, "err");
+      } else if (res.data) {
+        result = res.data;
+        if (res.data.sent > 0) {
+          store.notify(
+            _("notice.sent", { count: String(res.data.sent) }),
             "ok",
           );
         }
-        if (res.body.failed > 0) {
-          store.showToast(
-            _("notice.failed", { count: String(res.body.failed) }),
+        if (res.data.failed > 0) {
+          store.notify(
+            _("notice.failed", { count: String(res.data.failed) }),
             "err",
           );
         }
       }
     } catch (e) {
-      store.showToast(String(e), "err");
+      store.notify(String(e), "err");
     } finally {
       sending = false;
     }

@@ -11,6 +11,9 @@
     Activity,
     Globe,
     ArrowDownToLine,
+    HardDrive,
+    Pencil,
+    RotateCcw,
   } from "lucide-svelte";
   import FederationStatsGrid from "$lib/components/FederationStatsGrid.svelte";
   import PageLoader from "$lib/components/PageLoader.svelte";
@@ -90,6 +93,9 @@
       onTraffic: activeTab === "traffic",
     });
   }
+
+  let sizeInfo = $derived(store.federationSizeDisplay());
+  let sizeSupported = $derived(store.federationSizeSupported);
 </script>
 
 <div class="federation-layout">
@@ -156,6 +162,76 @@
       </button>
     </div>
   </div>
+
+  {#if sizeSupported}
+    <div class="fed-size-bar">
+      <div class="fed-size-info">
+        <div class="fed-size-icon">
+          <HardDrive size={14} />
+        </div>
+        <div class="fed-size-text">
+          <div class="fed-label">{_("fed.body_size_limit")}</div>
+          <div class="fed-size-value">
+            <span class="size-effective">{sizeInfo.effective}</span>
+            <span class="size-hint">{_("fed.body_size_hint")}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="fed-size-actions">
+        {#if store.editingFederationSize}
+          <input
+            type="text"
+            bind:value={store.federationSizeEditValue}
+            placeholder="70M"
+            class="fed-size-input"
+            onkeydown={(e) => {
+              if (e.key === "Enter") void store.saveFederationSize();
+              if (e.key === "Escape") store.cancelEditFederationSize();
+            }}
+          />
+          <button
+            class="fed-size-btn fed-size-btn--save"
+            onclick={() => store.saveFederationSize()}
+            disabled={store.busy || !store.federationSizeEditValue.trim()}
+          >
+            {_("action.save")}
+          </button>
+          <button
+            class="fed-size-btn"
+            onclick={() => store.cancelEditFederationSize()}
+            disabled={store.busy}
+          >
+            {_("action.cancel")}
+          </button>
+        {:else}
+          {#if sizeInfo.hasOverride}
+            <span class="size-override" title={_("fed.body_size_override")}>
+              {sizeInfo.configured}
+            </span>
+          {/if}
+          <button
+            class="fed-size-icon-btn"
+            onclick={() => store.startEditFederationSize()}
+            disabled={store.busy}
+            aria-label={_("fed.edit_body_size")}
+          >
+            <Pencil size={12} />
+          </button>
+          {#if sizeInfo.hasOverride}
+            <button
+              class="fed-size-icon-btn fed-size-icon-btn--reset"
+              onclick={() => store.resetFederationSize()}
+              disabled={store.busy}
+              aria-label={_("fed.reset_body_size")}
+            >
+              <RotateCcw size={12} />
+            </button>
+          {/if}
+        {/if}
+      </div>
+    </div>
+  {/if}
 
   {#if stats && health}
     <FederationStatsGrid

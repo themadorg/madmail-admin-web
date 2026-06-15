@@ -30,8 +30,9 @@ export function matrixRain(
 	node: HTMLCanvasElement,
 	options: MatrixRainOptions = { accent: "red" },
 ) {
-	const ctx = node.getContext("2d");
-	if (!ctx) return { destroy() {} };
+	const ctx0 = node.getContext("2d");
+	if (!ctx0) return { destroy() {} };
+	const ctx: CanvasRenderingContext2D = ctx0;
 
 	let currentAccent = options.accent;
 	let rainWord = options.rainWord ?? `${LOGO_SECRET_LABEL}.`;
