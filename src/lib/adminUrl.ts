@@ -1,5 +1,76 @@
 import type { AllSettings } from '$lib/api';
 
+export type AdminApiProtocol = 'https:' | 'http:';
+
+/** Split a stored or pasted admin API URL into protocol + host/path. */
+export function splitAdminApiUrl(input: string): { protocol: AdminApiProtocol; rest: string } {
+    const trimmed = input.trim();
+    if (!trimmed) return { protocol: 'https:', rest: '' };
+
+    if (/^https?:\/\//i.test(trimmed)) {
+        try {
+            const u = new URL(trimmed);
+            const rest = `${u.host}${u.pathname}${u.search}${u.hash}`.replace(/\/+$/, '');
+            return { protocol: u.protocol as AdminApiProtocol, rest };
+        } catch {
+            const m = trimmed.match(/^(https?):\/\/(.*)$/i);
+            if (m) {
+                return {
+                    protocol: `${m[1].toLowerCase()}:` as AdminApiProtocol,
+                    rest: m[2].replace(/\/+$/, ''),
+                };
+            }
+        }
+    }
+
+    if (trimmed.startsWith('//')) {
+        return { protocol: 'https:', rest: trimmed.slice(2).replace(/\/+$/, '') };
+    }
+
+    return { protocol: 'https:', rest: trimmed.replace(/\/+$/, '') };
+}
+
+/** Build a full admin API URL from the login protocol selector and host/path field. */
+export function buildAdminApiUrl(protocol: AdminApiProtocol, rest: string): string {
+    const trimmed = rest.trim();
+    if (!trimmed) return '';
+    if (/^https?:\/\//i.test(trimmed)) {
+        return normalizeAdminApiUrl(trimmed);
+    }
+    return normalizeAdminApiUrl(`${protocol}//${trimmed.replace(/^\/+/, '')}`, protocol);
+}
+
+/**
+ * Ensure the admin API URL has a protocol. Defaults to HTTPS when omitted
+ * (matches madmail admin-token output and typical deployments).
+ */
+export function normalizeAdminApiUrl(
+    input: string,
+    defaultProtocol: AdminApiProtocol = 'https:',
+): string {
+    const trimmed = input.trim();
+    if (!trimmed) return '';
+
+    let candidate = trimmed;
+    if (!/^https?:\/\//i.test(candidate)) {
+        if (candidate.startsWith('//')) {
+            candidate = `${defaultProtocol}${candidate}`;
+        } else {
+            candidate = `${defaultProtocol}//${candidate.replace(/^\/+/, '')}`;
+        }
+    }
+
+    try {
+        const u = new URL(candidate);
+        if (u.protocol !== 'http:' && u.protocol !== 'https:') {
+            return candidate.replace(/\/+$/, '');
+        }
+        return u.toString().replace(/\/+$/, '');
+    } catch {
+        return candidate.replace(/\/+$/, '');
+    }
+}
+
 /** Normalize an admin-web mount path (`/admin`, `/secret`, …). */
 export function normalizeAdminWebPath(raw: string): string {
     const trimmed = raw.trim();

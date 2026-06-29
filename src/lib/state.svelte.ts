@@ -30,6 +30,7 @@ import { compareVersions } from '$lib/version';
 import {
     applySettingsToAdminBaseUrl,
     isUnderAdminWebPath,
+    normalizeAdminApiUrl,
     normalizeAdminWebPath,
 } from '$lib/adminUrl';
 import { saveServer } from '$lib/servers';
@@ -125,12 +126,15 @@ let savedToken = '';
 if (typeof localStorage !== 'undefined') {
     savedUrl = localStorage.getItem('madmail_url') ?? '';
     savedToken = localStorage.getItem('madmail_token') ?? '';
-    try {
-        if (savedUrl && !new URL(savedUrl).pathname.replace(/\/+$/, '')) {
-            savedUrl = savedUrl.replace(/\/+$/, '') + '/api/admin';
+    if (savedUrl) {
+        savedUrl = normalizeAdminApiUrl(savedUrl);
+        try {
+            if (!new URL(savedUrl).pathname.replace(/\/+$/, '')) {
+                savedUrl = savedUrl.replace(/\/+$/, '') + '/api/admin';
+            }
             localStorage.setItem('madmail_url', savedUrl);
-        }
-    } catch { /* invalid URL */ }
+        } catch { /* invalid URL */ }
+    }
 }
 
 // --- Singleton reactive store ---
@@ -294,6 +298,7 @@ class AdminState {
 
     async connect() {
         if (!this.baseUrl || !this.token || this.connecting) return;
+        this.baseUrl = normalizeAdminApiUrl(this.baseUrl);
         this.connecting = true;
         this.connectError = '';
         const res = await fetchOverview(this.cfg());
