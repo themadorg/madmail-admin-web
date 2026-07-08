@@ -24,6 +24,9 @@
   }
 
   let locale = $state(getLocale());
+  let webmailDevOrigin = $state(
+    typeof location !== "undefined" ? location.origin : "http://127.0.0.1:5173",
+  );
   function _(key: string, params?: Record<string, string>): string {
     void locale;
     return t(key, params);
@@ -233,6 +236,32 @@
       store.settings.websmtp_enabled,
       "enabled",
     )}
+    <div class="ui-card ui-card--rounded ui-card-row items-start gap-3">
+      <div class="min-w-0 flex-1">
+        <div class="text-sm font-medium">{_("svc.webmail_dev")}</div>
+        <div class="text-xs text-text-2 font-mono">/admin/services/webmail_dev</div>
+        <p class="text-[10px] text-text-2 leading-snug mt-1">
+          {_("svc.webmail_dev_hint")}
+        </p>
+        <label class="block mt-2 text-xs text-text-2">
+          {_("svc.webmail_dev_origin")}
+          <input
+            type="text"
+            bind:value={webmailDevOrigin}
+            disabled={isWorking}
+            class="mt-1 w-full px-2 py-1 bg-surface border border-border rounded text-xs text-text outline-none focus:border-accent font-mono"
+            placeholder="http://127.0.0.1:5173"
+          />
+        </label>
+      </div>
+      <button
+        class="px-3 py-1.5 bg-accent text-white text-xs rounded hover:bg-accent-dim transition-colors shrink-0 self-center"
+        disabled={isWorking || !webmailDevOrigin.trim()}
+        onclick={() => store.enableWebmailDev(webmailDevOrigin)}
+      >
+        {_("svc.webmail_dev_enable")}
+      </button>
+    </div>
   </div>
 
   <!-- Configuration -->
@@ -240,10 +269,24 @@
     {_("svc.configuration")}
   </h3>
   <div class="space-y-2">
+    {@render editableRow(
+      "webmail_cors_origins",
+      _("svc.webmail_cors_origins"),
+      "",
+      "text",
+    )}
+    <p class="text-[10px] text-text-2 leading-snug -mt-1 mb-1 px-1">
+      {_("svc.webmail_cors_origins_hint")}
+    </p>
     {@render editableRow("smtp_hostname", _("svc.smtp_hostname"), "", "text")}
     {@render editableRow("turn_realm", _("svc.turn_realm"), "", "text")}
     {@render editableRow("turn_secret", _("svc.turn_secret"), "", "text")}
     {@render editableRow("turn_relay_ip", _("svc.turn_relay_ip"), "", "text")}
+    {@render editableRow("turn_relay_port_min", _("svc.turn_relay_port_min"), "49152", "number")}
+    {@render editableRow("turn_relay_port_max", _("svc.turn_relay_port_max"), "65535", "number")}
+    <p class="text-[10px] text-text-2 leading-snug -mt-1 mb-1 px-1">
+      {_("svc.turn_relay_ports_hint")}
+    </p>
     {@render editableRow("turn_ttl", _("svc.turn_ttl"), "", "number")}
     {@render editableRow("iroh_relay_url", _("svc.iroh_relay_url"), "", "text")}
     {@render selectRow(

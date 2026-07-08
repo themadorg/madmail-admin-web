@@ -551,6 +551,37 @@ class AdminState {
         serverCapabilities.reset();
     }
 
+    async enableWebmailDev(origin: string) {
+        if (this.busy) return;
+        const trimmed = origin.trim();
+        if (!trimmed) {
+            this.notify(t('svc.webmail_dev_origin_required'), 'err');
+            return;
+        }
+        this.busy = true;
+        try {
+            const res = await api.enableWebmailDev(this.cfg(), trimmed);
+            if (res.error) {
+                this.notify(res.error, 'err');
+                return;
+            }
+            if (this.settings && res.data) {
+                this.settings.webimap_enabled = res.data.webimap_enabled;
+                this.settings.websmtp_enabled = res.data.websmtp_enabled;
+                if (this.settings.webmail_cors_origins) {
+                    this.settings.webmail_cors_origins = {
+                        ...this.settings.webmail_cors_origins,
+                        value: res.data.cors_origins,
+                        is_set: true,
+                    };
+                }
+            }
+            this.notify(t('notify.webmail_dev_enabled', { origin: trimmed }));
+        } finally {
+            this.busy = false;
+        }
+    }
+
     async toggleService(resource: string, current: string) {
         if (resource === '/admin/services/push') {
             return this.togglePush();

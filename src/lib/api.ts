@@ -181,6 +181,7 @@ export interface AllSettings {
     admin_web_enabled: string;
     webimap_enabled: string;
     websmtp_enabled: string;
+    webmail_cors_origins: SettingValue;
     registration_token_required: string;
     smtp_port: SettingValue;
     submission_port: SettingValue;
@@ -213,6 +214,8 @@ export interface AllSettings {
     turn_realm: SettingValue;
     turn_secret: SettingValue;
     turn_relay_ip: SettingValue;
+    turn_relay_port_min: SettingValue;
+    turn_relay_port_max: SettingValue;
     turn_ttl: SettingValue;
     iroh_relay_url: SettingValue;
     ss_cipher: SettingValue;
@@ -476,6 +479,14 @@ export const api = {
         apiCall<ToggleStatus>(c, resource),
     setToggle: (c: ApiConfig, resource: string, action: string) =>
         apiCall<ToggleStatus>(c, resource, 'POST', { action }),
+    enableWebmailDev: (c: ApiConfig, origin: string) =>
+        apiCall<{
+            status: string;
+            webimap_enabled: string;
+            websmtp_enabled: string;
+            cors_origins: string;
+            origin: string;
+        }>(c, '/admin/services/webmail_dev', 'POST', { action: 'enable', origin }),
 
     // Settings
     getSetting: (c: ApiConfig, key: string) =>
