@@ -551,34 +551,151 @@ class AdminState {
         serverCapabilities.reset();
     }
 
-    async enableWebmailDev(origin: string) {
-        if (this.busy) return;
-        const trimmed = origin.trim();
-        if (!trimmed) {
-            this.notify(t('svc.webmail_dev_origin_required'), 'err');
-            return;
+    private isUnknownAdminResource(res: { error?: string; status: number }): boolean {
+        return res.status === 404 || !!res.error?.includes('unknown resource');
+    }
+
+    private appendCorsOrigin(existing: string, origin: string): string {
+        const list = existing
+            .split(/[,\n\r]+/)
+            .map((s) => s.trim())
+            .filter(Boolean);
+        if (!list.includes(origin)) list.push(origin);
+        return list.join('\n');
+    }
+
+    private applyWebmailDevResult(webimap: string, websmtp: string, corsOrigins?: string) {
+        if (!this.settings) return;
+        this.settings.webimap_enabled = webimap;
+        this.settings.websmtp_enabled = websmtp;
+        if (corsOrigins !== undefined && this.settings.webmail_cors_origins) {
+            this.settings.webmail_cors_origins = {
+                ...this.settings.webmail_cors_origins,
+                value: corsOrigins,
+                is_set: true,
+            };
         }
-        this.busy = true;
-        try {
-            const res = await api.enableWebmailDev(this.cfg(), trimmed);
+    }
+
+    private async enableWebmailDevLegacy(origin: string): Promise<void> {
+        for (const resource of ['/admin/services/webimap', '/admin/services/websmtp'] as const) {
+            const res = await api.setToggle(this.cfg(), resource, 'enable');
             if (res.error) {
                 this.notify(res.error, 'err');
                 return;
             }
-            if (this.settings && res.data) {
-                this.settings.webimap_enabled = res.data.webimap_enabled;
-                this.settings.websmtp_enabled = res.data.websmtp_enabled;
-                if (this.settings.webmail_cors_origins) {
-                    this.settings.webmail_cors_origins = {
-                        ...this.settings.webmail_cors_origins,
-                        value: res.data.cors_origins,
-                        is_set: true,
-                    };
-                }
+            if (this.settings && res.data?.status) {
+                applyToggleToSettings(this.settings, resource, res.data.status);
             }
-            this.notify(t('notify.webmail_dev_enabled', { origin: trimmed }));
+        }
+
+        const existing = this.settings?.webmail_cors_origins?.is_set
+            ? (this.settings.webmail_cors_origins.value ?? '')
+            : '';
+        const corsValue = this.appendCorsOrigin(existing, origin);
+        const corsRes = await api.setSetting(this.cfg(), 'webmail_cors_origins', corsValue);
+        if (corsRes.error) {
+            if (this.isUnknownAdminResource(corsRes)) {
+                this.applyWebmailDevResult('enabled', 'enabled');
+                this.notify(t('notify.webmail_dev_partial', { origin }), 'err');
+                return;
+            }
+            this.notify(corsRes.error, 'err');
+            return;
+        }
+        this.applyWebmailDevResult('enabled', 'enabled', corsRes.data?.value ?? corsValue);
+        this.notify(t('notify.webmail_dev_enabled', { origin }));
+    }
+
+    /** True when WebIMAP + WebSMTP are both on (browser CORS reflect mode). */
+    webmailBrowserAccessEnabled(): boolean {
+        return (
+            this.settings?.webimap_enabled === 'enabled' &&
+            this.settings?.websmtp_enabled === 'enabled'
+        );
+    }
+
+    private async disableWebmailDevLegacy(): Promise<void> {
+        for (const resource of ['/admin/services/webimap', '/admin/services/websmtp'] as const) {
+            const res = await api.setToggle(this.cfg(), resource, 'disable');
+            if (res.error) {
+                this.notify(res.error, 'err');
+                return;
+            }
+            if (this.settings && res.data?.status) {
+                applyToggleToSettings(this.settings, resource, res.data.status);
+            }
+        }
+        this.applyWebmailDevResult('disabled', 'disabled');
+        this.notify(t('notify.webmail_dev_disabled'));
+    }
+
+    async disableWebmailDev() {
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const res = await api.disableWebmailDev(this.cfg());
+            if (res.error) {
+                if (this.isUnknownAdminResource(res)) {
+                    await this.disableWebmailDevLegacy();
+                    return;
+                }
+                this.notify(res.error, 'err');
+                return;
+            }
+            if (res.data) {
+                this.applyWebmailDevResult(res.data.webimap_enabled, res.data.websmtp_enabled);
+            }
+            this.notify(t('notify.webmail_dev_disabled'));
         } finally {
             this.busy = false;
+        }
+    }
+
+    async enableWebmailDev(origin?: string) {
+        if (this.busy) return;
+        const trimmed = origin?.trim() ?? '';
+        this.busy = true;
+        try {
+            const res = await api.enableWebmailDev(this.cfg(), trimmed || undefined);
+            if (res.error) {
+                if (this.isUnknownAdminResource(res)) {
+                    if (!trimmed) {
+                        await this.enableWebmailDevLegacy(
+                            typeof location !== 'undefined'
+                                ? location.origin
+                                : 'http://127.0.0.1:5173',
+                        );
+                        return;
+                    }
+                    await this.enableWebmailDevLegacy(trimmed);
+                    return;
+                }
+                this.notify(res.error, 'err');
+                return;
+            }
+            if (this.settings && res.data) {
+                this.applyWebmailDevResult(
+                    res.data.webimap_enabled,
+                    res.data.websmtp_enabled,
+                    res.data.cors_origins,
+                );
+            }
+            this.notify(
+                trimmed
+                    ? t('notify.webmail_dev_enabled', { origin: trimmed })
+                    : t('notify.webmail_dev_enabled_generic'),
+            );
+        } finally {
+            this.busy = false;
+        }
+    }
+
+    async toggleWebmailBrowserAccess(origin?: string) {
+        if (this.webmailBrowserAccessEnabled()) {
+            await this.disableWebmailDev();
+        } else {
+            await this.enableWebmailDev(origin);
         }
     }
 

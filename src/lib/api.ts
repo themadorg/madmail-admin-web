@@ -479,14 +479,22 @@ export const api = {
         apiCall<ToggleStatus>(c, resource),
     setToggle: (c: ApiConfig, resource: string, action: string) =>
         apiCall<ToggleStatus>(c, resource, 'POST', { action }),
-    enableWebmailDev: (c: ApiConfig, origin: string) =>
+    enableWebmailDev: (c: ApiConfig, origin?: string) =>
         apiCall<{
             status: string;
+            browser_access_enabled?: boolean;
             webimap_enabled: string;
             websmtp_enabled: string;
             cors_origins: string;
-            origin: string;
-        }>(c, '/admin/services/webmail_dev', 'POST', { action: 'enable', origin }),
+            origin?: string;
+        }>(c, '/admin/services/webmail_dev', 'POST', { action: 'enable', origin: origin ?? '' }),
+    disableWebmailDev: (c: ApiConfig) =>
+        apiCall<{
+            status: string;
+            browser_access_enabled?: boolean;
+            webimap_enabled: string;
+            websmtp_enabled: string;
+        }>(c, '/admin/services/webmail_dev', 'POST', { action: 'disable' }),
 
     // Settings
     getSetting: (c: ApiConfig, key: string) =>

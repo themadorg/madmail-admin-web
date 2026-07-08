@@ -241,26 +241,29 @@
         <div class="text-sm font-medium">{_("svc.webmail_dev")}</div>
         <div class="text-xs text-text-2 font-mono">/admin/services/webmail_dev</div>
         <p class="text-[10px] text-text-2 leading-snug mt-1">
-          {_("svc.webmail_dev_hint")}
+          {store.webmailBrowserAccessEnabled()
+            ? _("svc.webmail_dev_on_hint")
+            : _("svc.webmail_dev_off_hint")}
         </p>
-        <label class="block mt-2 text-xs text-text-2">
-          {_("svc.webmail_dev_origin")}
-          <input
-            type="text"
-            bind:value={webmailDevOrigin}
-            disabled={isWorking}
-            class="mt-1 w-full px-2 py-1 bg-surface border border-border rounded text-xs text-text outline-none focus:border-accent font-mono"
-            placeholder="http://127.0.0.1:5173"
-          />
-        </label>
+        {#if !store.webmailBrowserAccessEnabled()}
+          <label class="block mt-2 text-xs text-text-2">
+            {_("svc.webmail_dev_origin_optional")}
+            <input
+              type="text"
+              bind:value={webmailDevOrigin}
+              disabled={isWorking}
+              class="mt-1 w-full px-2 py-1 bg-surface border border-border rounded text-xs text-text outline-none focus:border-accent font-mono"
+              placeholder="http://127.0.0.1:5173"
+            />
+          </label>
+        {/if}
       </div>
-      <button
-        class="px-3 py-1.5 bg-accent text-white text-xs rounded hover:bg-accent-dim transition-colors shrink-0 self-center"
-        disabled={isWorking || !webmailDevOrigin.trim()}
-        onclick={() => store.enableWebmailDev(webmailDevOrigin)}
-      >
-        {_("svc.webmail_dev_enable")}
-      </button>
+      <ToggleSwitch
+        checked={store.webmailBrowserAccessEnabled()}
+        disabled={isWorking}
+        label={_("svc.webmail_dev")}
+        onclick={() => store.toggleWebmailBrowserAccess(webmailDevOrigin)}
+      />
     </div>
   </div>
 
