@@ -1,3 +1,10 @@
+# [1.30.0](https://github.com/themadorg/madmail-admin-web/compare/v1.29.0...v1.30.0) (2026-07-08)
+
+
+### Features
+
+* add webmail dev access, CORS origins, and TURN relay port settings ([8e43b6e](https://github.com/themadorg/madmail-admin-web/commit/8e43b6ebd34f1e88ed3fbff4731b80cef6dd0d8e))
+
 # [1.29.0](https://github.com/themadorg/madmail-admin-web/compare/v1.28.0...v1.29.0) (2026-06-15)
 
 
