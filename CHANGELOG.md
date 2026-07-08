@@ -1,3 +1,10 @@
+# [1.31.0](https://github.com/themadorg/madmail-admin-web/compare/v1.30.0...v1.31.0) (2026-07-08)
+
+
+### Features
+
+* browser access toggle with enable/disable and legacy fallback ([a3fabc7](https://github.com/themadorg/madmail-admin-web/commit/a3fabc7fb0b78f892505ad5239672572d1408de6))
+
 # [1.30.0](https://github.com/themadorg/madmail-admin-web/compare/v1.29.0...v1.30.0) (2026-07-08)
 
 
