@@ -19,6 +19,11 @@
     type SavedServer,
   } from "$lib/servers";
   import { consumeLoginFromLocation } from "$lib/adminLoginQr";
+  import {
+    buildAdminApiUrl,
+    splitAdminApiUrl,
+    type AdminApiProtocol,
+  } from "$lib/adminUrl";
   import { releaseCameraAccess } from "$lib/cameraAccess";
   import LoginQrScanner from "$lib/components/LoginQrScanner.svelte";
   import ThemeSwitcher from "$lib/components/ThemeSwitcher.svelte";
@@ -84,8 +89,36 @@
     langOpen = false;
   }
 
+  const initialLoginUrl = splitAdminApiUrl(store.baseUrl);
+  let loginProtocol = $state<AdminApiProtocol>(initialLoginUrl.protocol);
+  let loginUrlRest = $state(initialLoginUrl.rest);
+
+  function syncLoginUrlFromStore(url: string) {
+    const parsed = splitAdminApiUrl(url);
+    loginProtocol = parsed.protocol;
+    loginUrlRest = parsed.rest;
+  }
+
+  function updateLoginBaseUrl() {
+    store.baseUrl = buildAdminApiUrl(loginProtocol, loginUrlRest);
+  }
+
+  function onLoginUrlRestInput() {
+    const trimmed = loginUrlRest.trim();
+    if (/^https?:\/\//i.test(trimmed)) {
+      const parsed = splitAdminApiUrl(trimmed);
+      loginProtocol = parsed.protocol;
+      loginUrlRest = parsed.rest;
+    }
+    updateLoginBaseUrl();
+  }
+
+  function onLoginProtocolChange() {
+    updateLoginBaseUrl();
+  }
+
   let canConnect = $derived(
-    store.baseUrl.length > 0 && store.token.length > 0 && !store.connecting,
+    loginUrlRest.trim().length > 0 && store.token.length > 0 && !store.connecting,
   );
 
   $effect(() => {
@@ -115,6 +148,7 @@
     if (creds) {
       store.baseUrl = creds.url;
       store.token = creds.token;
+      syncLoginUrlFromStore(creds.url);
     }
   });
 
@@ -123,6 +157,7 @@
     void releaseCameraAccess();
     store.baseUrl = creds.url;
     store.token = creds.token;
+    syncLoginUrlFromStore(creds.url);
     void connectWithMorph();
   }
 
@@ -133,6 +168,7 @@
   function selectServer(s: SavedServer) {
     store.baseUrl = s.url;
     store.token = s.token;
+    syncLoginUrlFromStore(s.url);
     store.connect();
   }
 
@@ -385,8 +421,10 @@
   }
 
   async function connectWithMorph() {
+    updateLoginBaseUrl();
     const from = loginLogoEl?.getBoundingClientRect();
     await store.connect();
+    syncLoginUrlFromStore(store.baseUrl);
     if (!store.connected) return;
     showLoginQr = false;
     void releaseCameraAccess();
@@ -755,13 +793,26 @@
         <label for="url" class="block text-xs text-text-2 mb-1"
           >{_("login.url_label")}</label
         >
-        <input
-          id="url"
-          type="url"
-          bind:value={store.baseUrl}
-          placeholder={_("login.url_placeholder")}
-          class="w-full mb-3 px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text placeholder-text-2/40 focus:border-accent focus:ring-1 focus:ring-accent/30 outline-none transition"
-        />
+        <div class="flex gap-2 mb-3">
+          <select
+            id="url-protocol"
+            bind:value={loginProtocol}
+            onchange={onLoginProtocolChange}
+            class="shrink-0 px-2 py-2 bg-surface border border-border rounded-lg text-sm text-text focus:border-accent focus:ring-1 focus:ring-accent/30 outline-none transition"
+            aria-label={_("login.url_protocol")}
+          >
+            <option value="https:">https://</option>
+            <option value="http:">http://</option>
+          </select>
+          <input
+            id="url"
+            type="text"
+            bind:value={loginUrlRest}
+            oninput={onLoginUrlRestInput}
+            placeholder={_("login.url_placeholder")}
+            class="min-w-0 flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text placeholder-text-2/40 focus:border-accent focus:ring-1 focus:ring-accent/30 outline-none transition"
+          />
+        </div>
 
         <label for="tok" class="block text-xs text-text-2 mb-1"
           >{_("login.token_label")}</label
