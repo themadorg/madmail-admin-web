@@ -1,3 +1,10 @@
+# [1.32.0](https://github.com/themadorg/madmail-admin-web/compare/v1.31.0...v1.32.0) (2026-08-19)
+
+
+### Features
+
+* add DKIM management interface and related functionality ([b7c6760](https://github.com/themadorg/madmail-admin-web/commit/b7c676060c3b503d9a552c6627a164a7e31a4f4b))
+
 # [1.31.0](https://github.com/themadorg/madmail-admin-web/compare/v1.30.0...v1.31.0) (2026-07-08)
 
 
