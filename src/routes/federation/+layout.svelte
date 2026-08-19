@@ -11,6 +11,7 @@
     Activity,
     Globe,
     ArrowDownToLine,
+    KeyRound,
     HardDrive,
     Pencil,
     RotateCcw,
@@ -50,6 +51,7 @@
     const p = $page.url.pathname;
     if (p.includes("/traffic")) return "traffic";
     if (p.includes("/endpoints")) return "endpoints";
+    if (p.includes("/dkim")) return "dkim";
     if (p.includes("/exchangers")) return "exchangers";
     return "rules";
   });
@@ -285,6 +287,15 @@
     >
       <Globe size={13} />
       {_("tab.dns")}
+    </a>
+    <a
+      class="tab"
+      class:active={activeTab === "dkim"}
+      href="{base}/federation/dkim"
+      data-sveltekit-noscroll
+    >
+      <KeyRound size={13} />
+      {_("tab.dkim")}
     </a>
     <a
       class="tab"

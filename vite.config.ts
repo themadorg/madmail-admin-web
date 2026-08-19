@@ -9,7 +9,12 @@ const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
-    const proxyTarget = env.DEV_API_PROXY_TARGET?.replace(/\/+$/, '');
+    // Default: same-origin `/api/admin` → local madmail. Phone/LAN browsers
+    // never need madmail bound on the LAN — only this Vite port.
+    const proxyTarget = (env.DEV_API_PROXY_TARGET || 'http://127.0.0.1:8080').replace(
+        /\/+$/,
+        ''
+    );
     const apiPath = (env.VITE_DEV_API_PATH || '/api/admin').replace(/\/+$/, '') || '/api/admin';
     const devHttps = env.VITE_DEV_HTTPS === '1';
 

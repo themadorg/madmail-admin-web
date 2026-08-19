@@ -10,8 +10,31 @@
 
 import { serverCapabilities } from '$lib/stores/serverCapabilities.svelte';
 
-function devProxyEnabled(): boolean {
-    return import.meta.env.DEV && import.meta.env.VITE_DEV_API_PROXY === '1';
+/** Vite `make dev`: proxy on unless VITE_DEV_API_PROXY is 0/false. */
+export function devProxyEnabled(): boolean {
+    if (!import.meta.env.DEV) return false;
+    const flag = import.meta.env.VITE_DEV_API_PROXY;
+    return flag !== '0' && flag !== 'false';
+}
+
+/** Same-origin admin API (e.g. `http://localhost:5173/api/admin`). Vite forwards to madmail. */
+export function viteDevAdminApiUrl(): string {
+    const path = (import.meta.env.VITE_DEV_API_PATH || '/api/admin').replace(/\/+$/, '');
+    const normalized = path.startsWith('/') ? path : `/${path}`;
+    if (typeof window === 'undefined') {
+        return `http://localhost:5173${normalized}`;
+    }
+    return `${window.location.origin}${normalized}`;
+}
+
+export function isLoopbackMadmailApiUrl(url: string): boolean {
+    try {
+        const u = new URL(url);
+        const loopback = u.hostname === '127.0.0.1' || u.hostname === 'localhost' || u.hostname === '::1';
+        return loopback && (u.port === '8080' || u.port === '');
+    } catch {
+        return false;
+    }
 }
 
 /** Vite dev serves the SPA at `/`; do not follow production `admin_web_path` redirects. */
@@ -35,10 +58,8 @@ export function isEmbeddedAdminShell(baseUrl: string): boolean {
 
 /** Same-origin admin API URL in dev (Vite proxy); otherwise the configured baseUrl. */
 function resolveAdminApiUrl(config: ApiConfig): string {
-    if (devProxyEnabled() && typeof window !== 'undefined') {
-        const path = (import.meta.env.VITE_DEV_API_PATH || '/api/admin').replace(/\/+$/, '');
-        const normalized = path.startsWith('/') ? path : `/${path}`;
-        return `${window.location.origin}${normalized}`;
+    if (devProxyEnabled()) {
+        return viteDevAdminApiUrl();
     }
     return config.baseUrl.replace(/\/+$/, '');
 }
@@ -269,6 +290,54 @@ export interface DnsEntry {
 export interface DnsListResponse {
     overrides: DnsEntry[];
     total: number;
+}
+
+/** `GET /admin/dkim` — outbound federation DKIM (same fields as `madmail dkim show --json`). */
+export interface DkimResponse {
+    selector: string;
+    domain: string;
+    dns_name: string;
+    dns_fqdn: string | null;
+    private_key_path: string;
+    txt_path: string;
+    txt: string | null;
+    key_present: boolean;
+    generated: boolean;
+    publishable: boolean;
+    reason?: string;
+}
+
+/** `GET /admin/dkim/check` — compare local TXT to DNS. */
+export interface DkimCheckResponse {
+    selector: string;
+    domain: string;
+    dns_name: string;
+    dns_fqdn: string | null;
+    expected_txt: string | null;
+    dns_txt: string[];
+    matched: boolean;
+    checked: boolean;
+    reason?: string;
+    lookup_error?: string;
+}
+
+/** `GET /admin/dkim/status` — local key + DNS match (`madmail dkim status`). */
+export interface DkimStatusResponse {
+    selector: string;
+    domain: string;
+    dns_name: string;
+    dns_fqdn: string | null;
+    private_key_path: string;
+    txt_path: string;
+    txt: string | null;
+    key_present: boolean;
+    generated: boolean;
+    publishable: boolean;
+    dns_checked: boolean;
+    dns_matched: boolean;
+    dns_txt: string[];
+    reason?: string;
+    lookup_error?: string;
 }
 
 export interface ExchangerEntry {
@@ -513,6 +582,10 @@ export const api = {
         apiCall(c, '/admin/queue', 'POST', { action: 'purge_blobs' }),
     purgeBlobsOlder: (c: ApiConfig, retention: string) =>
         apiCall(c, '/admin/queue', 'POST', { action: 'purge_blobs_older', retention }),
+
+    dkim: (c: ApiConfig) => apiCall<DkimResponse>(c, '/admin/dkim'),
+    dkimCheck: (c: ApiConfig) => apiCall<DkimCheckResponse>(c, '/admin/dkim/check'),
+    dkimStatus: (c: ApiConfig) => apiCall<DkimStatusResponse>(c, '/admin/dkim/status'),
 
     // DNS overrides
     dns: (c: ApiConfig) => apiCall<DnsListResponse>(c, '/admin/dns'),

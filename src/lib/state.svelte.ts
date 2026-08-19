@@ -6,6 +6,9 @@ import {
     fetchOverview,
     isEmbeddedAdminShell,
     isViteDevShell,
+    devProxyEnabled,
+    isLoopbackMadmailApiUrl,
+    viteDevAdminApiUrl,
     type ApiConfig,
     type StatusResponse,
     type OverviewResponse,
@@ -16,6 +19,7 @@ import {
     type SettingValue,
     type BlocklistResponse,
     type DnsListResponse,
+    type DkimResponse,
     type ExchangerListResponse,
     type RegistrationTokenListResponse,
     type CreateAccountResponse,
@@ -125,6 +129,12 @@ let savedToken = '';
 if (typeof localStorage !== 'undefined') {
     savedUrl = localStorage.getItem('madmail_url') ?? '';
     savedToken = localStorage.getItem('madmail_token') ?? '';
+    if (devProxyEnabled()) {
+        const proxyUrl = viteDevAdminApiUrl();
+        if (!savedUrl || isLoopbackMadmailApiUrl(savedUrl)) {
+            savedUrl = proxyUrl;
+        }
+    }
     try {
         if (savedUrl && !new URL(savedUrl).pathname.replace(/\/+$/, '')) {
             savedUrl = savedUrl.replace(/\/+$/, '') + '/api/admin';
@@ -158,6 +168,9 @@ class AdminState {
     blocklist = $state<BlocklistResponse | null>(null);
     endpointOverrides = $state<DnsListResponse | null>(null);
     endpointOverridesLoading = $state(false);
+    dkim = $state<DkimResponse | null>(null);
+    dkimLoading = $state(false);
+    dkimChecked = $state(false);
     exchangers = $state<ExchangerListResponse | null>(null);
     exchangersLoading = $state(false);
     registrationTokens = $state<RegistrationTokenListResponse | null>(null);
@@ -428,6 +441,27 @@ class AdminState {
         }
     }
 
+    async loadDkim() {
+        if (!this.connected) return;
+        this.dkimLoading = true;
+        try {
+            const res = await api.dkim(this.cfg());
+            if (res.error) {
+                if (this.isUnknownAdminResource(res)) {
+                    this.dkim = null;
+                    return;
+                }
+                this.notify(res.error, 'err');
+                return;
+            }
+            if (res.data) this.dkim = res.data;
+            if (res.version) this.serverVersion = res.version;
+        } finally {
+            this.dkimChecked = true;
+            this.dkimLoading = false;
+        }
+    }
+
     async loadRegistrationTokens() {
         if (!this.connected) return;
         const res = await api.registrationTokens(this.cfg());
@@ -513,6 +547,7 @@ class AdminState {
                 this.loadQuota(),
                 this.loadBlocklist(),
                 this.loadEndpointOverrides(),
+                this.loadDkim(),
                 this.loadExchangers(),
                 this.loadRegistrationTokens(),
                 this.loadFederationSettings(),
@@ -546,6 +581,8 @@ class AdminState {
         this.token = '';
         this.status = this.storage = this.settings = this.accounts = this.quota = this.blocklist = this.endpointOverrides = this.exchangers = this.registrationTokens = null;
         this.overview = null;
+        this.dkim = null;
+        this.dkimChecked = false;
         this.federationSettings = this.federationSize = this.federationRules = this.federationServers = null;
         this.newAccount = null;
         serverCapabilities.reset();

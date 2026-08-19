@@ -1,8 +1,11 @@
 # Madmail admin web (SvelteKit) — local development
 .PHONY: dev init build preview check help
 
-# Vite dev server (default http://127.0.0.1:5173)
+# Vite dev server (default http://127.0.0.1:5173, LAN via --host).
+# Proxies /api/admin → http://127.0.0.1:8080 so phones on Wi‑Fi work
+# without exposing madmail on the LAN.
 dev: init
+	@test -f .env || cp .env.example .env
 	@if command -v bun >/dev/null 2>&1; then \
 		exec bun run dev; \
 	elif command -v npm >/dev/null 2>&1; then \

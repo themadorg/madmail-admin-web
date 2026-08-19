@@ -9,6 +9,7 @@ export type PageRefreshTarget = {
 	loadAccountsSection: () => Promise<void>;
 	loadFederationSection: () => Promise<void>;
 	loadEndpointOverrides: () => Promise<void>;
+	loadDkim: () => Promise<void>;
 	loadExchangers: () => Promise<void>;
 };
 
@@ -45,6 +46,8 @@ export function getPageRefreshLoaders(
 		const loaders: RefreshLoader[] = [() => store.loadFederationSection()];
 		if (path.endsWith('/endpoints')) {
 			loaders.push(() => store.loadEndpointOverrides());
+		} else if (path.endsWith('/dkim')) {
+			loaders.push(() => store.loadDkim());
 		} else if (path.endsWith('/exchangers')) {
 			loaders.push(() => store.loadExchangers());
 		}

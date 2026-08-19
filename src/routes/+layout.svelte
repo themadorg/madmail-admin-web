@@ -6,6 +6,7 @@
   import { prefetchRouteData } from "$lib/pageRefresh";
   import { tick, untrack } from "svelte";
   import { store } from "$lib/state.svelte";
+  import { isViteDevShell, viteDevAdminApiUrl } from "$lib/api";
   import { t, getLocale, setLocale, LOCALES, type Locale } from "$lib/i18n";
   import {
     startVersionChecker,
@@ -759,7 +760,9 @@
           id="url"
           type="url"
           bind:value={store.baseUrl}
-          placeholder={_("login.url_placeholder")}
+          placeholder={isViteDevShell()
+            ? viteDevAdminApiUrl()
+            : _("login.url_placeholder")}
           class="w-full mb-3 px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text placeholder-text-2/40 focus:border-accent focus:ring-1 focus:ring-accent/30 outline-none transition"
         />
 
