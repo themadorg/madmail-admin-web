@@ -20,6 +20,7 @@ import {
     type BlocklistResponse,
     type DnsListResponse,
     type DkimResponse,
+    type DkimCheckResponse,
     type ExchangerListResponse,
     type RegistrationTokenListResponse,
     type CreateAccountResponse,
@@ -171,6 +172,8 @@ class AdminState {
     dkim = $state<DkimResponse | null>(null);
     dkimLoading = $state(false);
     dkimChecked = $state(false);
+    dkimCheckResult = $state<DkimCheckResponse | null>(null);
+    dkimChecking = $state(false);
     exchangers = $state<ExchangerListResponse | null>(null);
     exchangersLoading = $state(false);
     registrationTokens = $state<RegistrationTokenListResponse | null>(null);
@@ -462,6 +465,22 @@ class AdminState {
         }
     }
 
+    async checkDkim() {
+        if (!this.connected) return;
+        this.dkimChecking = true;
+        try {
+            const res = await api.dkimCheck(this.cfg());
+            if (res.error) {
+                this.notify(res.error, 'err');
+                return;
+            }
+            if (res.data) this.dkimCheckResult = res.data;
+            if (res.version) this.serverVersion = res.version;
+        } finally {
+            this.dkimChecking = false;
+        }
+    }
+
     async loadRegistrationTokens() {
         if (!this.connected) return;
         const res = await api.registrationTokens(this.cfg());
@@ -547,7 +566,6 @@ class AdminState {
                 this.loadQuota(),
                 this.loadBlocklist(),
                 this.loadEndpointOverrides(),
-                this.loadDkim(),
                 this.loadExchangers(),
                 this.loadRegistrationTokens(),
                 this.loadFederationSettings(),
@@ -583,6 +601,8 @@ class AdminState {
         this.overview = null;
         this.dkim = null;
         this.dkimChecked = false;
+        this.dkimCheckResult = null;
+        this.dkimChecking = false;
         this.federationSettings = this.federationSize = this.federationRules = this.federationServers = null;
         this.newAccount = null;
         serverCapabilities.reset();

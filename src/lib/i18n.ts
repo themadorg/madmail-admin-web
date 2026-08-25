@@ -504,6 +504,11 @@ const translations: Record<Locale, Record<string, string>> = {
         'dkim.private_key': 'Private key',
         'dkim.txt_path': 'TXT file',
         'dkim.unsupported': 'This server does not expose GET /admin/dkim.',
+        'dkim.check_dns': 'Check DNS',
+        'dkim.check_ok': 'Published TXT matches',
+        'dkim.check_mismatch': 'DNS TXT does not match the local key',
+        'dkim.check_lookup_failed': 'DNS lookup failed',
+        'dkim.check_skipped': 'DNS check skipped',
 
         // Exchangers
         'exc.count_one': '1 exchanger',
@@ -1035,6 +1040,11 @@ const translations: Record<Locale, Record<string, string>> = {
         'dkim.private_key': 'کلید خصوصی',
         'dkim.txt_path': 'فایل TXT',
         'dkim.unsupported': 'این سرور GET /admin/dkim را ارائه نمی‌دهد.',
+        'dkim.check_dns': 'بررسی DNS',
+        'dkim.check_ok': 'TXT منتشرشده مطابقت دارد',
+        'dkim.check_mismatch': 'TXT در DNS با کلید محلی یکی نیست',
+        'dkim.check_lookup_failed': 'جستجوی DNS ناموفق بود',
+        'dkim.check_skipped': 'بررسی DNS رد شد',
 
         'exc.count_one': '۱ مبادله‌کننده',
         'exc.count_many': '{n} مبادله‌کننده',
@@ -1565,6 +1575,11 @@ const translations: Record<Locale, Record<string, string>> = {
         'dkim.private_key': 'Clave privada',
         'dkim.txt_path': 'Archivo TXT',
         'dkim.unsupported': 'Este servidor no expone GET /admin/dkim.',
+        'dkim.check_dns': 'Comprobar DNS',
+        'dkim.check_ok': 'El TXT publicado coincide',
+        'dkim.check_mismatch': 'El TXT de DNS no coincide con la clave local',
+        'dkim.check_lookup_failed': 'Falló la consulta DNS',
+        'dkim.check_skipped': 'Comprobación DNS omitida',
 
         'exc.count_one': '1 intercambiador',
         'exc.count_many': '{n} intercambiadores',
@@ -2097,6 +2112,11 @@ const translations: Record<Locale, Record<string, string>> = {
         'dkim.private_key': 'Закрытый ключ',
         'dkim.txt_path': 'Файл TXT',
         'dkim.unsupported': 'Этот сервер не предоставляет GET /admin/dkim.',
+        'dkim.check_dns': 'Проверить DNS',
+        'dkim.check_ok': 'Опубликованный TXT совпадает',
+        'dkim.check_mismatch': 'TXT в DNS не совпадает с локальным ключом',
+        'dkim.check_lookup_failed': 'Ошибка DNS-запроса',
+        'dkim.check_skipped': 'Проверка DNS пропущена',
 
         'exc.count_one': '1 обменник',
         'exc.count_many': '{n} обменников',

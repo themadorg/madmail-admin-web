@@ -1,7 +1,7 @@
 <script lang="ts">
   import { store } from "$lib/state.svelte";
   import { t, getLocale } from "$lib/i18n";
-  import { KeyRound, Copy, AlertTriangle, CheckCircle2 } from "lucide-svelte";
+  import { KeyRound, Copy, AlertTriangle, CheckCircle2, Globe } from "lucide-svelte";
   import PageLoader from "$lib/components/PageLoader.svelte";
 
   let locale = $state(getLocale());
@@ -51,6 +51,40 @@
     {/if}
 
     <p class="dkim-hint">{_("dkim.hint")}</p>
+
+    <div class="dkim-actions">
+      <button
+        type="button"
+        class="btn-copy"
+        disabled={store.dkimChecking}
+        onclick={() => store.checkDkim()}
+      >
+        <Globe size={12} />
+        {_("dkim.check_dns")}
+      </button>
+      {#if store.dkimCheckResult}
+        <span
+          class={[
+            "dkim-check-result",
+            store.dkimCheckResult.checked && store.dkimCheckResult.matched
+              ? "ok"
+              : store.dkimCheckResult.checked
+                ? "fail"
+                : "skip",
+          ]}
+        >
+          {#if !store.dkimCheckResult.checked}
+            {_("dkim.check_skipped")}
+          {:else if store.dkimCheckResult.lookup_error}
+            {_("dkim.check_lookup_failed")}
+          {:else if store.dkimCheckResult.matched}
+            {_("dkim.check_ok")}
+          {:else}
+            {_("dkim.check_mismatch")}
+          {/if}
+        </span>
+      {/if}
+    </div>
 
     <dl class="dkim-meta">
       <div class="dkim-row">
@@ -186,6 +220,28 @@
     color: var(--th-text-2);
     line-height: 1.4;
     margin: 0 0 1rem;
+  }
+
+  .dkim-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 0 1rem;
+  }
+
+  .dkim-check-result {
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  .dkim-check-result.ok {
+    color: var(--th-success);
+  }
+  .dkim-check-result.fail {
+    color: var(--th-danger, var(--th-warning));
+  }
+  .dkim-check-result.skip {
+    color: var(--th-text-2);
   }
 
   .dkim-meta {
