@@ -1,3 +1,10 @@
+# [1.33.0](https://github.com/themadorg/madmail-admin-web/compare/v1.32.0...v1.33.0) (2026-08-25)
+
+
+### Features
+
+* **dkim:** add Check DNS and stop minting keys on global refresh ([1a4ce6b](https://github.com/themadorg/madmail-admin-web/commit/1a4ce6b7d73d8cfff2e478460a9c68c93387cb75))
+
 # [1.32.0](https://github.com/themadorg/madmail-admin-web/compare/v1.31.0...v1.32.0) (2026-08-19)
 
 
