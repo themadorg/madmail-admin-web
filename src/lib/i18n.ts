@@ -160,6 +160,12 @@ const translations: Record<Locale, Record<string, string>> = {
         'svc.admin_web_path': 'Admin Web Path',
         'svc.webimap': 'WebIMAP (REST/WebSocket)',
         'svc.websmtp': 'WebSMTP (HTTP Send)',
+        'svc.shared_port_imap': 'IMAP on the HTTPS port (443)',
+        'svc.shared_port_imap_hint':
+            'Also serve IMAP on port 443, so mail clients work on networks that block port 993. Applies to new connections; usually no restart needed.',
+        'svc.shared_port_smtp': 'SMTP submission on the HTTPS port (443)',
+        'svc.shared_port_smtp_hint':
+            'Also serve SMTP submission on port 443, so mail clients work on networks that block port 465. Applies to new connections; usually no restart needed.',
         'svc.webmail_dev': 'Dev browser access (WebIMAP + WebSMTP)',
         'svc.webmail_dev_hint': 'Enables WebIMAP and WebSMTP and allows CORS from your dev app origin (e.g. Vite on localhost).',
         'svc.webmail_dev_on_hint':
@@ -731,6 +737,12 @@ const translations: Record<Locale, Record<string, string>> = {
         'svc.admin_web_path': 'مسیر وب مدیریت',
         'svc.webimap': 'وب‌آی‌مپ (REST/WebSocket)',
         'svc.websmtp': 'وب‌اس‌ام‌تی‌پی (ارسال HTTP)',
+        'svc.shared_port_imap': 'IMAP روی پورت HTTPS (۴۴۳)',
+        'svc.shared_port_imap_hint':
+            'ارائهٔ IMAP روی پورت ۴۴۳ تا برنامه‌های ایمیل در شبکه‌هایی که پورت ۹۹۳ را مسدود می‌کنند کار کنند. روی اتصال‌های جدید اعمال می‌شود؛ معمولاً نیازی به راه‌اندازی مجدد نیست.',
+        'svc.shared_port_smtp': 'ارسال SMTP روی پورت HTTPS (۴۴۳)',
+        'svc.shared_port_smtp_hint':
+            'ارائهٔ ارسال SMTP روی پورت ۴۴۳ تا برنامه‌های ایمیل در شبکه‌هایی که پورت ۴۶۵ را مسدود می‌کنند کار کنند. روی اتصال‌های جدید اعمال می‌شود؛ معمولاً نیازی به راه‌اندازی مجدد نیست.',
         'svc.webmail_dev': 'دسترسی مرورگر توسعه (WebIMAP + WebSMTP)',
         'svc.webmail_dev_hint': 'WebIMAP و WebSMTP را فعال می‌کند و CORS را از مبدأ برنامه توسعه شما (مثلاً Vite روی localhost) مجاز می‌کند.',
         'svc.webmail_dev_on_hint':
@@ -1266,6 +1278,12 @@ const translations: Record<Locale, Record<string, string>> = {
         'svc.admin_web_path': 'Ruta Web Admin',
         'svc.webimap': 'WebIMAP (REST/WebSocket)',
         'svc.websmtp': 'WebSMTP (envío HTTP)',
+        'svc.shared_port_imap': 'IMAP en el puerto HTTPS (443)',
+        'svc.shared_port_imap_hint':
+            'Sirve también IMAP en el puerto 443, para que los clientes de correo funcionen en redes que bloquean el puerto 993. Se aplica a las conexiones nuevas; normalmente no hace falta reiniciar.',
+        'svc.shared_port_smtp': 'Envío SMTP en el puerto HTTPS (443)',
+        'svc.shared_port_smtp_hint':
+            'Sirve también el envío SMTP en el puerto 443, para que los clientes de correo funcionen en redes que bloquean el puerto 465. Se aplica a las conexiones nuevas; normalmente no hace falta reiniciar.',
         'svc.webmail_dev': 'Acceso de navegador de desarrollo (WebIMAP + WebSMTP)',
         'svc.webmail_dev_hint': 'Habilita WebIMAP y WebSMTP y permite CORS desde el origen de tu app de desarrollo (p. ej. Vite en localhost).',
         'svc.webmail_dev_on_hint':
@@ -1803,6 +1821,12 @@ const translations: Record<Locale, Record<string, string>> = {
         'svc.admin_web_path': 'Путь веб-панели',
         'svc.webimap': 'WebIMAP (REST/WebSocket)',
         'svc.websmtp': 'WebSMTP (отправка по HTTP)',
+        'svc.shared_port_imap': 'IMAP на порту HTTPS (443)',
+        'svc.shared_port_imap_hint':
+            'Также обслуживать IMAP на порту 443, чтобы почтовые клиенты работали в сетях, где закрыт порт 993. Применяется к новым соединениям; перезапуск обычно не нужен.',
+        'svc.shared_port_smtp': 'Отправка SMTP на порту HTTPS (443)',
+        'svc.shared_port_smtp_hint':
+            'Также обслуживать отправку SMTP на порту 443, чтобы почтовые клиенты работали в сетях, где закрыт порт 465. Применяется к новым соединениям; перезапуск обычно не нужен.',
         'svc.webmail_dev': 'Доступ браузера для разработки (WebIMAP + WebSMTP)',
         'svc.webmail_dev_hint': 'Включает WebIMAP и WebSMTP и разрешает CORS с origin вашего dev-приложения (например, Vite на localhost).',
         'svc.webmail_dev_on_hint':

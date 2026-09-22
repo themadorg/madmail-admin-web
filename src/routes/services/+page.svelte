@@ -59,6 +59,26 @@
     </div>
   {/snippet}
 
+  {#snippet sharedPortRow(proto: "imap" | "smtp", enabled: boolean)}
+    <div class="ui-card ui-card--rounded ui-card-row items-start gap-3">
+      <div class="min-w-0 flex-1">
+        <div class="text-sm font-medium">{_(`svc.shared_port_${proto}`)}</div>
+        <div class="text-xs text-text-2 font-mono">
+          /admin/settings/shared_port_{proto}
+        </div>
+        <p class="text-[10px] text-text-2 leading-snug mt-1">
+          {_(`svc.shared_port_${proto}_hint`)}
+        </p>
+      </div>
+      <ToggleSwitch
+        checked={enabled}
+        disabled={isWorking}
+        label={_(`svc.shared_port_${proto}`)}
+        onclick={() => store.toggleSharedPort(proto)}
+      />
+    </div>
+  {/snippet}
+
   {#snippet editableRow(
     key: string,
     label: string,
@@ -236,6 +256,8 @@
       store.settings.websmtp_enabled,
       "enabled",
     )}
+    {@render sharedPortRow("imap", store.settings.shared_port_imap === true)}
+    {@render sharedPortRow("smtp", store.settings.shared_port_smtp === true)}
     <div class="ui-card ui-card--rounded ui-card-row items-start gap-3">
       <div class="min-w-0 flex-1">
         <div class="text-sm font-medium">{_("svc.webmail_dev")}</div>

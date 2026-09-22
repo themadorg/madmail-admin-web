@@ -1361,6 +1361,27 @@ class AdminState {
         } finally { this.busy = false; }
     }
 
+    async toggleSharedPort(proto: 'imap' | 'smtp') {
+        if (this.busy) return;
+        this.busy = true;
+        try {
+            const key = proto === 'imap' ? 'shared_port_imap' : 'shared_port_smtp';
+            const action = this.settings?.[key] ? 'disable' : 'enable';
+            const res = await api.setToggle(this.cfg(), `/admin/settings/${key}`, action);
+            if (res.error) { this.notify(res.error, 'err'); return; }
+            if (res.data?.status && this.settings) {
+                this.settings[key] = res.data.status === 'enabled';
+            }
+            if (res.data?.restart_required) this.pendingRestart = true;
+            this.notify(
+                t('notify.toggle_arrow', {
+                    service: t(`svc.shared_port_${proto}`),
+                    status: toggleStatusLabel(res.data?.status),
+                }),
+            );
+        } finally { this.busy = false; }
+    }
+
     async checkServerUpdate() {
         if (this.checkingUpdates) return;
         this.checkingUpdates = true;
