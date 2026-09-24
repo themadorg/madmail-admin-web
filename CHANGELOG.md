@@ -1,3 +1,10 @@
+# [1.34.0](https://github.com/themadorg/madmail-admin-web/compare/v1.33.0...v1.34.0) (2026-09-24)
+
+
+### Features
+
+* **services:** add shared-port IMAP/SMTP toggles ([e062f88](https://github.com/themadorg/madmail-admin-web/commit/e062f88acf46035e90beaf8c99caaa4e0f79b8ec))
+
 # [1.33.0](https://github.com/themadorg/madmail-admin-web/compare/v1.32.0...v1.33.0) (2026-08-25)
 
 
