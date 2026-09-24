@@ -204,6 +204,9 @@ export interface AllSettings {
     websmtp_enabled: string;
     webmail_cors_origins: SettingValue;
     registration_token_required: string;
+    /** Serve IMAP / SMTP submission on the HTTPS port (443). Absent on older servers. */
+    shared_port_imap?: boolean;
+    shared_port_smtp?: boolean;
     smtp_port: SettingValue;
     submission_port: SettingValue;
     submission_tls_port: SettingValue;
