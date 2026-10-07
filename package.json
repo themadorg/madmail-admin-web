@@ -15,7 +15,8 @@
 		"dev:electron": "vite build && electron .",
 		"build:electron": "vite build && electron-builder --win --linux",
 		"build:electron:win": "vite build && electron-builder --win",
-		"build:electron:linux": "vite build && electron-builder --linux"
+		"build:electron:linux": "vite build && electron-builder --linux",
+		"test": "bun test tests/*.test.ts"
 	},
 	"devDependencies": {
 		"@semantic-release/changelog": "^6.0.3",

@@ -4,6 +4,7 @@
   import { Pencil, RotateCcw, Dice5 } from "lucide-svelte";
   import ToggleSwitch from "$lib/components/ToggleSwitch.svelte";
   import Select from "$lib/components/Select.svelte";
+  import OperatorWebhooks from "$lib/components/OperatorWebhooks.svelte";
   import PageLoader from "$lib/components/PageLoader.svelte";
 
   function randomPath(): string {
@@ -37,6 +38,7 @@
 </script>
 
 {#if store.settings}
+  <OperatorWebhooks />
   {#snippet toggleRow(
     label: string,
     resource: string,
