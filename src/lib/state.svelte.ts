@@ -1,3 +1,4 @@
+import { configurationSource, protectionMessage } from '$lib/configurationPolicy';
 // Shared reactive state for the admin dashboard.
 // Uses a singleton object with $state fields so it can be exported from a module.
 
@@ -749,6 +750,7 @@ class AdminState {
     }
 
     async toggleWebmailBrowserAccess(origin?: string) {
+        if (this.preventProtected("webimap_enabled", "websmtp_enabled", "webmail_cors_origins")) return;
         if (this.webmailBrowserAccessEnabled()) {
             await this.disableWebmailDev();
         } else {
@@ -756,7 +758,23 @@ class AdminState {
         }
     }
 
+    configurationSource(key: string) {
+        return configurationSource(this.settings?.configuration_sources, key);
+    }
+    isProtected(key: string): boolean { return this.configurationSource(key)?.locked ?? false; }
+    protectedResource(resource: string): string {
+        return String(TOGGLE_RESOURCE_SETTINGS[resource] ?? resource.split('/').pop() ?? '');
+    }
+    private preventProtected(...keys: string[]): boolean {
+        for (const key of keys) {
+            const message = protectionMessage(this.settings?.configuration_sources, key);
+            if (message) { this.notify(message, 'err'); return true; }
+        }
+        return false;
+    }
+
     async toggleService(resource: string, current: string) {
+        if (this.preventProtected(this.protectedResource(resource))) return;
         if (resource === '/admin/services/push') {
             return this.togglePush();
         }
@@ -786,6 +804,7 @@ class AdminState {
     }
 
     async save(key: string, value: string) {
+        if (this.preventProtected(key)) return;
         if (this.busy) return;
         this.busy = true;
         try {
@@ -797,10 +816,11 @@ class AdminState {
             // If admin_path changed, reload immediately with the new URL
             if (key === 'admin_path' && value) {
                 // Remount HTTP routes on the old URL (still active until listeners restart)
-                await api.reload(this.cfg(), { scope: 'http', wait: true });
+                const reloadResult = await api.reload(this.cfg(), { scope: 'http', wait: true });
+                if (reloadResult.error) { this.notify(reloadResult.error, 'err'); return; }
                 // Now update our baseUrl to the new path
                 const url = new URL(this.baseUrl);
-                url.pathname = value;
+                url.pathname = res.data?.value || value;
                 this.baseUrl = url.toString().replace(/\/+$/, '');
                 localStorage.setItem('madmail_url', this.baseUrl);
                 this.pendingRestart = false;
@@ -876,6 +896,7 @@ class AdminState {
     }
 
     async reset(key: string) {
+        if (this.preventProtected(key)) return;
         if (this.busy) return;
         this.busy = true;
         try {
@@ -885,7 +906,8 @@ class AdminState {
             this.notify(t('notify.reset', { key }));
             // If admin_path reset, reload immediately with the default URL
             if (key === 'admin_path') {
-                await api.reload(this.cfg(), { scope: 'http', wait: true });
+                const reloadResult = await api.reload(this.cfg(), { scope: 'http', wait: true });
+                if (reloadResult.error) { this.notify(reloadResult.error, 'err'); return; }
                 const url = new URL(this.baseUrl);
                 url.pathname = '/api/admin';
                 this.baseUrl = url.toString().replace(/\/+$/, '');
@@ -969,6 +991,7 @@ class AdminState {
     }
 
     async togglePortAccess(localOnlySettingKey: string, currentAccess: string) {
+        if (this.preventProtected(localOnlySettingKey)) return;
         if (this.busy) return;
         this.busy = true;
         try {
@@ -1150,6 +1173,7 @@ class AdminState {
     }
 
     startEdit(key: string, current: string) {
+        if (this.preventProtected(key)) return;
         this.editingField = key;
         this.editValue = current;
     }
@@ -1240,6 +1264,7 @@ class AdminState {
     }
 
     async toggleAutoPurgeSeen() {
+        if (this.preventProtected('auto_purge_seen')) return;
         if (this.busy) return;
         this.busy = true;
         try {
@@ -1264,6 +1289,7 @@ class AdminState {
     }
 
     async togglePush() {
+        if (this.preventProtected('push_mode', 'push_enabled')) return;
         if (this.busy) return;
         this.busy = true;
         try {
@@ -1302,6 +1328,7 @@ class AdminState {
     }
 
     async toggleMessageRetention() {
+        if (this.preventProtected('message_retention_enabled')) return;
         if (this.busy || !this.overview?.message_retention) return;
         this.busy = true;
         try {
@@ -1328,6 +1355,7 @@ class AdminState {
     }
 
     async setMessageRetentionDays(days: number) {
+        if (this.preventProtected('message_retention')) return;
         if (this.busy || !this.overview?.message_retention) return;
         this.busy = true;
         try {
@@ -1345,6 +1373,7 @@ class AdminState {
     }
 
     async toggleTokenRequired() {
+        if (this.preventProtected('registration_token_required')) return;
         if (this.busy) return;
         this.busy = true;
         try {
@@ -1362,6 +1391,7 @@ class AdminState {
     }
 
     async toggleSharedPort(proto: 'imap' | 'smtp') {
+        if (this.preventProtected(`shared_port_${proto}`)) return;
         if (this.busy) return;
         this.busy = true;
         try {
@@ -1419,6 +1449,7 @@ class AdminState {
     }
 
     async toggleFederationEnabled() {
+        if (this.preventProtected('federation_enabled')) return;
         if (this.busy) return;
         this.busy = true;
         try {
@@ -1487,6 +1518,7 @@ class AdminState {
     }
 
     async saveFederationSize() {
+        if (this.preventProtected('max_federation_size')) return;
         const size = this.federationSizeEditValue.trim();
         if (!size || this.busy) return;
         this.busy = true;
@@ -1506,6 +1538,7 @@ class AdminState {
     }
 
     async resetFederationSize() {
+        if (this.preventProtected('max_federation_size')) return;
         if (this.busy) return;
         this.busy = true;
         try {

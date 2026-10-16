@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ConfigurationNotice from "$lib/components/ConfigurationNotice.svelte";
   import "./layout.css";
   import { page } from "$app/stores";
   import { base } from "$app/paths";
@@ -1050,6 +1051,7 @@
       <!-- Page Content -->
       <main class="app-main flex flex-col flex-1">
         {#key $page.url.pathname}
+          <ConfigurationNotice />
           {@render children()}
         {/key}
       </main>

@@ -185,6 +185,7 @@ export interface SettingValue {
 }
 
 export interface AllSettings {
+    configuration_sources?: import("./configurationPolicy").ConfigurationSources;
     registration: string;
     jit_registration: string;
     turn_enabled: string;
