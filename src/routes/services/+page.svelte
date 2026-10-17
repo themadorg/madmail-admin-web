@@ -4,6 +4,7 @@
   import { Pencil, RotateCcw, Dice5 } from "lucide-svelte";
   import ToggleSwitch from "$lib/components/ToggleSwitch.svelte";
   import Select from "$lib/components/Select.svelte";
+  import OperatorWebhooks from "$lib/components/OperatorWebhooks.svelte";
   import PageLoader from "$lib/components/PageLoader.svelte";
 
   function randomPath(): string {
@@ -37,6 +38,7 @@
 </script>
 
 {#if store.settings}
+  <OperatorWebhooks />
   {#snippet toggleRow(
     label: string,
     resource: string,
@@ -185,6 +187,16 @@
       {/if}
     </div>
   {/snippet}
+
+  <div class="space-y-2">
+    {@render toggleRow(
+      _("svc.websocket_bridge"),
+      "/admin/services/websocket_bridge",
+      store.settings.websocket_bridge_enabled ?? "disabled",
+      "enabled",
+    )}
+    <p class="text-xs text-text-2">{_("svc.websocket_bridge_hint")}</p>
+  </div>
 
   <!-- Toggle Services -->
   <div class="space-y-2">
