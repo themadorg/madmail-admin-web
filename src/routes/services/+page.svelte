@@ -188,6 +188,16 @@
     </div>
   {/snippet}
 
+  <div class="space-y-2">
+    {@render toggleRow(
+      _("svc.websocket_bridge"),
+      "/admin/services/websocket_bridge",
+      store.settings.websocket_bridge_enabled ?? "disabled",
+      "enabled",
+    )}
+    <p class="text-xs text-text-2">{_("svc.websocket_bridge_hint")}</p>
+  </div>
+
   <!-- Toggle Services -->
   <div class="space-y-2">
     {@render toggleRow(

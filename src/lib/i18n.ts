@@ -182,6 +182,8 @@ const translations: Record<Locale, Record<string, string>> = {
         'svc.admin_web_path': 'Admin Web Path',
         'svc.webimap': 'WebIMAP (REST/WebSocket)',
         'svc.websmtp': 'WebSMTP (HTTP Send)',
+        'svc.websocket_bridge': 'WebSocket mail bridge',
+        'svc.websocket_bridge_hint': 'Carry native IMAP and authenticated SMTP over HTTPS. Disabled by default. Browser origins require an explicit allowlist.',
         'svc.shared_port_imap': 'IMAP on the HTTPS port (443)',
         'svc.shared_port_imap_hint':
             'Also serve IMAP on port 443, so mail clients work on networks that block port 993. Applies to new connections; usually no restart needed.',
@@ -781,6 +783,8 @@ const translations: Record<Locale, Record<string, string>> = {
         'svc.admin_web_path': 'مسیر وب مدیریت',
         'svc.webimap': 'وب‌آی‌مپ (REST/WebSocket)',
         'svc.websmtp': 'وب‌اس‌ام‌تی‌پی (ارسال HTTP)',
+        'svc.websocket_bridge': 'پل وب‌سوکت ایمیل',
+        'svc.websocket_bridge_hint': 'انتقال IMAP و SMTP احرازهویت‌شده روی HTTPS. پیش‌فرض خاموش است. مبدأ مرورگر باید صریحاً مجاز شود.',
         'svc.shared_port_imap': 'IMAP روی پورت HTTPS (۴۴۳)',
         'svc.shared_port_imap_hint':
             'ارائهٔ IMAP روی پورت ۴۴۳ تا برنامه‌های ایمیل در شبکه‌هایی که پورت ۹۹۳ را مسدود می‌کنند کار کنند. روی اتصال‌های جدید اعمال می‌شود؛ معمولاً نیازی به راه‌اندازی مجدد نیست.',
@@ -1344,6 +1348,8 @@ const translations: Record<Locale, Record<string, string>> = {
         'svc.admin_web_path': 'Ruta Web Admin',
         'svc.webimap': 'WebIMAP (REST/WebSocket)',
         'svc.websmtp': 'WebSMTP (envío HTTP)',
+        'svc.websocket_bridge': 'Puente WebSocket de correo',
+        'svc.websocket_bridge_hint': 'Transporta IMAP y SMTP autenticado por HTTPS. Desactivado por defecto. Los orígenes del navegador requieren autorización explícita.',
         'svc.shared_port_imap': 'IMAP en el puerto HTTPS (443)',
         'svc.shared_port_imap_hint':
             'Sirve también IMAP en el puerto 443, para que los clientes de correo funcionen en redes que bloquean el puerto 993. Se aplica a las conexiones nuevas; normalmente no hace falta reiniciar.',
@@ -1909,6 +1915,8 @@ const translations: Record<Locale, Record<string, string>> = {
         'svc.admin_web_path': 'Путь веб-панели',
         'svc.webimap': 'WebIMAP (REST/WebSocket)',
         'svc.websmtp': 'WebSMTP (отправка по HTTP)',
+        'svc.websocket_bridge': 'Мост WebSocket для почты',
+        'svc.websocket_bridge_hint': 'IMAP и SMTP с аутентификацией через HTTPS. По умолчанию выключен. Для браузера нужен список разрешённых источников.',
         'svc.shared_port_imap': 'IMAP на порту HTTPS (443)',
         'svc.shared_port_imap_hint':
             'Также обслуживать IMAP на порту 443, чтобы почтовые клиенты работали в сетях, где закрыт порт 993. Применяется к новым соединениям; перезапуск обычно не нужен.',
