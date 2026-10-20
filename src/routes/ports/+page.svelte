@@ -162,7 +162,7 @@
       >
         <div class="min-w-0 flex-1">
           <div class="text-sm font-medium">{label}</div>
-          {#if store.editingField === key}
+          {#if store.editingField === key && !store.isProtected(key)}
             <div class="flex gap-2 mt-1.5">
               <input
                 type="number"
@@ -191,7 +191,7 @@
             </div>
           {/if}
         </div>
-        {#if store.editingField !== key}
+        {#if store.editingField !== key && !store.isProtected(key)}
           <div class="flex gap-1 shrink-0 items-center">
             <!-- Access toggle (Public / Local) -->
             {#if access}
@@ -207,7 +207,7 @@
                     requestMakeLocal(key);
                   }
                 }}
-                disabled={store.busy}
+                disabled={store.busy || store.isProtected(accessKeyMap[key]?.localOnlySetting ?? "")}
                 class="flex items-center gap-1 px-2 py-1 text-xs rounded border transition-colors {access ===
                 'local'
                   ? 'bg-warning/15 border-warning/40 text-warning'
