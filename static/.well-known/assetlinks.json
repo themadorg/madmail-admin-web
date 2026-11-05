@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "org.madmail.mobile",
+      "sha256_cert_fingerprints": ["3A:03:36:5D:F3:03:F1:77:28:6F:3A:BD:CD:A9:8F:99:07:A4:64:8E:94:B5:4E:7A:88:02:7E:D5:29:12:B8:1F"]
+    }
+  }
+]
