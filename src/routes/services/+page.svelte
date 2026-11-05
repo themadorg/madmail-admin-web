@@ -4,6 +4,7 @@
   import { Pencil, RotateCcw, Dice5 } from "lucide-svelte";
   import ToggleSwitch from "$lib/components/ToggleSwitch.svelte";
   import Select from "$lib/components/Select.svelte";
+  import OperatorWebhooks from "$lib/components/OperatorWebhooks.svelte";
   import PageLoader from "$lib/components/PageLoader.svelte";
 
   function randomPath(): string {
@@ -37,6 +38,7 @@
 </script>
 
 {#if store.settings}
+  <OperatorWebhooks />
   {#snippet toggleRow(
     label: string,
     resource: string,
@@ -49,10 +51,13 @@
       <div>
         <div class="text-sm font-medium">{label}</div>
         <div class="text-xs text-text-2 font-mono">{resource}</div>
+        {#if store.isProtected(store.protectedResource(resource))}
+          <p class="text-xs text-warning">Read-only: {store.configurationSource(store.protectedResource(resource))?.source}</p>
+        {/if}
       </div>
       <ToggleSwitch
         checked={current === onLabel}
-        disabled={isWorking}
+        disabled={isWorking || store.isProtected(store.protectedResource(resource))}
         label={label}
         onclick={() => store.toggleService(resource, current)}
       />
@@ -72,7 +77,7 @@
       </div>
       <ToggleSwitch
         checked={enabled}
-        disabled={isWorking}
+        disabled={isWorking || store.isProtected(`shared_port_${proto}`)}
         label={_(`svc.shared_port_${proto}`)}
         onclick={() => store.toggleSharedPort(proto)}
       />
@@ -90,7 +95,10 @@
     >
       <div class="min-w-0 flex-1">
         <div class="text-sm font-medium">{label}</div>
-        {#if store.editingField === key}
+        {#if store.isProtected(key)}
+          <p class="text-xs text-warning">Read-only: {store.configurationSource(key)?.source}. Change that source and restart the service.</p>
+        {/if}
+        {#if store.editingField === key && !store.isProtected(key)}
           <div class="flex gap-2 mt-1.5">
             {#if inputType === "number"}
               <input
@@ -158,7 +166,7 @@
           </div>
         {/if}
       </div>
-      {#if store.editingField !== key}
+      {#if store.editingField !== key && !store.isProtected(key)}
         <div class="flex gap-1 shrink-0 items-center">
           {#if store.setting(key).is_set}<span
               class="w-1.5 h-1.5 rounded-full bg-warning"
@@ -185,6 +193,16 @@
       {/if}
     </div>
   {/snippet}
+
+  <div class="space-y-2">
+    {@render toggleRow(
+      _("svc.websocket_bridge"),
+      "/admin/services/websocket_bridge",
+      store.settings.websocket_bridge_enabled ?? "disabled",
+      "enabled",
+    )}
+    <p class="text-xs text-text-2">{_("svc.websocket_bridge_hint")}</p>
+  </div>
 
   <!-- Toggle Services -->
   <div class="space-y-2">
@@ -227,7 +245,7 @@
       </div>
       <ToggleSwitch
         checked={store.pushRuntimeEnabled()}
-        disabled={isWorking}
+        disabled={isWorking || store.isProtected("push_mode") || store.isProtected("push_enabled")}
         label={_("svc.push")}
         onclick={() => store.togglePush()}
       />
@@ -273,7 +291,7 @@
             <input
               type="text"
               bind:value={webmailDevOrigin}
-              disabled={isWorking}
+              disabled={isWorking || ["webimap_enabled", "websmtp_enabled", "webmail_cors_origins"].some(key => store.isProtected(key))}
               class="mt-1 w-full px-2 py-1 bg-surface border border-border rounded text-xs text-text outline-none focus:border-accent font-mono"
               placeholder="http://127.0.0.1:5173"
             />
@@ -282,7 +300,7 @@
       </div>
       <ToggleSwitch
         checked={store.webmailBrowserAccessEnabled()}
-        disabled={isWorking}
+        disabled={isWorking || ["webimap_enabled", "websmtp_enabled", "webmail_cors_origins"].some(key => store.isProtected(key))}
         label={_("svc.webmail_dev")}
         onclick={() => store.toggleWebmailBrowserAccess(webmailDevOrigin)}
       />
@@ -366,7 +384,10 @@
   <div class="ui-card ui-card--rounded ui-card-row gap-3">
     <div class="min-w-0 flex-1">
       <div class="text-sm font-medium">{label}</div>
-      {#if store.editingField === key}
+      {#if store.isProtected(key)}
+          <p class="text-xs text-warning">Read-only: {store.configurationSource(key)?.source}. Change that source and restart the service.</p>
+        {/if}
+        {#if store.editingField === key && !store.isProtected(key)}
         <div class="flex gap-2 mt-1.5">
           <Select bind:value={store.editValue} class="flex-1 rounded">
             {#each options as opt}
@@ -395,7 +416,7 @@
         </div>
       {/if}
     </div>
-    {#if store.editingField !== key}
+    {#if store.editingField !== key && !store.isProtected(key)}
       <div class="flex gap-1 shrink-0 items-center">
         {#if store.setting(key).is_set}
           <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>

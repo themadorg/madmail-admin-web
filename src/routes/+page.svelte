@@ -442,7 +442,7 @@
           </div>
           <ToggleSwitch
             checked={rotationEnabled}
-            disabled={store.busy || !rotationApiAvailable}
+            disabled={store.busy || !rotationApiAvailable || store.isProtected("message_retention_enabled")}
             label={_("svc.message_retention")}
             onclick={() => store.toggleMessageRetention()}
           />
@@ -454,7 +454,7 @@
           <Select
             id="rotation-days"
             bind:value={rotationDaysSelect}
-            disabled={!rotationApiAvailable || !rotationEnabled || store.busy}
+            disabled={!rotationApiAvailable || !rotationEnabled || store.busy || store.isProtected("message_retention")}
             onchange={() => store.setMessageRetentionDays(rotationDaysSelect)}
             class="flex-1 bg-surface-2 py-1.5 disabled:opacity-45"
           >
@@ -583,7 +583,7 @@
       </div>
       <ToggleSwitch
         checked={pushEnabled}
-        disabled={store.busy || !pushApiAvailable}
+        disabled={store.busy || !pushApiAvailable || store.isProtected("push_mode") || store.isProtected("push_enabled")}
         label={_("svc.push")}
         onclick={() => store.togglePush()}
       />

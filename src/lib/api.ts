@@ -185,6 +185,7 @@ export interface SettingValue {
 }
 
 export interface AllSettings {
+    configuration_sources?: import("./configurationPolicy").ConfigurationSources;
     registration: string;
     jit_registration: string;
     turn_enabled: string;
@@ -202,6 +203,7 @@ export interface AllSettings {
     admin_web_enabled: string;
     webimap_enabled: string;
     websmtp_enabled: string;
+    websocket_bridge_enabled?: string;
     webmail_cors_origins: SettingValue;
     registration_token_required: string;
     /** Serve IMAP / SMTP submission on the HTTPS port (443). Absent on older servers. */

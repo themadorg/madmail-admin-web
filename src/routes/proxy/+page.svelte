@@ -73,7 +73,7 @@
       </div>
       <ToggleSwitch
         checked={current === onLabel}
-        disabled={isWorking}
+        disabled={isWorking || store.isProtected(store.protectedResource(resource))}
         label={label}
         onclick={() => store.toggleService(resource, current)}
       />
@@ -91,7 +91,7 @@
     >
       <div class="min-w-0 flex-1">
         <div class="text-sm font-medium">{label}</div>
-        {#if store.editingField === key}
+        {#if store.editingField === key && !store.isProtected(key)}
           <div class="flex gap-2 mt-1.5">
             {#if inputType === "number"}
               <input
@@ -159,7 +159,7 @@
           </div>
         {/if}
       </div>
-      {#if store.editingField !== key}
+      {#if store.editingField !== key && !store.isProtected(key)}
         <div class="flex gap-1 shrink-0 items-center">
           {#if store.setting(key).is_set}<span
               class="w-1.5 h-1.5 rounded-full bg-warning"
@@ -197,7 +197,7 @@
       </h3>
       <ToggleSwitch
         checked={store.settings.ss_enabled === "enabled"}
-        disabled={isWorking}
+        disabled={isWorking || store.isProtected("ss_enabled")}
         label={_("proxy.shadowsocks")}
         onclick={() =>
           store.toggleService(
