@@ -38,6 +38,7 @@ import {
     normalizeAdminWebPath,
 } from '$lib/adminUrl';
 import { saveServer } from '$lib/servers';
+import { migrateServerKey } from '$lib/userTags';
 import {
     getPageRefreshLoaders,
     normalizeRoutePath,
@@ -278,6 +279,8 @@ class AdminState {
         if (next === this.baseUrl) {
             return;
         }
+        // Same server, new URL (port or SMTP hostname). Keep local tags with it.
+        migrateServerKey(this.baseUrl, next);
         this.baseUrl = next;
         if (typeof localStorage !== 'undefined') {
             localStorage.setItem('madmail_url', next);
