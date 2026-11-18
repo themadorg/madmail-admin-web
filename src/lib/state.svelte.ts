@@ -267,14 +267,16 @@ class AdminState {
      * navigate to the configured path (e.g. after a CLI change) so the SPA keeps working.
      */
     /**
-     * Keep the stored admin API base URL in sync with server-side overrides
-     * (hostname, https/http port, admin path) so the bar matches madmail admin-token.
+     * Keep the stored admin API path aligned with `admin_path`.
+     * Host and port stay on the URL that reached this server. Pass
+     * `{ followListener: true }` after the operator changes the listen port
+     * in this session so the UI reconnects on that listener.
      */
-    syncConnectionBaseUrlWithSettings() {
+    syncConnectionBaseUrlWithSettings(options?: { followListener?: boolean }) {
         if (!this.connected || !this.settings || !this.baseUrl) {
             return;
         }
-        const next = applySettingsToAdminBaseUrl(this.baseUrl, this.settings);
+        const next = applySettingsToAdminBaseUrl(this.baseUrl, this.settings, options);
         if (next === this.baseUrl) {
             return;
         }
@@ -844,7 +846,7 @@ class AdminState {
             // HTTP/HTTPS listener ports: restart immediately so the UI reconnects on the new port
             if ((key === 'http_port' || key === 'https_port') && res.data?.restart_required) {
                 this.patchPortSettingAfterSave(key, value);
-                this.syncConnectionBaseUrlWithSettings();
+                this.syncConnectionBaseUrlWithSettings({ followListener: true });
                 this.pendingRestart = false;
                 await this.reload();
                 return;
@@ -939,7 +941,7 @@ class AdminState {
                         is_set: res.data.is_set,
                     },
                 );
-                this.syncConnectionBaseUrlWithSettings();
+                this.syncConnectionBaseUrlWithSettings({ followListener: true });
                 this.pendingRestart = false;
                 await this.reload();
                 return;
