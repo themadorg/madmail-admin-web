@@ -17,14 +17,25 @@ export function isUnderAdminWebPath(pathname: string, adminWebPath: string): boo
     return cur.startsWith(`${prefix}/`);
 }
 
+export interface AdminBaseUrlSyncOptions {
+    /**
+     * Copy `smtp_hostname` and the HTTP(S) listen port onto the URL.
+     * Overview and settings refresh leave this off so a reverse proxy in
+     * front of a custom listen port keeps the origin that loaded the page.
+     * The ports screen turns it on after the operator changes that listener.
+     */
+    followListener?: boolean;
+}
+
 /**
- * Recompute the admin API base URL (same inputs as the madmail admin-token
- * / buildAdminURL logic): apply DB overrides for SMTP hostname, HTTPS/HTTP
- * port, and admin API path, while keeping the current URL as the template.
+ * Recompute the admin API base URL. `admin_path` always follows the server.
+ * Host and port follow `smtp_hostname` and the listen port only when
+ * `followListener` is set, which is the madmail admin-token shape.
  */
 export function applySettingsToAdminBaseUrl(
     current: string,
     settings: AllSettings,
+    options?: AdminBaseUrlSyncOptions,
 ): string {
     let u: URL;
     try {
@@ -33,19 +44,21 @@ export function applySettingsToAdminBaseUrl(
         return current;
     }
 
-    if (settings.smtp_hostname.is_set && settings.smtp_hostname.value?.trim()) {
-        u.hostname = settings.smtp_hostname.value.trim();
-    }
-
-    if (u.protocol === 'https:') {
-        if (settings.https_port.is_set && settings.https_port.value) {
-            const p = settings.https_port.value.trim();
-            u.port = p === '443' ? '' : p;
+    if (options?.followListener) {
+        if (settings.smtp_hostname.is_set && settings.smtp_hostname.value?.trim()) {
+            u.hostname = settings.smtp_hostname.value.trim();
         }
-    } else if (u.protocol === 'http:') {
-        if (settings.http_port.is_set && settings.http_port.value) {
-            const p = settings.http_port.value.trim();
-            u.port = p === '80' ? '' : p;
+
+        if (u.protocol === 'https:') {
+            if (settings.https_port.is_set && settings.https_port.value) {
+                const p = settings.https_port.value.trim();
+                u.port = p === '443' ? '' : p;
+            }
+        } else if (u.protocol === 'http:') {
+            if (settings.http_port.is_set && settings.http_port.value) {
+                const p = settings.http_port.value.trim();
+                u.port = p === '80' ? '' : p;
+            }
         }
     }
 
