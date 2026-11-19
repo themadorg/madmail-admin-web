@@ -37,6 +37,7 @@ import {
     isUnderAdminWebPath,
     normalizeAdminWebPath,
 } from '$lib/adminUrl';
+import { adminConnectionKey, planAdminPathFollowUp } from '$lib/adminPathApply';
 import { saveServer } from '$lib/servers';
 import {
     getPageRefreshLoaders,
@@ -189,7 +190,18 @@ class AdminState {
     toast = $state('');
     toastType = $state<'ok' | 'err'>('ok');
     pendingRestart = $state(false);
+    /** Admin API URL to probe after a path change that was not confirmed. */
+    pendingAdminUrl = $state('');
     reloading = $state(false);
+    /** Bumped when the signed-in server changes so old reconnect polls stop. */
+    private connectionEpoch = 0;
+    /** Origin and token that own `pendingAdminUrl`. */
+    private pendingConnectionKey = '';
+    private sessionKey = '';
+    /** Identifies the save/reset that currently owns `busy`. */
+    private operationId = 0;
+    /** Connection epoch of the operation that owns `busy`. */
+    private operationEpoch = 0;
     editingField = $state('');
     editValue = $state('');
     refreshing = $state(false);
@@ -229,6 +241,102 @@ class AdminState {
     // --- Helpers ---
     cfg(): ApiConfig {
         return { baseUrl: this.baseUrl, token: this.token };
+    }
+
+    /**
+     * Confirmed remounts become the live URL. Otherwise the panel stays on the
+     * current URL and remembers the saved path for the next reconnect.
+     * Returns true when the live URL changed.
+     */
+    private commitAdminPath(
+        savedPath: string,
+        data: SettingValue | undefined,
+        origin: ApiConfig,
+    ): { confirmed: boolean; destination: string } {
+        const plan = planAdminPathFollowUp(origin.baseUrl, savedPath, data);
+        if (!plan.confirmed) {
+            this.pendingAdminUrl = plan.pendingUrl ?? '';
+            this.pendingConnectionKey = adminConnectionKey(origin.baseUrl, origin.token);
+            this.pendingRestart = true;
+            this.notify(t('notify.restart_pending'), 'err');
+            return { confirmed: false, destination: plan.destination };
+        }
+        this.pendingAdminUrl = '';
+        this.pendingConnectionKey = '';
+        this.baseUrl = plan.destination;
+        localStorage.setItem('madmail_url', this.baseUrl);
+        this.pendingRestart = false;
+        return { confirmed: true, destination: plan.destination };
+    }
+
+    /** A save/reset may start when the panel is idle or the in-flight one belongs to a retired server. */
+    private canStartOperation(): boolean {
+        return !this.busy || this.operationEpoch !== this.connectionEpoch;
+    }
+
+    private beginOperation(): number {
+        this.operationId += 1;
+        this.operationEpoch = this.connectionEpoch;
+        this.busy = true;
+        return this.operationId;
+    }
+
+    private finishOperation(id: number) {
+        if (this.operationId === id) this.busy = false;
+    }
+
+    /** Forget a deferred path and stop reconnect polls from the previous server. */
+    private retireConnection() {
+        this.connectionEpoch += 1;
+        this.pendingAdminUrl = '';
+        this.pendingConnectionKey = '';
+        this.pendingRestart = false;
+    }
+
+    /** A different origin or token is a different connection. */
+    private adoptConnection(baseUrl: string, token: string) {
+        const key = adminConnectionKey(baseUrl, token);
+        if (key === this.sessionKey) return;
+        this.retireConnection();
+        this.sessionKey = key;
+    }
+
+    private pendingProbe(): ApiConfig | null {
+        if (!this.pendingAdminUrl) return null;
+        if (this.pendingConnectionKey !== adminConnectionKey(this.baseUrl, this.token)) return null;
+        return { baseUrl: this.pendingAdminUrl, token: this.token };
+    }
+
+    /**
+     * Poll `probe` until it answers. `epoch` is the connection that started the
+     * poll. A later disconnect or server switch drops the result, and a success
+     * commits `probe.baseUrl` rather than whatever pending URL is current.
+     */
+    private watchAdminPath(epoch: number, probe: ApiConfig, adoptProbedUrl: boolean) {
+        setTimeout(async () => {
+            for (let i = 0; i < 10; i++) {
+                await new Promise((r) => setTimeout(r, 2000));
+                if (epoch !== this.connectionEpoch) return;
+                const status = await api.status(probe);
+                if (epoch !== this.connectionEpoch) return;
+                if (status.data) {
+                    if (adoptProbedUrl) {
+                        this.baseUrl = probe.baseUrl;
+                        localStorage.setItem('madmail_url', this.baseUrl);
+                        if (this.pendingAdminUrl === probe.baseUrl) {
+                            this.pendingAdminUrl = '';
+                            this.pendingConnectionKey = '';
+                        }
+                        if (!this.pendingAdminUrl) this.pendingRestart = false;
+                    }
+                    this.notify(t('notify.online'));
+                    await this.refresh();
+                    return;
+                }
+            }
+            if (epoch !== this.connectionEpoch) return;
+            this.notify(t('notify.restart_pending'), 'err');
+        }, 1000);
     }
 
     notify(msg: string, type: 'ok' | 'err' = 'ok') {
@@ -310,6 +418,7 @@ class AdminState {
 
     async connect() {
         if (!this.baseUrl || !this.token || this.connecting) return;
+        this.adoptConnection(this.baseUrl, this.token);
         this.connecting = true;
         this.connectError = '';
         const res = await fetchOverview(this.cfg());
@@ -592,6 +701,8 @@ class AdminState {
     }
 
     disconnect() {
+        this.retireConnection();
+        this.sessionKey = '';
         this.connected = false;
         localStorage.removeItem('madmail_url');
         localStorage.removeItem('madmail_token');
@@ -786,37 +897,27 @@ class AdminState {
     }
 
     async save(key: string, value: string) {
-        if (this.busy) return;
-        this.busy = true;
+        if (!this.canStartOperation()) return;
+        const operation = this.beginOperation();
+        const epoch = this.connectionEpoch;
+        const origin = this.cfg();
         try {
-            const res = await api.setSetting(this.cfg(), key, value);
+            const res = await api.setSetting(origin, key, value);
+            if (epoch !== this.connectionEpoch) return;
             if (res.error) { this.notify(res.error, 'err'); return; }
             if (res.data?.restart_required) this.pendingRestart = true;
             this.notify(t('notify.updated', { key }));
             this.editingField = '';
-            // If admin_path changed, reload immediately with the new URL
+            // Do not POST /admin/reload again. A confirmed remount already
+            // switched the route; another reload would target a path that
+            // may have just stopped serving. An unconfirmed change keeps the
+            // current URL and remembers the saved one for reconnect.
             if (key === 'admin_path' && value) {
-                // Remount HTTP routes on the old URL (still active until listeners restart)
-                await api.reload(this.cfg(), { scope: 'http', wait: true });
-                // Now update our baseUrl to the new path
-                const url = new URL(this.baseUrl);
-                url.pathname = value;
-                this.baseUrl = url.toString().replace(/\/+$/, '');
-                localStorage.setItem('madmail_url', this.baseUrl);
-                this.pendingRestart = false;
+                const saved = (res.data?.value || value).trim();
+                const outcome = this.commitAdminPath(saved, res.data, origin);
+                if (!outcome.confirmed) return;
                 this.notify(t('action.restarting'));
-                // Wait for service to come back on the new path
-                setTimeout(async () => {
-                    for (let i = 0; i < 10; i++) {
-                        await new Promise(r => setTimeout(r, 2000));
-                        if ((await api.status(this.cfg())).data) {
-                            this.notify(t('notify.online'));
-                            await this.refresh();
-                            return;
-                        }
-                    }
-                    this.notify(t('notify.restart_pending'), 'err');
-                }, 1000);
+                this.watchAdminPath(epoch, { baseUrl: outcome.destination, token: origin.token }, false);
                 return;
             }
             // Admin web UI path: server already remounted HTTP routes in setSetting; navigate only
@@ -850,7 +951,9 @@ class AdminState {
                 return;
             }
             await this.refresh();
-        } finally { this.busy = false; }
+        } finally {
+            this.finishOperation(operation);
+        }
     }
 
     /** Update local settings snapshot so baseUrl can follow the new port before reload. */
@@ -876,33 +979,22 @@ class AdminState {
     }
 
     async reset(key: string) {
-        if (this.busy) return;
-        this.busy = true;
+        if (!this.canStartOperation()) return;
+        const operation = this.beginOperation();
+        const epoch = this.connectionEpoch;
+        const origin = this.cfg();
         try {
-            const res = await api.resetSetting(this.cfg(), key);
+            const res = await api.resetSetting(origin, key);
+            if (epoch !== this.connectionEpoch) return;
             if (res.error) { this.notify(res.error, 'err'); return; }
             if (res.data?.restart_required) this.pendingRestart = true;
             this.notify(t('notify.reset', { key }));
-            // If admin_path reset, reload immediately with the default URL
             if (key === 'admin_path') {
-                await api.reload(this.cfg(), { scope: 'http', wait: true });
-                const url = new URL(this.baseUrl);
-                url.pathname = '/api/admin';
-                this.baseUrl = url.toString().replace(/\/+$/, '');
-                localStorage.setItem('madmail_url', this.baseUrl);
-                this.pendingRestart = false;
+                const saved = (res.data?.value || '/api/admin').trim() || '/api/admin';
+                const outcome = this.commitAdminPath(saved, res.data, origin);
+                if (!outcome.confirmed) return;
                 this.notify(t('action.restarting'));
-                setTimeout(async () => {
-                    for (let i = 0; i < 10; i++) {
-                        await new Promise(r => setTimeout(r, 2000));
-                        if ((await api.status(this.cfg())).data) {
-                            this.notify(t('notify.online'));
-                            await this.refresh();
-                            return;
-                        }
-                    }
-                    this.notify(t('notify.restart_pending'), 'err');
-                }, 1000);
+                this.watchAdminPath(epoch, { baseUrl: outcome.destination, token: origin.token }, false);
                 return;
             }
             if (key === 'admin_web_path') {
@@ -945,27 +1037,27 @@ class AdminState {
                 return;
             }
             await this.refresh();
-        } finally { this.busy = false; }
+        } finally {
+            this.finishOperation(operation);
+        }
     }
 
     async reload() {
         this.reloading = true;
-        const res = await api.reload(this.cfg());
+        const epoch = this.connectionEpoch;
+        // Restart the process that is still mounted. Status polls use this
+        // connection's saved path, captured now so a later edit cannot redirect
+        // the result onto a URL this request did not probe.
+        const mounted = this.cfg();
+        const saved = this.pendingProbe();
+        const probe = saved ?? mounted;
+        const res = await api.reload(mounted);
         this.reloading = false;
+        if (epoch !== this.connectionEpoch) return;
         if (res.error) { this.notify(res.error, 'err'); return; }
-        this.pendingRestart = false;
+        if (!saved) this.pendingRestart = false;
         this.notify(t('action.restarting'));
-        setTimeout(async () => {
-            for (let i = 0; i < 10; i++) {
-                await new Promise(r => setTimeout(r, 2000));
-                if ((await api.status(this.cfg())).data) {
-                    this.notify(t('notify.online'));
-                    await this.refresh();
-                    return;
-                }
-            }
-            this.notify(t('notify.restart_pending'), 'err');
-        }, 1000);
+        this.watchAdminPath(epoch, probe, saved !== null);
     }
 
     async togglePortAccess(localOnlySettingKey: string, currentAccess: string) {
