@@ -182,6 +182,12 @@ export interface SettingValue {
     value: string;
     is_set: boolean;
     restart_required?: boolean;
+    /**
+     * Present for admin_path on current servers.
+     * `true` means the remount was accepted. `false` means the database changed
+     * and a restart is still required. Missing means the outcome is unknown.
+     */
+    applied?: boolean;
 }
 
 export interface AllSettings {
